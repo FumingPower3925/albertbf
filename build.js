@@ -239,8 +239,8 @@ function generateIndexHTML(articles, templates, styles) {
   
   // Wrap in layout template
   const fullHTML = renderTemplate(templates.layout, {
-    title: 'Personal Blog',
-    description: 'A minimalist personal blog with beautiful design',
+    title: 'Albert BF\'s Blog',
+    description: 'My personal minimalist technical blog',
     content: indexContent,
     styles: styles
   });
