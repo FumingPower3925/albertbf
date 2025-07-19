@@ -73,7 +73,7 @@
       if (!noResults) {
         noResults = document.createElement('div');
         noResults.id = 'no-results';
-        noResults.className = 'glass-container text-center';
+        noResults.className = 'minimal-card text-center';
         noResults.innerHTML = '<p>No articles found matching your search.</p>';
         document.querySelector('.articles-container')?.appendChild(noResults);
       }
@@ -107,7 +107,7 @@
       }
       
       // Add fade-in animation to all visible elements
-      const elements = document.querySelectorAll('.glass-container, .article-card');
+      const elements = document.querySelectorAll('.minimal-card, .article-card');
       elements.forEach((el, index) => {
         setTimeout(() => {
           el.classList.add('fade-in');

@@ -283,7 +283,7 @@ function generateProjectsHTML(articles, templates, styles) {
     }).join('');
     
     return `
-      <div class="project-section glass-container">
+      <div class="project-section minimal-card">
         <h2>${projectName}</h2>
         <ul class="project-articles">
           ${articlesList}
