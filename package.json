@@ -1,0 +1,25 @@
+{
+  "name": "liquid-blog",
+  "version": "1.0.0",
+  "description": "Minimalist personal blog with Apple Liquid Glass aesthetic",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "bun run build.js",
+    "dev": "wrangler dev",
+    "deploy": "bun run build && wrangler deploy",
+    "preview": "wrangler dev --local"
+  },
+  "dependencies": {
+    "hono": "^3.12.12",
+    "marked": "^12.0.2",
+    "js-yaml": "^4.1.0",
+    "highlight.js": "^11.11.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250719.0",
+    "wrangler": "^3.114.11"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

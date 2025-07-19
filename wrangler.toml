@@ -1,0 +1,17 @@
+name = "liquid-blog"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "bun run build"
+
+# For static assets in newer Wrangler versions
+[site]
+bucket = "./dist"
+
+[vars]
+ENVIRONMENT = "production"
+
+# For local development
+[env.development]
+vars = { ENVIRONMENT = "development" }
