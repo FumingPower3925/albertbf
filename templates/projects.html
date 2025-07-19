@@ -1,3 +1,21 @@
+<script>
+  const navLinks = document.querySelectorAll('nav a');
+      const currentPath = window.location.pathname;
+
+      navLinks.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (linkPath === '/' && currentPath === '/') {
+          console.log(linkPath, currentPath);
+          link.classList.add('active');
+        } else if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+          console.log(linkPath, currentPath);
+          link.classList.add('active');
+        } else {
+          console.log(linkPath, currentPath);
+        }
+      });
+</script>
+
 <div class="minimal-card text-center mb-large">
   <h1>Projects</h1>
   <p>A collection of my projects and their related articles.</p>

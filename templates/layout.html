@@ -7,97 +7,92 @@
   <title>{{title}}</title>
   <style>{{styles}}</style>
   <script>
-    // Search functionality
-    let searchIndex = [];
-    
-    async function loadSearchIndex() {
-      try {
-        const response = await fetch('/search-index.json');
-        searchIndex = await response.json();
-      } catch (err) {
-        console.warn('Could not load search index:', err);
-      }
-    }
-    
-    function performSearch(query) {
-      if (!query.trim()) {
-        showAllArticles();
-        return;
-      }
+    document.addEventListener('DOMContentLoaded', () => {
+      // Search functionality
+      let searchIndex = [];
       
-      const lowerQuery = query.toLowerCase();
-      const results = searchIndex.filter(article => 
-        article.title.toLowerCase().includes(lowerQuery) ||
-        article.description.toLowerCase().includes(lowerQuery) ||
-        article.content.toLowerCase().includes(lowerQuery) ||
-        (article.projectName && article.projectName.toLowerCase().includes(lowerQuery))
-      );
-      
-      hideAllArticles();
-      results.forEach(result => {
-        const articleCard = document.querySelector(`[data-title*="${result.title.toLowerCase()}"]`);
-        if (articleCard) {
-          articleCard.style.display = 'block';
-          articleCard.classList.add('fade-in');
+      async function loadSearchIndex() {
+        try {
+          const response = await fetch('/search-index.json');
+          searchIndex = await response.json();
+        } catch (err) {
+          console.warn('Could not load search index:', err);
         }
-      });
+      }
       
-      // Show "no results" message if needed
-      const visibleArticles = document.querySelectorAll('.article-card[style*="block"], .article-card:not([style*="none"])');
-      if (results.length === 0) {
-        showNoResults();
-      } else {
+      function performSearch(query) {
+        if (!query.trim()) {
+          showAllArticles();
+          return;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        const results = searchIndex.filter(article => 
+          article.title.toLowerCase().includes(lowerQuery) ||
+          article.description.toLowerCase().includes(lowerQuery) ||
+          article.content.toLowerCase().includes(lowerQuery) ||
+          (article.projectName && article.projectName.toLowerCase().includes(lowerQuery))
+        );
+        
+        hideAllArticles();
+        results.forEach(result => {
+          const articleCard = document.querySelector(`[data-title*="${result.title.toLowerCase()}"]`);
+          if (articleCard) {
+            articleCard.style.display = 'block';
+            articleCard.classList.add('fade-in');
+          }
+        });
+        
+        const visibleArticles = document.querySelectorAll('.article-card[style*="block"], .article-card:not([style*="none"])');
+        if (results.length === 0) {
+          showNoResults();
+        } else {
+          hideNoResults();
+        }
+      }
+      
+      function showAllArticles() {
+        const articles = document.querySelectorAll('.article-card');
+        articles.forEach(article => {
+          article.style.display = 'block';
+          article.classList.add('fade-in');
+        });
         hideNoResults();
       }
-    }
-    
-    function showAllArticles() {
-      const articles = document.querySelectorAll('.article-card');
-      articles.forEach(article => {
-        article.style.display = 'block';
-        article.classList.add('fade-in');
-      });
-      hideNoResults();
-    }
-    
-    function hideAllArticles() {
-      const articles = document.querySelectorAll('.article-card');
-      articles.forEach(article => {
-        article.style.display = 'none';
-        article.classList.remove('fade-in');
-      });
-    }
-    
-    function showNoResults() {
-      let noResults = document.getElementById('no-results');
-      if (!noResults) {
-        noResults = document.createElement('div');
-        noResults.id = 'no-results';
-        noResults.className = 'minimal-card text-center';
-        noResults.innerHTML = '<p>No articles found matching your search.</p>';
-        document.querySelector('.articles-container')?.appendChild(noResults);
+      
+      function hideAllArticles() {
+        const articles = document.querySelectorAll('.article-card');
+        articles.forEach(article => {
+          article.style.display = 'none';
+          article.classList.remove('fade-in');
+        });
       }
-      noResults.style.display = 'block';
-    }
-    
-    function hideNoResults() {
-      const noResults = document.getElementById('no-results');
-      if (noResults) {
-        noResults.style.display = 'none';
+      
+      function showNoResults() {
+        let noResults = document.getElementById('no-results');
+        if (!noResults) {
+          noResults = document.createElement('div');
+          noResults.id = 'no-results';
+          noResults.className = 'minimal-card text-center';
+          noResults.innerHTML = '<p>No articles found matching your search.</p>';
+          document.querySelector('.articles-container')?.appendChild(noResults);
+        }
+        noResults.style.display = 'block';
       }
-    }
-    
-    // Initialize search on page load
-    document.addEventListener('DOMContentLoaded', () => {
+      
+      function hideNoResults() {
+        const noResults = document.getElementById('no-results');
+        if (noResults) {
+          noResults.style.display = 'none';
+        }
+      }
+
+      // Initialize search
       loadSearchIndex();
       
       const searchInput = document.getElementById('search-input');
       if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          performSearch(e.target.value);
-        });
-        
-        // Clear search on escape
+        searchInput.addEventListener('input', (e) => performSearch(e.target.value));
         searchInput.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
             searchInput.value = '';
@@ -106,12 +101,26 @@
         });
       }
       
-      // Add fade-in animation to all visible elements
+      // Fade-in animation
       const elements = document.querySelectorAll('.minimal-card, .article-card');
       elements.forEach((el, index) => {
-        setTimeout(() => {
-          el.classList.add('fade-in');
-        }, index * 100);
+        setTimeout(() => el.classList.add('fade-in'), index * 100);
+      });
+
+      const navLinks = document.querySelectorAll('nav a');
+      const currentPath = window.location.pathname;
+
+      navLinks.forEach(link => {
+        const linkPath = link.getAttribute('href');
+        if (linkPath === '/' && currentPath === '/') {
+          console.log(linkPath, currentPath);
+          link.classList.add('active');
+        } else if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+          console.log(linkPath, currentPath);
+          link.classList.add('active');
+        } else {
+          console.log(linkPath, currentPath);
+        }
       });
     });
   </script>
@@ -119,7 +128,7 @@
 <body>
   <nav>
     <ul>
-      <li><a href="/">Home</a></li>
+      <li><a href="/">Articles</a></li>
       <li><a href="/projects/">Projects</a></li>
     </ul>
   </nav>

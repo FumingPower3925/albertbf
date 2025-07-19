@@ -55,11 +55,6 @@ body::before {
   transition: all 0.2s ease;
 }
 
-.minimal-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-  transform: translateY(-1px);
-}
-
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
@@ -147,32 +142,40 @@ nav ul {
   padding-inline-start: 0px;
 }
 
+nav li {
+  position: relative;
+  margin-bottom: 0;
+}
+
 nav li:not(:last-child)::after {
   content: '';
   position: absolute;
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  width: 1px;
-  height: 60%;
+  width: 0.5px;
+  height: 85%;
   background: rgba(0, 0, 0, 0.08);
-}
-
-nav li {
-  position: relative;
-  margin-bottom: 0;
+  z-index: 1;
 }
 
 nav a {
   color: #2c2c2c;
   font-weight: 400;
   padding: 0.4rem 0.8rem;
-  border-radius: 16px;
   transition: all 0.2s ease;
   border-bottom: none;
   display: flex;
   align-items: center;
   font-size: 0.9rem;
+}
+
+nav li:first-child a {
+  border-radius: 16px 0 0 16px;
+}
+
+nav li:last-child a {
+  border-radius: 0 16px 16px 0;
 }
 
 nav a:hover {
@@ -512,21 +515,12 @@ th {
     padding: 1rem 0.5rem;
   }
   
-  nav {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    margin-bottom: 2rem;
-  }
-  
-  nav ul {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
   main {
-    margin-top: 0;
+    margin-top: 3rem;
+  }
+
+  nav {
+    top: 1rem;
   }
   
   h1 {
@@ -602,7 +596,7 @@ th {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d32f2f;
+  background: #d35050;
 }
 
 /* Print styles */
