@@ -73,13 +73,28 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+function formatDateEuro(dateObj) {
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const year = dateObj.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 marked.use({ renderer });
 
 class Article {
   constructor(content, frontmatter, filePath) {
     this.content = content;
     this.title = frontmatter.title || 'Untitled';
-    this.date = new Date(frontmatter.date || Date.now());
+
+    let dateInput = frontmatter.date || Date.now();
+    if (typeof dateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(dateInput)) {
+      const [day, month, year] = dateInput.split('-');
+      this.date = new Date(year, month - 1, day);
+    } else {
+      this.date = new Date(dateInput);
+    }
+
     this.description = frontmatter.description || '';
     this.tags = frontmatter.tags || [];
     this.filePath = filePath;
@@ -171,11 +186,7 @@ function renderTemplate(template, data) {
 }
 
 function generateArticleHTML(article, templates, styles) {
-  const formattedDate = article.date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const formattedDate = formatDateEuro(article.date);
 
   currentArticleForRenderer = article;
   const htmlContent = marked.parse(article.content);
@@ -215,11 +226,7 @@ function generateIndexHTML(articles, templates, styles) {
   const sortedArticles = articles.sort((a, b) => b.date - a.date);
 
   const articlesList = sortedArticles.map(article => {
-    const formattedDate = article.date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    const formattedDate = formatDateEuro(article.date);
 
     const readTime = `${article.readTime} min read`;
 
@@ -293,11 +300,7 @@ function generateProjectsHTML(articles, templates, styles) {
 
   const projectsList = Array.from(projectsMap.entries()).map(([projectName, articles]) => {
     const articlesList = articles.map(article => {
-      const formattedDate = article.date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+      const formattedDate = formatDateEuro(article.date);
       const readTime = `${article.readTime} min read`;
 
       return `
@@ -369,7 +372,7 @@ async function build() {
     const styles = await readFile(STYLES_PATH, 'utf-8');
     const templates = await loadTemplates();
 
-    console.log('📖 Parsing markdown files...');
+    console.log('📚 Parsing markdown files...');
     const markdownFiles = await findMarkdownFiles(ARTICLES_DIR);
     const articles = await Promise.all(markdownFiles.map(async file => {
       try {
@@ -385,7 +388,7 @@ async function build() {
       }
     })).then(results => results.filter(Boolean));
 
-    console.log(`📚 Found ${articles.length} articles`);
+    console.log(`📖 Found ${articles.length} articles`);
 
     console.log('📝 Generating article pages and copying images...');
     for (const article of articles) {
@@ -411,7 +414,7 @@ async function build() {
     const indexHTML = generateIndexHTML(articles, templates, styles);
     await writeFile(join(DIST_DIR, 'index.html'), indexHTML);
 
-    console.log('📂 Generating projects page...');
+    console.log('🗂️ Generating projects page...');
     const projectsHTML = generateProjectsHTML(articles, templates, styles);
     await ensureDir(join(DIST_DIR, 'projects'));
     await writeFile(join(DIST_DIR, 'projects', 'index.html'), projectsHTML);
