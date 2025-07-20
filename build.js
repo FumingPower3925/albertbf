@@ -376,6 +376,7 @@ async function build() {
     const templates = await loadTemplates();
 
     console.log('📚 Parsing markdown files...');
+    const markdownFiles = await findMarkdownFiles(ARTICLES_DIR);
     const articles = await Promise.all(markdownFiles.map(async file => {
       try {
         const article = await parseMarkdownFile(file);
