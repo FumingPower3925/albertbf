@@ -203,6 +203,7 @@ main {
   margin-bottom: 1.5rem;
   transition: all 0.2s ease;
   position: relative;
+  cursor: pointer;
 }
 
 .article-card::before {
@@ -255,6 +256,16 @@ main {
   margin-bottom: 0.5rem;
   font-size: 1.4rem;
   font-weight: 400;
+}
+
+.article-card h2 a {
+  color: inherit;
+  border-bottom: none;
+}
+
+.article-card h2 a:hover {
+  color: inherit;
+  border-bottom: none;
 }
 
 .article-description {
@@ -496,12 +507,23 @@ th {
   border-radius: 4px;
   margin-bottom: 0.75rem;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .project-article:hover {
   background: #f9f9f9;
   border-color: #d5d5d5;
   transform: translateX(3px);
+}
+
+.project-article a {
+  color: inherit;
+  border-bottom: none;
+}
+
+.project-article a:hover {
+  color: inherit;
+  border-bottom: none;
 }
 
 .project-article time {
