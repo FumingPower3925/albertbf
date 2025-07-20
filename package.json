@@ -1,7 +1,7 @@
 {
-  "name": "liquid-blog",
+  "name": "albertbf-blog",
   "version": "1.0.0",
-  "description": "Minimalist personal blog with Apple Liquid Glass aesthetic",
+  "description": "My minimalist personal technical blog",
   "main": "src/index.ts",
   "scripts": {
     "build": "bun run build.js",
