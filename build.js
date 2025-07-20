@@ -19,13 +19,14 @@ let currentArticleForRenderer = null;
 
 const renderer = new marked.Renderer();
 
-renderer.code = function(code, language) {
+renderer.code = function(code) {
+  const language = code.lang;
   if (language && SUPPORTED_LANGUAGES.includes(language)) {
     currentArticleLanguages.add(language);
 
     if (hljs.getLanguage(language)) {
       try {
-        const result = hljs.highlight(code, { language: language });
+        const result = hljs.highlight(code.text, { language: language });
         return `<div class="code-block-wrapper">
           <pre data-language="${language}"><code class="hljs language-${language}">${result.value}</code></pre>
           <button class="code-copy-btn" data-code="${escapeHtml(code)}" aria-label="Copy code">
@@ -66,7 +67,7 @@ renderer.image = function(href, title, text) {
 
 function escapeHtml(str) {
   if (typeof str !== 'string') {
-    return '';
+    str = str.text;
   }
   return str
     .replace(/&/g, '&amp;')
