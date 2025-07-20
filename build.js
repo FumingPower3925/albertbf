@@ -149,7 +149,7 @@ async function findMarkdownFiles(dir, files = []) {
 // Load templates
 async function loadTemplates() {
   const templates = {};
-  const templateFiles = ['layout.html', 'index.html', 'article.html', 'projects.html'];
+  const templateFiles = ['layout.html', 'index.html', 'article.html', 'projects.html', '404.html'];
   
   for (const file of templateFiles) {
     const name = basename(file, '.html');
@@ -334,6 +334,17 @@ function generateProjectsHTML(articles, templates, styles) {
   return fullHTML;
 }
 
+// Generate 404 page
+function generate404HTML(templates, styles) {
+  const fullHTML = renderTemplate(templates.layout, {
+    title: '404 - Not Found',
+    description: 'The page you were looking for could not be found.',
+    content: templates['404'],
+    styles: styles
+  });
+  return fullHTML;
+}
+
 // Generate search index
 function generateSearchIndex(articles) {
   return articles.map(article => {
@@ -422,6 +433,10 @@ async function build() {
     console.log('🔍 Generating search index...');
     const searchIndex = generateSearchIndex(articles);
     await writeFile(join(DIST_DIR, 'search-index.json'), JSON.stringify(searchIndex, null, 2));
+    
+    console.log('📄 Generating 404 page...');
+    const notFoundHTML = generate404HTML(templates, styles);
+    await writeFile(join(DIST_DIR, '404.html'), notFoundHTML);
     
     console.log('✨ Build completed successfully!');
     console.log(`📊 Generated ${articles.length} articles`);
