@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "bun run build.js",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --env development",
     "deploy": "bun run build && wrangler deploy",
     "preview": "wrangler dev --local"
   },
