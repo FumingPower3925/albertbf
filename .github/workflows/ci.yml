@@ -5,8 +5,25 @@ on:
     branches: [ main ]
 
 jobs:
+  test-build:
+    name: Test Build and Parsing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run build to check for errors
+        run: bun run build
+
   build:
-    name: Build & Test
+    name: Build & Upload Artifact
+    needs: test-build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

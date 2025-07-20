@@ -65,6 +65,9 @@ renderer.image = function(href, title, text) {
 };
 
 function escapeHtml(str) {
+  if (typeof str !== 'string') {
+    return '';
+  }
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -373,7 +376,6 @@ async function build() {
     const templates = await loadTemplates();
 
     console.log('📚 Parsing markdown files...');
-    const markdownFiles = await findMarkdownFiles(ARTICLES_DIR);
     const articles = await Promise.all(markdownFiles.map(async file => {
       try {
         const article = await parseMarkdownFile(file);
@@ -384,9 +386,9 @@ async function build() {
         return article;
       } catch (err) {
         console.error(`❌ Error parsing ${file}:`, err.message);
-        return null;
+        process.exit(1);
       }
-    })).then(results => results.filter(Boolean));
+    }));
 
     console.log(`📖 Found ${articles.length} articles`);
 
