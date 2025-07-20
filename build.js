@@ -181,6 +181,10 @@ function generateArticleHTML(article, templates, styles) {
   const projectBadge = article.projectName 
     ? `<span class="project-badge">${article.projectName}</span>` 
     : '';
+    
+  const tagsBlock = article.tags.length > 0
+    ? `<div class="tags-container">${article.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}</div>`
+    : '';
   
   const descriptionBlock = article.description 
     ? `<p class="article-description">${article.description}</p>` 
@@ -192,6 +196,7 @@ function generateArticleHTML(article, templates, styles) {
     content: htmlContent,
     date: formattedDate,
     projectBadge: projectBadge,
+    tagsBlock: tagsBlock,
     descriptionBlock: descriptionBlock
   });
   
@@ -220,6 +225,10 @@ function generateIndexHTML(articles, templates, styles) {
     const projectBadge = article.isProject 
       ? `<span class="project-badge">${article.projectName}</span>` 
       : '';
+      
+    const tagsList = article.tags.length > 0
+      ? `<div class="tags-container">${article.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}</div>`
+      : '';
     
     // Clean content for search
     const cleanContent = article.content
@@ -247,13 +256,15 @@ function generateIndexHTML(articles, templates, styles) {
       <article class="article-card" 
                data-title="${escapeAttr(article.title.toLowerCase())}" 
                data-content="${escapeAttr(cleanContent.toLowerCase())}" 
-               data-project="${escapeAttr(article.projectName || '')}">
+               data-project="${escapeAttr(article.projectName || '')}"
+               data-tags="${escapeAttr(article.tags.join(' ').toLowerCase())}">
         <div class="article-meta">
           <time datetime="${article.date.toISOString()}">${formattedDate}</time>
           ${projectBadge}
         </div>
         <h2><a href="${article.url}">${article.title}</a></h2>
         <p class="article-description">${article.description}</p>
+        ${tagsList}
       </article>
     `;
   }).join('');
@@ -368,7 +379,8 @@ function generateSearchIndex(articles) {
       date: article.date.toISOString(),
       projectName: article.projectName,
       content: cleanContent,
-      languages: Array.from(article.languages || [])
+      languages: Array.from(article.languages || []),
+      tags: article.tags || []
     };
   });
 }

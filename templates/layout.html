@@ -94,7 +94,8 @@
           article.title.toLowerCase().includes(lowerQuery) ||
           article.description.toLowerCase().includes(lowerQuery) ||
           article.content.toLowerCase().includes(lowerQuery) ||
-          (article.projectName && article.projectName.toLowerCase().includes(lowerQuery))
+          (article.projectName && article.projectName.toLowerCase().includes(lowerQuery)) ||
+          (article.tags && article.tags.join(' ').toLowerCase().includes(lowerQuery))
         );
         
         hideAllArticles();
