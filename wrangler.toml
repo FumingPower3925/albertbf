@@ -5,9 +5,8 @@ compatibility_date = "2024-01-01"
 [build]
 command = "bun run build"
 
-# For static assets in newer Wrangler versions
-[site]
-bucket = "./dist"
+[assets]
+directory = "./dist"
 
 [vars]
 ENVIRONMENT = "production"
