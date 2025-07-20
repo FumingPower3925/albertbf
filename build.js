@@ -12,17 +12,17 @@ const DIST_DIR = './dist';
 const STYLES_PATH = './src/styles.css';
 const IMAGES_DIR = './src/images';
 
-const SUPPORTED_LANGUAGES = ['javascript', 'go', 'typescript', 'bash', 'yaml', 'json', 'html', 'css'];
+const SUPPORTED_LANGUAGES = hljs.listLanguages();
 
 let currentArticleLanguages = new Set();
-let currentArticleForRenderer = null; // Context for the renderer
+let currentArticleForRenderer = null;
 
 const renderer = new marked.Renderer();
 
 renderer.code = function(code, language) {
   if (language && SUPPORTED_LANGUAGES.includes(language)) {
     currentArticleLanguages.add(language);
-    
+
     if (hljs.getLanguage(language)) {
       try {
         const result = hljs.highlight(code, { language: language });
@@ -41,7 +41,7 @@ renderer.code = function(code, language) {
       }
     }
   }
-  
+
   const escapedCode = escapeHtml(code);
   return `<div class="code-block-wrapper">
     <pre data-language="${language || 'text'}"><code class="language-${language || ''}">${escapedCode}</code></pre>
@@ -85,11 +85,11 @@ class Article {
     this.filePath = filePath;
     this.languages = new Set();
     this.images = [];
-    
+
     const pathParts = filePath.split('/');
     this.isProject = pathParts.includes('projects');
     this.projectName = this.isProject ? pathParts[pathParts.indexOf('projects') + 1] : null;
-    
+
     const fileName = basename(filePath, '.md');
     if (this.isProject) {
       this.url = `/articles/projects/${this.projectName}/${fileName}`;
@@ -97,7 +97,7 @@ class Article {
       const year = this.date.getFullYear();
       this.url = `/articles/${year}/${fileName}`;
     }
-    
+
     const wordCount = this.content.split(/\s+/).filter(Boolean).length;
     this.readTime = Math.ceil(wordCount / 200);
   }
@@ -105,62 +105,62 @@ class Article {
 
 async function parseMarkdownFile(filePath) {
   const content = await readFile(filePath, 'utf-8');
-  
+
   const frontmatterRegex = /^---\s*\n(.*?)\n---\s*\n(.*)/s;
   const match = content.match(frontmatterRegex);
-  
+
   if (!match) {
     throw new Error(`No frontmatter found in ${filePath}`);
   }
-  
+
   const frontmatter = yaml.load(match[1]);
   const markdownContent = match[2];
-  
+
   const article = new Article(markdownContent, frontmatter, filePath);
-  
+
   const imageRegex = /!\[.*?\]\((?!https?:\/\/)(.*?)\)/g;
   let imageMatch;
   while ((imageMatch = imageRegex.exec(markdownContent)) !== null) {
     article.images.push(imageMatch[1]);
   }
-  
+
   currentArticleLanguages.clear();
-  
+
   currentArticleForRenderer = article;
   marked.parse(article.content);
   currentArticleForRenderer = null;
 
   article.languages = new Set(currentArticleLanguages);
-  
+
   return article;
 }
 
 async function findMarkdownFiles(dir, files = []) {
   const entries = await readdir(dir);
-  
+
   for (const entry of entries) {
     const fullPath = join(dir, entry);
     const stats = await stat(fullPath);
-    
+
     if (stats.isDirectory()) {
       await findMarkdownFiles(fullPath, files);
     } else if (entry.endsWith('.md')) {
       files.push(fullPath);
     }
   }
-  
+
   return files;
 }
 
 async function loadTemplates() {
   const templates = {};
   const templateFiles = ['layout.html', 'index.html', 'article.html', 'projects.html', '404.html'];
-  
+
   for (const file of templateFiles) {
     const name = basename(file, '.html');
     templates[name] = await readFile(join(TEMPLATES_DIR, file), 'utf-8');
   }
-  
+
   return templates;
 }
 
@@ -176,23 +176,23 @@ function generateArticleHTML(article, templates, styles) {
     month: 'long',
     day: 'numeric'
   });
-  
+
   currentArticleForRenderer = article;
   const htmlContent = marked.parse(article.content);
   currentArticleForRenderer = null;
-  
-  const projectBadge = article.projectName 
-    ? `<span class="project-badge">${article.projectName}</span>` 
+
+  const projectBadge = article.projectName
+    ? `<span class="project-badge">${article.projectName}</span>`
     : '';
-    
+
   const tagsBlock = article.tags.length > 0
     ? `<div class="tags-container">${article.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}</div>`
     : '';
-  
-  const descriptionBlock = article.description 
-    ? `<p class="article-description">${article.description}</p>` 
+
+  const descriptionBlock = article.description
+    ? `<p class="article-description">${article.description}</p>`
     : '';
-  
+
   const articleContent = renderTemplate(templates.article, {
     title: article.title,
     content: htmlContent,
@@ -202,7 +202,7 @@ function generateArticleHTML(article, templates, styles) {
     tagsBlock: tagsBlock,
     descriptionBlock: descriptionBlock
   });
-  
+
   return renderTemplate(templates.layout, {
     title: article.title,
     description: article.description,
@@ -213,24 +213,24 @@ function generateArticleHTML(article, templates, styles) {
 
 function generateIndexHTML(articles, templates, styles) {
   const sortedArticles = articles.sort((a, b) => b.date - a.date);
-  
+
   const articlesList = sortedArticles.map(article => {
     const formattedDate = article.date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
-    
+
     const readTime = `${article.readTime} min read`;
-    
-    const projectBadge = article.isProject 
-      ? `<span class="project-badge">${article.projectName}</span>` 
+
+    const projectBadge = article.isProject
+      ? `<span class="project-badge">${article.projectName}</span>`
       : '';
-      
+
     const tagsList = article.tags.length > 0
       ? `<div class="tags-container">${article.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}</div>`
       : '';
-    
+
     const cleanContent = article.content
       .replace(/```[\s\S]*?```/g, '')
       .replace(/!\[.*?\]\(.*?\)/g, '')
@@ -244,13 +244,13 @@ function generateIndexHTML(articles, templates, styles) {
       .replace(/\s+/g, ' ')
       .trim()
       .substring(0, 100);
-    
+
     const escapeAttr = (str) => str ? str.replace(/"/g, '&quot;') : '';
-    
+
     return `
-      <article class="article-card" 
-               data-title="${escapeAttr(article.title.toLowerCase())}" 
-               data-content="${escapeAttr(cleanContent.toLowerCase())}" 
+      <article class="article-card"
+               data-title="${escapeAttr(article.title.toLowerCase())}"
+               data-content="${escapeAttr(cleanContent.toLowerCase())}"
                data-project="${escapeAttr(article.projectName || '')}"
                data-tags="${escapeAttr(article.tags.join(' ').toLowerCase())}">
         <div class="article-meta">
@@ -265,9 +265,9 @@ function generateIndexHTML(articles, templates, styles) {
       </article>
     `;
   }).join('');
-  
+
   const indexContent = renderTemplate(templates.index, { articles: articlesList });
-  
+
   return renderTemplate(templates.layout, {
     title: 'Albert BF\'s Blog',
     description: 'My personal minimalist technical blog',
@@ -279,18 +279,18 @@ function generateIndexHTML(articles, templates, styles) {
 function generateProjectsHTML(articles, templates, styles) {
   const projectArticles = articles.filter(a => a.isProject);
   const projectsMap = new Map();
-  
+
   projectArticles.forEach(article => {
     if (!projectsMap.has(article.projectName)) {
       projectsMap.set(article.projectName, []);
     }
     projectsMap.get(article.projectName).push(article);
   });
-  
+
   for (const [, articles] of projectsMap) {
     articles.sort((a, b) => b.date - a.date);
   }
-  
+
   const projectsList = Array.from(projectsMap.entries()).map(([projectName, articles]) => {
     const articlesList = articles.map(article => {
       const formattedDate = article.date.toLocaleDateString('en-US', {
@@ -299,7 +299,7 @@ function generateProjectsHTML(articles, templates, styles) {
         day: 'numeric'
       });
       const readTime = `${article.readTime} min read`;
-      
+
       return `
         <li class="project-article">
           <a href="${article.url}">${article.title}</a>
@@ -311,7 +311,7 @@ function generateProjectsHTML(articles, templates, styles) {
         </li>
       `;
     }).join('');
-    
+
     return `
       <div class="project-section minimal-card">
         <h2>${projectName}</h2>
@@ -321,9 +321,9 @@ function generateProjectsHTML(articles, templates, styles) {
       </div>
     `;
   }).join('');
-  
+
   const projectsContent = renderTemplate(templates.projects, { projects: projectsList });
-  
+
   return renderTemplate(templates.layout, {
     title: 'Albert BF\'s Projects',
     description: 'A collection of my projects and their related articles',
@@ -362,20 +362,20 @@ async function ensureDir(dir) {
 
 async function build() {
   console.log('🚀 Starting build process...');
-  
+
   try {
     await ensureDir(DIST_DIR);
-    
+
     const styles = await readFile(STYLES_PATH, 'utf-8');
     const templates = await loadTemplates();
-    
+
     console.log('📖 Parsing markdown files...');
     const markdownFiles = await findMarkdownFiles(ARTICLES_DIR);
     const articles = await Promise.all(markdownFiles.map(async file => {
       try {
         const article = await parseMarkdownFile(file);
-        const languageInfo = article.languages.size > 0 
-          ? ` (languages: ${Array.from(article.languages).join(', ')})` 
+        const languageInfo = article.languages.size > 0
+          ? ` (languages: ${Array.from(article.languages).join(', ')})`
           : '';
         console.log(`✅ Parsed: ${article.title} (~${article.readTime} min read)${languageInfo}`);
         return article;
@@ -384,17 +384,17 @@ async function build() {
         return null;
       }
     })).then(results => results.filter(Boolean));
-    
+
     console.log(`📚 Found ${articles.length} articles`);
-    
+
     console.log('📝 Generating article pages and copying images...');
     for (const article of articles) {
       const articleHTML = generateArticleHTML(article, templates, styles);
       const outputPath = join(DIST_DIR, article.url.substring(1), 'index.html');
-      
+
       await ensureDir(dirname(outputPath));
       await writeFile(outputPath, articleHTML);
-      
+
       const articleSrcDir = dirname(article.filePath);
       for (const imagePath of article.images) {
         const srcImagePath = join(articleSrcDir, imagePath);
@@ -406,16 +406,16 @@ async function build() {
         }
       }
     }
-    
+
     console.log('🏠 Generating index page...');
     const indexHTML = generateIndexHTML(articles, templates, styles);
     await writeFile(join(DIST_DIR, 'index.html'), indexHTML);
-    
+
     console.log('📂 Generating projects page...');
     const projectsHTML = generateProjectsHTML(articles, templates, styles);
     await ensureDir(join(DIST_DIR, 'projects'));
     await writeFile(join(DIST_DIR, 'projects', 'index.html'), projectsHTML);
-    
+
     console.log('🖼️ Copying general images...');
     try {
         const destImagesDir = join(DIST_DIR, 'images');
@@ -427,17 +427,17 @@ async function build() {
             console.error('❌ Error copying general images:', err);
         }
     }
-    
+
     console.log('🔍 Generating search index...');
     const searchIndex = generateSearchIndex(articles);
     await writeFile(join(DIST_DIR, 'search-index.json'), JSON.stringify(searchIndex, null, 2));
-    
+
     console.log('📄 Generating 404 page...');
     const notFoundHTML = generate404HTML(templates, styles);
     await writeFile(join(DIST_DIR, '404.html'), notFoundHTML);
-    
+
     console.log('✨ Build completed successfully!');
-    
+
   } catch (err) {
     console.error('❌ Build failed:', err);
     process.exit(1);
