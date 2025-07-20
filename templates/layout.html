@@ -253,6 +253,24 @@
           link.classList.add('active');
         }
       });
+      
+      const nav = document.querySelector('nav');
+      let lastScrollY = window.scrollY;
+
+      window.addEventListener('scroll', () => {
+        if (lastScrollY < window.scrollY && window.scrollY > 100) {
+          nav.classList.add('nav--hidden');
+        } else {
+          nav.classList.remove('nav--hidden');
+        }
+        lastScrollY = window.scrollY;
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (e.clientY < 60) {
+          nav.classList.remove('nav--hidden');
+        }
+      });
     });
   </script>
 </body>
