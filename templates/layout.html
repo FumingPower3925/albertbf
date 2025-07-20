@@ -101,6 +101,34 @@
         });
       }
       
+      // Make article cards clickable
+      const articleCards = document.querySelectorAll('.article-card');
+      articleCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'A') return;
+          
+          const link = card.querySelector('h2 a');
+          if (link) {
+            window.location.href = link.href;
+          }
+        });
+      });
+
+      // Make project articles clickable
+      const projectArticles = document.querySelectorAll('.project-article');
+      projectArticles.forEach(article => {
+        article.style.cursor = 'pointer';
+        article.addEventListener('click', (e) => {
+          if (e.target.tagName === 'A') return;
+          
+          const link = article.querySelector('a');
+          if (link) {
+            window.location.href = link.href;
+          }
+        });
+      });
+
       // Fade-in animation
       const elements = document.querySelectorAll('.minimal-card, .article-card');
       elements.forEach((el, index) => {
