@@ -121,7 +121,7 @@ body::before {
 .container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem;
   position: relative;
   z-index: 1;
 }
@@ -211,6 +211,11 @@ nav {
   line-height: 1;
   display: flex;
   align-items: center;
+  transition: top 0.3s ease-in-out;
+}
+
+.nav--hidden {
+  top: -100px;
 }
 
 nav ul {
@@ -259,7 +264,7 @@ nav li:first-child a {
 }
 
 nav li:last-child a {
-  border-radius: 0 16px 16px 0;
+  border-radius: 0;
 }
 
 nav a:hover {
@@ -278,7 +283,7 @@ nav a.active {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0.1rem 0.6rem;
+  padding: 0.3rem 0.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,7 +291,9 @@ nav a.active {
   border-left: 1px solid var(--border-nav);
 }
 .theme-toggle:hover {
+  background: var(--bg-nav-hover);
   color: var(--text-link-hover);
+  border-radius: 0 16px 16px 0;
 }
 .moon-icon { display: none; }
 .sun-icon { display: block; }
