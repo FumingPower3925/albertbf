@@ -96,6 +96,10 @@ class Article {
       const year = this.date.getFullYear();
       this.url = `/articles/${year}/${fileName}`;
     }
+    
+    // Calculate read time
+    const wordCount = this.content.split(/\s+/).filter(Boolean).length;
+    this.readTime = Math.ceil(wordCount / 200);
   }
 }
 
@@ -195,6 +199,7 @@ function generateArticleHTML(article, templates, styles) {
     title: article.title,
     content: htmlContent,
     date: formattedDate,
+    readTime: `${article.readTime} min read`,
     projectBadge: projectBadge,
     tagsBlock: tagsBlock,
     descriptionBlock: descriptionBlock
@@ -221,6 +226,8 @@ function generateIndexHTML(articles, templates, styles) {
       month: 'short',
       day: 'numeric'
     });
+    
+    const readTime = `${article.readTime} min read`;
     
     const projectBadge = article.isProject 
       ? `<span class="project-badge">${article.projectName}</span>` 
@@ -260,6 +267,8 @@ function generateIndexHTML(articles, templates, styles) {
                data-tags="${escapeAttr(article.tags.join(' ').toLowerCase())}">
         <div class="article-meta">
           <time datetime="${article.date.toISOString()}">${formattedDate}</time>
+          <span class="meta-separator">·</span>
+          <span class="read-time">${readTime}</span>
           ${projectBadge}
         </div>
         <h2><a href="${article.url}">${article.title}</a></h2>
@@ -310,11 +319,16 @@ function generateProjectsHTML(articles, templates, styles) {
         month: 'short',
         day: 'numeric'
       });
+      const readTime = `${article.readTime} min read`;
       
       return `
         <li class="project-article">
           <a href="${article.url}">${article.title}</a>
-          <time datetime="${article.date.toISOString()}">${formattedDate}</time>
+          <div class="project-article-meta">
+            <time datetime="${article.date.toISOString()}">${formattedDate}</time>
+            <span class="meta-separator">·</span>
+            <span class="read-time">${readTime}</span>
+          </div>
         </li>
       `;
     }).join('');
@@ -336,7 +350,7 @@ function generateProjectsHTML(articles, templates, styles) {
   
   // Wrap in layout template
   const fullHTML = renderTemplate(templates.layout, {
-    title: 'Projects',
+    title: 'Albert BF\'s Projects',
     description: 'A collection of my projects and their related articles',
     content: projectsContent,
     styles: styles
@@ -377,6 +391,7 @@ function generateSearchIndex(articles) {
       description: article.description,
       url: article.url,
       date: article.date.toISOString(),
+      readTime: article.readTime,
       projectName: article.projectName,
       content: cleanContent,
       languages: Array.from(article.languages || []),
@@ -415,7 +430,7 @@ async function build() {
         const languageInfo = article.languages.size > 0 
           ? ` (languages: ${Array.from(article.languages).join(', ')})` 
           : '';
-        console.log(`✅ Parsed: ${article.title}${languageInfo}`);
+        console.log(`✅ Parsed: ${article.title} (~${article.readTime} min read)${languageInfo}`);
       } catch (err) {
         console.error(`❌ Error parsing ${file}:`, err.message);
       }
