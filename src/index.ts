@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { serveStatic } from 'hono/cloudflare-workers';
 
 type Bindings = {
   ENVIRONMENT: string;
@@ -7,9 +6,7 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// Security headers
 app.use('*', async (c, next) => {
-
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'`,
@@ -29,41 +26,6 @@ app.use('*', async (c, next) => {
   c.header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
 });
 
-// Conditional Cache headers
-app.use('*', async (c, next) => {
-  await next();
-  const url = new URL(c.req.url);
-
-  if (c.env.ENVIRONMENT === 'development') {
-    if (url.pathname.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$/)) {
-      c.header('Cache-Control', 'no-cache');
-    }
-  } else {
-    if (url.pathname.endsWith('.html') || url.pathname === '/' || !url.pathname.includes('.')) {
-      c.header('Cache-Control', 'public, max-age=3600');
-    } else if (url.pathname.endsWith('.json')) {
-      c.header('Cache-Control', 'public, max-age=600');
-    }
-  }
-});
-
-// Development-only static file serving
-app.use('*', (c, next) => {
-  if (c.env.ENVIRONMENT === 'development') {
-    return serveStatic({
-      root: './',
-      rewriteRequestPath: (path) => {
-        if (path === '/') return '/index.html';
-        if (!path.includes('.') && !path.endsWith('/')) return `${path}/index.html`;
-        if (path.endsWith('/')) return `${path}index.html`;
-        return path;
-      }
-    })(c, next);
-  }
-  return next();
-});
-
-// Health check endpoint
 app.get('/health', (c) => {
   return c.json({
     status: 'ok',
