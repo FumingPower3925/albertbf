@@ -8,7 +8,70 @@
   <style>{{styles}}</style>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Search functionality
+      function initCodeCopy() {
+        const copyButtons = document.querySelectorAll('.code-copy-btn');
+        
+        copyButtons.forEach(button => {
+          button.addEventListener('click', async () => {
+            const code = button.getAttribute('data-code');
+            const copyText = button.querySelector('.copy-text');
+            const originalText = copyText.textContent;
+            
+            try {
+              await navigator.clipboard.writeText(code);
+              
+              button.classList.add('copied');
+              copyText.textContent = 'Copied!';
+              
+              button.querySelector('svg').innerHTML = `
+                <polyline points="20 6 9 17 4 12"></polyline>
+              `;
+              
+              setTimeout(() => {
+                button.classList.remove('copied');
+                copyText.textContent = originalText;
+                
+                button.querySelector('svg').innerHTML = `
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                `;
+              }, 2000);
+            } catch (err) {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = code;
+              textArea.style.position = 'fixed';
+              textArea.style.left = '-999999px';
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              
+              try {
+                document.execCommand('copy');
+                button.classList.add('copied');
+                copyText.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                  button.classList.remove('copied');
+                  copyText.textContent = originalText;
+                }, 2000);
+              } catch (err) {
+                console.error('Failed to copy code:', err);
+                copyText.textContent = 'Failed';
+                
+                setTimeout(() => {
+                  copyText.textContent = originalText;
+                }, 2000);
+              }
+              
+              document.body.removeChild(textArea);
+            }
+          });
+        });
+      }
+      
+      initCodeCopy();
+      
       let searchIndex = [];
       
       async function loadSearchIndex() {
@@ -87,7 +150,6 @@
         }
       }
 
-      // Initialize search
       loadSearchIndex();
       
       const searchInput = document.getElementById('search-input');
@@ -101,7 +163,6 @@
         });
       }
       
-      // Make article cards clickable
       const articleCards = document.querySelectorAll('.article-card');
       articleCards.forEach(card => {
         card.style.cursor = 'pointer';
@@ -115,7 +176,6 @@
         });
       });
 
-      // Make project articles clickable
       const projectArticles = document.querySelectorAll('.project-article');
       projectArticles.forEach(article => {
         article.style.cursor = 'pointer';
@@ -129,7 +189,6 @@
         });
       });
 
-      // Fade-in animation
       const elements = document.querySelectorAll('.minimal-card, .article-card');
       elements.forEach((el, index) => {
         setTimeout(() => el.classList.add('fade-in'), index * 100);
@@ -141,13 +200,9 @@
       navLinks.forEach(link => {
         const linkPath = link.getAttribute('href');
         if (linkPath === '/' && currentPath === '/') {
-          console.log(linkPath, currentPath);
           link.classList.add('active');
         } else if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
-          console.log(linkPath, currentPath);
           link.classList.add('active');
-        } else {
-          console.log(linkPath, currentPath);
         }
       });
     });

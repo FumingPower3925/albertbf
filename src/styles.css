@@ -302,12 +302,17 @@ main {
 }
 
 /* Code blocks */
+.code-block-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+}
+
 pre {
   background: #f8f8f8;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
+  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  margin: 0;
   overflow-x: auto;
   position: relative;
 }
@@ -318,26 +323,93 @@ pre code {
   line-height: 1.6;
   background: transparent;
   color: #2c2c2c;
+  display: block;
 }
 
-pre:hover {
+.code-block-wrapper:hover pre {
   border-color: #d0d0d0;
 }
 
 /* Language badge for code blocks */
-pre[class*="language-"]::before {
-  content: attr(class);
+.code-block-wrapper pre[data-language]::before {
+  content: attr(data-language);
   position: absolute;
   top: 0.5rem;
-  right: 0.75rem;
-  background: #e8e8e8;
+  left: 0.75rem;
+  background: rgba(0, 0, 0, 0.04);
   color: #666666;
-  padding: 0.25rem 0.5rem;
-  border-radius: 2px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  pointer-events: none;
+  z-index: 9;
+  line-height: 1;
+  font-weight: 500;
+}
+
+/* Hide badge for plain text */
+.code-block-wrapper pre[data-language="text"]::before,
+.code-block-wrapper pre:not([data-language])::before {
+  display: none;
+}
+
+/* Reduce top padding for code blocks without language badge */
+.code-block-wrapper pre[data-language="text"],
+.code-block-wrapper pre:not([data-language]) {
+  padding-top: 1.5rem;
+}
+
+/* Copy button styles */
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #666666;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  transition: all 0.2s ease;
+  z-index: 10;
+  outline: none;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #2c2c2c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.code-copy-btn:active {
+  transform: scale(0.95);
+}
+
+.code-copy-btn.copied {
+  background: rgba(39, 174, 96, 0.1);
+  border-color: #27ae60;
+  color: #27ae60;
+}
+
+.code-copy-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.code-copy-btn .copy-text {
+  font-weight: 500;
 }
 
 /* Inline code */
@@ -568,8 +640,35 @@ th {
   }
   
   pre {
-    padding: 1rem;
+    padding: 2.5rem 1rem 1rem 1rem;
     font-size: 0.8rem;
+  }
+  
+  /* Reduce top padding for code blocks without language badge on mobile */
+  .code-block-wrapper pre[data-language="text"],
+  .code-block-wrapper pre:not([data-language]) {
+    padding-top: 1rem;
+  }
+  
+  .code-copy-btn {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.7rem;
+  }
+  
+  .code-copy-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  /* Hide copy button text on mobile, show only icon */
+  .code-copy-btn .copy-text {
+    display: none;
+  }
+  
+  /* Adjust language badge on mobile */
+  .code-block-wrapper pre[data-language]::before {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
   }
 }
 
@@ -634,7 +733,7 @@ th {
     box-shadow: none;
   }
   
-  nav {
+  nav, .code-copy-btn {
     display: none;
   }
   
