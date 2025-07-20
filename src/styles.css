@@ -252,6 +252,22 @@ main {
   letter-spacing: 0.02em;
 }
 
+.tags-container {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-badge {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 .article-card h2 {
   margin-bottom: 0.5rem;
   font-size: 1.4rem;
