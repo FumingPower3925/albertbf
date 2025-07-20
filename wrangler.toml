@@ -11,6 +11,11 @@ directory = "./dist"
 [vars]
 ENVIRONMENT = "production"
 
+[env.production]
+routes = [
+  { pattern = "albertbf.com/*", custom_domain = true }
+]
+
 # For local development
 [env.development]
 vars = { ENVIRONMENT = "development" }
