@@ -467,8 +467,8 @@ pre code {
   position: absolute;
   top: 0.5rem;
   left: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
-  color: #ccc;
+  background: var(--bg-badge);
+  color: var(--text-badge);
   padding: 0.25rem 0.6rem;
   border-radius: 3px;
   font-size: 0.7rem;
