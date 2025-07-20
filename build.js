@@ -27,7 +27,17 @@ renderer.code = function(code, language) {
     if (hljs.getLanguage(language)) {
       try {
         const result = hljs.highlight(code, { language: language });
-        return `<pre><code class="hljs language-${language}">${result.value}</code></pre>`;
+        // Add wrapper div with copy button
+        return `<div class="code-block-wrapper">
+          <pre data-language="${language}"><code class="hljs language-${language}">${result.value}</code></pre>
+          <button class="code-copy-btn" data-code="${escapeHtml(code)}" aria-label="Copy code">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span class="copy-text">Copy</span>
+          </button>
+        </div>`;
       } catch (err) {
         console.warn(`Warning: Error highlighting ${language}:`, err.message);
       }
@@ -35,13 +45,29 @@ renderer.code = function(code, language) {
   }
   
   // Return escaped code if no highlighting applied
-  const escapedCode = code.replace(/[&<>"']/g, (match) => {
-    const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-    return escapeMap[match];
-  });
+  const escapedCode = escapeHtml(code);
   
-  return `<pre><code class="language-${language || ''}">${escapedCode}</code></pre>`;
+  return `<div class="code-block-wrapper">
+    <pre data-language="${language || 'text'}"><code class="language-${language || ''}">${escapedCode}</code></pre>
+    <button class="code-copy-btn" data-code="${escapeHtml(code)}" aria-label="Copy code">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <span class="copy-text">Copy</span>
+    </button>
+  </div>`;
 };
+
+// Helper function to escape HTML
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // Apply the custom renderer
 marked.use({ renderer });
