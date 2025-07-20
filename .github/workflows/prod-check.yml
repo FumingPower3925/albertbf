@@ -1,0 +1,41 @@
+name: Production Health Check
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  audit-production:
+    name: Audit Production Site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Cloudflare deployment
+        run: sleep 60
+
+      - name: Check site availability
+        run: curl -s --fail https://albertbf.com/
+
+      - name: Create performance budget file
+        run: |
+          echo '[{ "path": "/*", "resourceSizes": [{ "resourceType": "total", "budget": 50 }] }]' > ./budget.json
+
+      - name: Run Lighthouse audit on production
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            https://albertbf.com/
+            https://albertbf.com/projects/
+          budgetPath: ./budget.json
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check response time
+        run: |
+          echo "Pinging albertbf.com..."
+          response_time=$(curl -o /dev/null -s -w '%{time_total}\n' https://albertbf.com/)
+          echo "Response time: ${response_time}s"
+          # Fail if the response time is over 1 second
+          if (( $(echo "$response_time > 1.0" | bc -l) )); then
+            echo "Error: Response time is too slow."
+            exit 1
+          fi
