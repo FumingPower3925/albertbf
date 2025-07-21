@@ -63,7 +63,7 @@ jobs:
           echo '{ "ci": { "collect": { "staticDistDir": "./dist" } } }' > ./lighthouserc.json
 
       - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v11
+        uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: './lighthouserc.json'
           uploadArtifacts: true
