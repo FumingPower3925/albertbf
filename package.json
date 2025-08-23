@@ -10,7 +10,7 @@
     "preview": "wrangler dev --local"
   },
   "dependencies": {
-    "hono": "^4.9.1",
+    "hono": "^4.9.4",
     "marked": "^16.1.2",
     "js-yaml": "^4.1.0",
     "highlight.js": "^11.11.1"
