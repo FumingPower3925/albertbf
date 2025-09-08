@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "wrangler": "^4.33.1",
-    "@cloudflare/workers-types": "^4.20250831.0"
+    "@cloudflare/workers-types": "^4.20250906.0"
   },
   "engines": {
     "bun": ">=1.0.0"
