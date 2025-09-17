@@ -131,4 +131,4 @@ The evolution of Auto-Grade is a testament to the iterative nature of software d
 
 By embracing the chaos, refactoring for sanity, and making the tough decisions, the Auto-Grade project is now stronger, more resilient, and better prepared for the challenges that lie ahead. The road to building a truly intelligent grading assistant is a long one, but with a solid foundation in place, the journey is well underway.
 
-*Check out the [GitHub repository](https://www.google.com/search?q=https://github.com/FumingPower3925/auto-grade) to explore the latest code and see the evolution of the project firsthand.*
+*Check out the [GitHub repository](https://github.com/FumingPower3925/auto-grade) to explore the latest code and see the evolution of the project firsthand.*
