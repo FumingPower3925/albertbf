@@ -72,7 +72,7 @@ This approach keeps the frontend lightweight and maintainable. When you click th
 
 ## Testing: The Safety Net
 
-One thing that sets this project apart is its comprehensive testing strategy. With **99% code coverage** (yes, really!), Auto-Grade doesn't just hope things work – it verifies them at every level:
+One thing that sets this project apart is its comprehensive testing strategy. With **100% code coverage** (yes, really!), Auto-Grade doesn't just hope things work – it verifies them at every level:
 
 ### Unit Tests
 Testing individual components in isolation:
