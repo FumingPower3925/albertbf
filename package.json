@@ -10,14 +10,14 @@
     "preview": "wrangler dev --local"
   },
   "dependencies": {
-    "hono": "^4.9.7",
+    "hono": "^4.9.8",
     "marked": "^16.3.0",
     "js-yaml": "^4.1.0",
     "highlight.js": "^11.11.1"
   },
   "devDependencies": {
-    "wrangler": "^4.37.0",
     "@cloudflare/workers-types": "^4.20250922.0"
+    "wrangler": "^4.38.0",
   },
   "engines": {
     "bun": ">=1.0.0"
