@@ -5,8 +5,6 @@ description: "How I built a high-performance blog with zero maintenance costs us
 tags: ["cloudflare", "static-site", "web-development", "architecture", "bun"]
 ---
 
-# Building a Zero-Cost Blog: The Architecture Behind albertbf.com
-
 When I set out to build my personal blog, I had four non-negotiable requirements:
 - **Zero maintenance costs** - No monthly hosting fees
 - **Lightning-fast load times** - Sub-second page loads globally
