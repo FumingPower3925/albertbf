@@ -5,8 +5,6 @@ description: "Diving into the design and mechanics of a multi-level puzzle game 
 tags: ["llm", "prompt-engineering", "red-teaming", "security", "puzzle", "python", "docker"]
 ---
 
-# Mini-Gandalf: A Puzzle Sandbox for Exploring LLM Defenses
-
 Imagine chatting with an AI assistant that's guarding a secret password, and your job is to coax it out through clever prompts, encodings, or even authorization rituals. Sounds like a fun challenge? That's the essence of red teaming LLMs – testing their defenses against information leakage. But what if we turned that into an interactive game with escalating difficulties, multiple solution paths, and real lessons in prompt engineering?
 
 Enter Mini-Gandalf: a proof-of-concept puzzle sandbox inspired by Lakera's Gandalf challenge. This project creates a series of levels where players try to extract a "watchword" (think secret password) from an LLM-powered assistant. Each level introduces new defensive layers, from simple output filters to external vector stores and nonce-based challenges. It's not just a game – it's an educational tool that demonstrates how to harden LLMs against prompt injections and unauthorized disclosures, all while keeping things engaging and multi-path.

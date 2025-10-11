@@ -5,8 +5,6 @@ description: "Deep dive into the performance optimizations that make albertbf.co
 tags: ["performance", "web-optimization", "cloudflare", "css", "javascript"]
 ---
 
-# Performance First: Optimizing for Lightning-Fast Load Times
-
 Speed isn't just a feature—it's the foundation of a good user experience. When building albertbf.com, I obsessed over every millisecond, implementing numerous optimizations to achieve sub-200ms load times globally.
 
 ## The Performance Budget
