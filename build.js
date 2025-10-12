@@ -392,10 +392,25 @@ async function build() {
       }
     }));
 
-    console.log(`📖 Found ${articles.length} articles`);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    const publishedArticles = articles.filter(article => {
+      const articleDate = new Date(article.date);
+      articleDate.setHours(0, 0, 0, 0);
+      
+      if (articleDate > now) {
+        console.log(`⏭️  Skipped (scheduled for future): ${article.title} (${formatDateEuro(article.date)})`);
+        return false;
+      }
+      return true;
+    });
+
+    const scheduledCount = articles.length - publishedArticles.length;
+    console.log(`📖 Found ${articles.length} articles (${publishedArticles.length} published${scheduledCount > 0 ? `, ${scheduledCount} scheduled` : ''})`);
 
     console.log('📝 Generating article pages and copying images...');
-    for (const article of articles) {
+    for (const article of publishedArticles) {
       const articleHTML = generateArticleHTML(article, templates, styles);
       const outputPath = join(DIST_DIR, article.url.substring(1), 'index.html');
 
@@ -415,11 +430,11 @@ async function build() {
     }
 
     console.log('🏠 Generating index page...');
-    const indexHTML = generateIndexHTML(articles, templates, styles);
+    const indexHTML = generateIndexHTML(publishedArticles, templates, styles);
     await writeFile(join(DIST_DIR, 'index.html'), indexHTML);
 
     console.log('🗂️ Generating projects page...');
-    const projectsHTML = generateProjectsHTML(articles, templates, styles);
+    const projectsHTML = generateProjectsHTML(publishedArticles, templates, styles);
     await ensureDir(join(DIST_DIR, 'projects'));
     await writeFile(join(DIST_DIR, 'projects', 'index.html'), projectsHTML);
 
@@ -436,7 +451,7 @@ async function build() {
     }
 
     console.log('🔍 Generating search index...');
-    const searchIndex = generateSearchIndex(articles);
+    const searchIndex = generateSearchIndex(publishedArticles);
     await writeFile(join(DIST_DIR, 'search-index.json'), JSON.stringify(searchIndex, null, 2));
 
     console.log('📄 Generating 404 page...');
