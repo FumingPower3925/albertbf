@@ -1,11 +1,11 @@
 ---
-title: "Starfinder 2e Session Manager: Building a Browser-Based GM Companion"
+title: "TTRPG Session Manager: Building a Browser-Based GM Companion"
 date: "11-10-2025"
 description: "Exploring the design and implementation of a web-based campaign management tool that helps Game Masters run smoother TTRPG sessions through organized file management, dynamic audio control, and real-time session tracking."
 tags: ["next.js", "file-system-api", "ttrpg", "web-app", "typescript", "game-mastering"]
 ---
 
-Picture this: you're running a tabletop role-playing game (TTRPG) session — think Dungeons & Dragons, but in space. You've got four players waiting expectantly, combat music needs to switch on at just the right moment, you need to reference that NPC's stat block you wrote last week, and someone just asked about a plot detail from three sessions ago. You're juggling physical notes, PDFs, music apps, and trying to keep everything flowing smoothly. Sound chaotic? That's where the Starfinder 2e Session Manager comes in.
+Picture this: you're running a tabletop role-playing game (TTRPG) session — think Dungeons & Dragons. You've got four players waiting expectantly, combat music needs to switch on at just the right moment, you need to reference that NPC's stat block you wrote last week, and someone just asked about a plot detail from three sessions ago. You're juggling physical notes, PDFs, music apps, and trying to keep everything flowing smoothly. Sound chaotic? That's where the TTRPG Session Manager comes in.
 
 This project tackles a problem familiar to anyone who's run a TTRPG campaign: managing the avalanche of content that makes up a game session. Built as a fully static web application using Next.js and modern browser APIs, it transforms how Game Masters (GMs) organize and access their campaign materials during play. No servers, no databases, no complex setup — just point it at a folder of your campaign files and you're ready to run.
 
@@ -293,6 +293,6 @@ This project exemplifies how modern browser APIs can eliminate entire categories
 
 For content-heavy applications with local-first workflows, this pattern is incredibly powerful. Whether you're building a GM tool, a writing app, a music organizer, or any other tool that works with user files, consider whether you really need a backend at all.
 
-The Starfinder 2e Session Manager proves you can build sophisticated, feature-rich applications purely in the browser — and deliver a better user experience in the process. The code is open source at [this repo](https://github.com/FumingPower3925/starfinder2e-session-manager). If you run TTRPGs and want to spend less time fumbling with files and more time crafting memorable moments, give it a try.
+The TTRPG Session Manager proves you can build sophisticated, feature-rich applications purely in the browser — and deliver a better user experience in the process. The code is open source at [this repo](https://github.com/FumingPower3925/ttrpg-session-manager). If you run TTRPGs and want to spend less time fumbling with files and more time crafting memorable moments, give it a try.
 
 After all, the best technology is the kind that gets out of your way and lets you focus on what matters — in this case, spinning tales of adventure among the stars.
