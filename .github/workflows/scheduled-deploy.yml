@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  build:
+    name: Build and Commit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,8 +22,16 @@ jobs:
       - name: Build static site
         run: bun run build
 
-      - name: Deploy to Cloudflare
-        uses: cloudflare/wrangler-action@v3
+      # OPTIONAL: if your build output needs committing (e.g., generated content)
+      - name: Commit build output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: scheduled build [skip ci]" || echo "No changes to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.8.0
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: deploy
+          branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
