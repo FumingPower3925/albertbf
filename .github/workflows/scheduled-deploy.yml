@@ -22,7 +22,6 @@ jobs:
       - name: Build static site
         run: bun run build
 
-      # OPTIONAL: if your build output needs committing (e.g., generated content)
       - name: Commit build output
         run: |
           git config user.name "github-actions[bot]"
