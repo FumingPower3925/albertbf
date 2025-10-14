@@ -1,40 +1,34 @@
-name: Scheduled Daily Build
+name: Scheduled Daily Build and Cloudflare Deploy
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
-
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  workflow_dispatch: # allows manual trigger
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build:
-    name: Build and Commit
+  trigger-cloudflare-deploy:
+    name: Daily Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout (optional)
         uses: actions/checkout@v5
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build static site
-        run: bun run build
-
-      - name: Commit build output
+      - name: Trigger Cloudflare Pages deployment
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "chore: scheduled build [skip ci]" || echo "No changes to commit"
+          echo "Requesting new Cloudflare Pages deployment..."
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${CLOUDFLARE_PROJECT_NAME}/deployments" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            | jq .
 
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.8.0
-        with:
-          branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          echo "✅ Cloudflare deploy request sent."
