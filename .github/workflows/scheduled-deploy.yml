@@ -4,16 +4,19 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-permissions:
-  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Worker
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
