@@ -12,7 +12,7 @@
   "dependencies": {
     "hono": "^4.10.4",
     "marked": "^17.0.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "highlight.js": "^11.11.1"
   },
   "devDependencies": {
