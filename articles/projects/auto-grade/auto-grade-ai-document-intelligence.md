@@ -7,7 +7,7 @@ tags: ["llm", "ocr", "embeddings", "rag", "fastapi", "python", "openai", "mistra
 
 ## From Storage to Understanding
 
-In the [previous chapters](https://albertbf.com/articles/projects/auto-grade/auto-grade-testing/) of the Auto-Grade saga, we built a solid foundation: a three-layer architecture, 100% test coverage, and GridFS for handling large files. But there was a fundamental problem lurking beneath the surface. The system could *store* documents beautifully, but it couldn't *understand* them.
+In the [previous chapters](https://albertbf.com/articles/projects/auto-grade/auto-grade-navigating-the-chaos/) of the Auto-Grade saga, we built a solid foundation: a three-layer architecture, 100% test coverage, and GridFS for handling large files. But there was a fundamental problem lurking beneath the surface. The system could *store* documents beautifully, but it couldn't *understand* them.
 
 For an AI-powered grading assistant, simply storing PDFs isn't enough. The system needs to extract structured information from rubrics, understand the grading criteria, and provide relevant context when evaluating student submissions. This article chronicles the journey of transforming Auto-Grade from a glorified file cabinet into an intelligent document processing platform.
 

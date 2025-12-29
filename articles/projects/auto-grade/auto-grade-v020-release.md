@@ -7,7 +7,7 @@ tags: ["release", "python", "fastapi", "docker", "ui", "crud", "devops"]
 
 ## The Road to v0.2.0
 
-If you've been following the Auto-Grade journey, you know it started as an ambitious experiment: an AI-powered grading assistant that could help educators provide faster, more consistent feedback to students. The [first article](https://albertbf.com/articles/projects/auto-grade/auto-grade-foundation/) laid the architectural groundwork. The [second](https://albertbf.com/articles/projects/auto-grade/auto-grade-testing/) tackled the chaos of 100% test coverage. The [third](https://albertbf.com/articles/projects/auto-grade/auto-grade-ai-intelligence/) brought AI-powered document intelligence.
+If you've been following the Auto-Grade journey, you know it started as an ambitious experiment: an AI-powered grading assistant that could help educators provide faster, more consistent feedback to students. The [first article](https://albertbf.com/articles/projects/auto-grade/auto-grade-foundation/) laid the architectural groundwork. The [second](https://albertbf.com/articles/projects/auto-grade/auto-grade-navigating-the-chaos/) tackled the chaos of 100% test coverage. The [third](https://albertbf.com/articles/projects/auto-grade/auto-grade-ai-document-intelligence/) brought AI-powered document intelligence.
 
 Today, I'm thrilled to announce **Auto-Grade v0.2.0**—a milestone that marks the transition from "interesting prototype" to "something you might actually want to use."
 
@@ -135,7 +135,7 @@ For those who appreciate metrics, here's where Auto-Grade v0.2.0 stands:
 | **Source Files** | 14 |
 | **Lines of Code** | ~1,500 |
 
-The 100% coverage requirement has been a double-edged sword (as discussed in [Part 2](https://albertbf.com/articles/projects/auto-grade/auto-grade-testing/)), but it's also forced us to write testable, modular code. Every new feature comes with its full suite of tests before merging.
+The 100% coverage requirement has been a double-edged sword (as discussed in [Part 2](https://albertbf.com/articles/projects/auto-grade/auto-grade-navigating-the-chaos/)), but it's also forced us to write testable, modular code. Every new feature comes with its full suite of tests before merging.
 
 ---
 
