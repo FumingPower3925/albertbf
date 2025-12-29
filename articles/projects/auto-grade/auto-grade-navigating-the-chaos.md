@@ -7,7 +7,7 @@ tags: ["llm", "testing", "refactoring", "fastapi", "python", "gridfs", "docker"]
 
 ## The Unforeseen Consequences of Perfection
 
-In the [first chapter of the Auto-Grade saga](https://albertbf.com/articles/projects/auto-grade/auto-grade-foundation/), we laid down a robust architectural foundation for an AI-powered grading system. The goal was clear: build a production-ready application with a clean three-layer architecture, a lightweight HTMX frontend, and a rigorous testing strategy that boasted **100% code coverage**. It was a testament to pragmatic engineering, a solid starting point for a project with ambitious goals. But as any seasoned developer will tell you, the map is not the territory.
+In the [first chapter of the Auto-Grade saga](/articles/projects/auto-grade/auto-grade-foundation/), we laid down a robust architectural foundation for an AI-powered grading system. The goal was clear: build a production-ready application with a clean three-layer architecture, a lightweight HTMX frontend, and a rigorous testing strategy that boasted **100% code coverage**. It was a testament to pragmatic engineering, a solid starting point for a project with ambitious goals. But as any seasoned developer will tell you, the map is not the territory.
 
 The pursuit of 100% test coverage, while noble in theory, led to a host of unforeseen challenges. The tests, once a safety net, became a tangled mess of mocks, patches, and convoluted setups that made refactoring a nightmare. At the same time, the initial approach to handling file uploads began to show its limitations, with performance bottlenecks emerging as the system was pushed to its limits.
 
