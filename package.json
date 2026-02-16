@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "hono": "^4.11.9",
-    "marked": "^17.0.1",
+    "marked": "^17.0.2",
     "js-yaml": "^4.1.1",
     "highlight.js": "^11.11.1"
   },
