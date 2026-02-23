@@ -16,7 +16,7 @@
     "highlight.js": "^11.11.1"
   },
   "devDependencies": {
-    "wrangler": "^4.59.2",
+    "wrangler": "^4.68.0",
     "@cloudflare/workers-types": "^4.20260207.0"
   },
   "engines": {
