@@ -1,6 +1,7 @@
 ---
 title: "Auto-Grade Part 2: Navigating the Chaos of 100% Test Coverage"
 date: "18-09-2025"
+archive-date: "01-03-2026"
 description: "A deep dive into the evolution of the Auto-Grade project, exploring the challenges of maintaining 100% test coverage, the decision to refactor for sanity, and the performance gains from integrating GridFS."
 tags: ["llm", "testing", "refactoring", "fastapi", "python", "gridfs", "docker"]
 ---

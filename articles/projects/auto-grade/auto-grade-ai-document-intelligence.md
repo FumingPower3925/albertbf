@@ -1,6 +1,7 @@
 ---
 title: "Auto-Grade: Building AI-Powered Document Intelligence"
 date: "28-12-2025"
+archive-date: "01-03-2026"
 description: "How we integrated OCR, LLMs, and vector embeddings to transform Auto-Grade from a file management system into an intelligent document processing platform capable of understanding rubrics and contextual grading materials."
 tags: ["llm", "ocr", "embeddings", "rag", "fastapi", "python", "openai", "mistral"]
 ---

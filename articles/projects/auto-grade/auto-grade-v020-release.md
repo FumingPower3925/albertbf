@@ -1,6 +1,7 @@
 ---
 title: "Auto-Grade: Shipping v0.2.0 — From Prototype to Product"
 date: "29-12-2025"
+archive-date: "01-03-2026"
 description: "Announcing Auto-Grade v0.2.0: a milestone release featuring complete file management, polished UI, Python 3.13 upgrade, and the foundation for AI-powered grading. A reflection on the journey from hackathon prototype to production-ready platform."
 tags: ["release", "python", "fastapi", "docker", "ui", "crud", "devops"]
 ---

@@ -1,6 +1,7 @@
 ---
 title: "Auto-Grade: Building a Foundation for AI-Powered Assignment Grading"
 date: "09-08-2025"
+archive-date: "01-03-2026"
 description: "Exploring the architecture and design decisions behind a proof-of-concept for automated bulk assignment grading using LLMs, FastAPI, and modern web technologies."
 tags: ["llm", "agentic-ui", "fastapi", "python", "architecture", "htmx", "docker"]
 ---
