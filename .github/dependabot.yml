@@ -4,18 +4,26 @@ updates:
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     open-pull-requests-limit: 10
     reviewers:
       - "FumingPower3925"
     assignees:
       - "FumingPower3925"
+    groups:
+      all-bun-dependencies:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     reviewers:
       - "FumingPower3925"
     assignees:
       - "FumingPower3925"
+    groups:
+      all-github-actions:
+        patterns:
+          - "*"
