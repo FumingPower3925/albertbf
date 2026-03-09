@@ -402,14 +402,18 @@ function generateProjectsHTML(articles, templates, styles) {
   }
 
   const projectsList = Array.from(projectsMap.entries()).map(([projectName, articles]) => {
+    const allArchived = articles.every(a => a.isArchived);
+
     const articlesList = articles.map(article => {
       const formattedDate = formatDateEuro(article.date);
       const readTime = `${article.readTime} min read`;
+      const archivedBadge = article.isArchived ? `<span class="archived-badge">Archived</span>` : '';
 
       return `
-        <li class="project-article">
+        <li class="project-article${article.isArchived ? ' project-article--archived' : ''}">
           <a href="${article.url}">${article.title}</a>
           <div class="project-article-meta">
+            ${archivedBadge}
             <time datetime="${article.date.toISOString()}">${formattedDate}</time>
             <span class="meta-separator">·</span>
             <span class="read-time">${readTime}</span>
@@ -418,9 +422,11 @@ function generateProjectsHTML(articles, templates, styles) {
       `;
     }).join('');
 
+    const projectArchivedBadge = allArchived ? `<span class="archived-badge">Archived</span>` : '';
+
     return `
-      <div class="project-section minimal-card">
-        <h2>${projectName}</h2>
+      <div class="project-section minimal-card${allArchived ? ' project-section--archived' : ''}">
+        <h2>${projectName} ${projectArchivedBadge}</h2>
         <ul class="project-articles">
           ${articlesList}
         </ul>

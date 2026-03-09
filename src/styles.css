@@ -487,6 +487,14 @@ main {
   opacity: 0.7;
 }
 
+.project-section--archived {
+  opacity: 0.7;
+}
+
+.project-article--archived {
+  opacity: 0.7;
+}
+
 /* Series navigation */
 .series-nav {
   border-top: 1px solid var(--border-primary);
@@ -505,30 +513,24 @@ main {
 .series-links {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .series-link {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-primary);
-  border-radius: 4px;
+  gap: 0.2rem;
+  padding: 0;
+  max-width: 48%;
+  background: none;
+  border: none;
+  border-bottom: none;
   color: var(--text-primary);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border-primary);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  flex: 1;
-  min-width: 0;
 }
 
 .series-link:hover {
-  border-color: var(--accent-primary);
-  border-bottom-color: var(--accent-primary);
-  box-shadow: 0 2px 8px var(--shadow-color-hover);
-  color: var(--text-primary);
+  border-bottom: none;
+  color: var(--text-link-hover);
 }
 
 .series-link-label {
@@ -536,24 +538,31 @@ main {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.series-link:hover .series-link-label {
   color: var(--accent-primary);
 }
 
 .series-link-title {
   font-size: 0.9rem;
   color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
 }
 
 .series-link:hover .series-link-title {
-  color: var(--text-primary);
+  color: var(--text-link-hover);
+}
+
+.series-link--prev {
+  align-items: flex-start;
 }
 
 .series-link--next {
-  text-align: right;
   align-items: flex-end;
+  text-align: right;
+  margin-left: auto;
 }
 
 /* Related articles */
@@ -591,9 +600,6 @@ main {
 .related-articles li a {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .related-meta {
@@ -980,11 +986,17 @@ th {
 
   .series-links {
     flex-direction: column;
+    gap: 1rem;
+  }
+
+  .series-link {
+    max-width: 100%;
   }
 
   .series-link--next {
     text-align: left;
     align-items: flex-start;
+    margin-left: 0;
   }
 
   .related-articles li {
