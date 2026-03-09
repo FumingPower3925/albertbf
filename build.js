@@ -11,6 +11,7 @@ const TEMPLATES_DIR = './templates';
 const DIST_DIR = './dist';
 const STYLES_PATH = './src/styles.css';
 const IMAGES_DIR = './src/images';
+const SITE_URL = 'https://albertbf.com';
 
 const SUPPORTED_LANGUAGES = hljs.listLanguages();
 
@@ -131,6 +132,8 @@ class Article {
     if (this.projectUrl && this.urls.length === 0) {
       this.urls.push({ label: 'Project URL', url: this.projectUrl });
     }
+
+    this.projectDescription = frontmatter['project-description'] || frontmatter['project_description'] || '';
 
     this.related = [];
     this.prevArticle = null;
@@ -316,7 +319,10 @@ function generateArticleHTML(article, templates, styles) {
     title: article.title,
     description: article.description,
     content: articleContent,
-    styles: styles
+    styles: styles,
+    pageUrl: `${SITE_URL}${article.url}`,
+    ogType: 'article',
+    year: new Date().getFullYear().toString()
   });
 }
 
@@ -376,13 +382,19 @@ function generateIndexHTML(articles, templates, styles) {
     `;
   }).join('');
 
-  const indexContent = renderTemplate(templates.index, { articles: articlesList });
+  const projectCount = new Set(articles.filter(a => a.isProject).map(a => a.projectName)).size;
+  const articleStats = `${articles.length} articles across ${projectCount} projects`;
+
+  const indexContent = renderTemplate(templates.index, { articles: articlesList, articleStats: articleStats });
 
   return renderTemplate(templates.layout, {
     title: 'Albert BF\'s Blog',
     description: 'My personal minimalist technical blog',
     content: indexContent,
-    styles: styles
+    styles: styles,
+    pageUrl: SITE_URL,
+    ogType: 'website',
+    year: new Date().getFullYear().toString()
   });
 }
 
@@ -403,6 +415,12 @@ function generateProjectsHTML(articles, templates, styles) {
 
   const projectsList = Array.from(projectsMap.entries()).map(([projectName, articles]) => {
     const allArchived = articles.every(a => a.isArchived);
+
+    const sortedByDateAsc = [...articles].sort((a, b) => a.date - b.date);
+    const projectDescription = sortedByDateAsc.find(a => a.projectDescription)?.projectDescription || '';
+    const descriptionBlock = projectDescription
+      ? `<p class="project-description">${projectDescription}</p>`
+      : '';
 
     const articlesList = articles.map(article => {
       const formattedDate = formatDateEuro(article.date);
@@ -427,6 +445,7 @@ function generateProjectsHTML(articles, templates, styles) {
     return `
       <div class="project-section minimal-card${allArchived ? ' project-section--archived' : ''}">
         <h2>${projectName} ${projectArchivedBadge}</h2>
+        ${descriptionBlock}
         <ul class="project-articles">
           ${articlesList}
         </ul>
@@ -440,7 +459,10 @@ function generateProjectsHTML(articles, templates, styles) {
     title: 'Albert BF\'s Projects',
     description: 'A collection of my projects and their related articles',
     content: projectsContent,
-    styles: styles
+    styles: styles,
+    pageUrl: `${SITE_URL}/projects/`,
+    ogType: 'website',
+    year: new Date().getFullYear().toString()
   });
 }
 
@@ -450,7 +472,10 @@ function generate404HTML(templates, styles) {
     title: '404 - Not Found',
     description: 'The page you were looking for could not be found.',
     content: content,
-    styles: styles
+    styles: styles,
+    pageUrl: SITE_URL,
+    ogType: 'website',
+    year: new Date().getFullYear().toString()
   });
 }
 

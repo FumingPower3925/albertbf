@@ -6,6 +6,7 @@ tags: ["privacy", "web-development", "typescript", "pwa", "architecture", "bun"]
 project: "libre-utils"
 project_version: "0.2.0"
 project_url: "https://libreutils.org"
+project-description: "An open-source collection of privacy-first browser utilities — your data never leaves your device."
 ---
 
 You've been there. We all have. You need to quickly encode something to Base64, convert an image format, compress a file or wahtever. You search for "base64 encoder online" and land on a website plastered with ads, cookie banners, and that nagging feeling: *where exactly is my data going?*
@@ -119,18 +120,10 @@ Version management is automated through a pre-commit hook. Update `package.json`
 
 When a new version is available, users see a non-intrusive toast notification. No forced refreshes. They decide when to update. Respecting user agency extends beyond just their data.
 
-## What's Coming Next
+## Closing Thoughts
 
-This article establishes the foundation — the "why" behind LibreUtils. But foundations are only valuable when you build on them. In upcoming articles, we'll dive deeper:
-
-- **Part 2**: The testing infrastructure that gives us confidence to ship
-- **Part 3**: Building the Text Encoder tool from scratch — anatomy of a LibreUtils tool
-- **Part 4**: Reaching v0.2.0 — cryptographic tools and the Privacy Core
+This article establishes the foundation — the "why" behind LibreUtils. But foundations are only valuable when you build on them. The rest of this series dives deeper into testing infrastructure, building tools from scratch, and the cryptographic operations that form the Privacy Core.
 
 The code is open source and contributions are welcome: [github.com/FumingPower3925/libreutils](https://github.com/FumingPower3925/libreutils)
 
 Or just use the tools directly at [libreutils.org](https://libreutils.org). Your data stays yours. That's the whole point.
-
----
-
-*Next: Part 2 — Testing Infrastructure and Developer Experience*

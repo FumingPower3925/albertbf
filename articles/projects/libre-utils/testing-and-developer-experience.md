@@ -183,15 +183,10 @@ When tests run in milliseconds, you run them constantly. When pre-commit hooks c
 
 The result? A codebase that welcomes contributions rather than intimidating them away.
 
-## What's Next
+## Closing Thoughts
 
-With the testing infrastructure solid, the next article dives into building an actual tool from scratch. We'll walk through the Text Encoder — the first tool in LibreUtils — from pure logic to polished UI.
+With the testing infrastructure solid, the foundation is set for building actual tools with confidence. Every encoding format, every error path, every integration — tested and verified before shipping.
 
 The code is open source: [github.com/FumingPower3925/libreutils](https://github.com/FumingPower3925/libreutils)
 
 Clone it, install the hooks, run the tests. See for yourself how fast "fast" can feel.
-
----
-
-*Previous: Part 1 — Philosophy and Architecture*  
-*Next: Part 3 — Anatomy of a Tool: Text Encoder*

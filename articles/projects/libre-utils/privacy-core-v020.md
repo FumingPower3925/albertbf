@@ -246,7 +246,3 @@ That's a different kind of software. That's what v0.2.0 represents.
 Try it at [libreutils.org](https://libreutils.org). The code is open source at [github.com/FumingPower3925/libreutils](https://github.com/FumingPower3925/libreutils).
 
 Your data stays yours. Everything else is just implementation details.
-
----
-
-*Previous: Part 3 — Anatomy of a Tool: Text Encoder*

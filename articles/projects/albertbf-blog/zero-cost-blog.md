@@ -3,6 +3,7 @@ title: "Building a Zero-Cost Blog: The Architecture Behind albertbf.com"
 date: "19-06-2025"
 description: "How I built a high-performance blog with zero maintenance costs using Cloudflare Workers, static site generation, and modern web technologies."
 tags: ["cloudflare", "static-site", "web-development", "architecture", "bun"]
+project-description: "A zero-cost, high-performance static blog built with Bun and Cloudflare Workers."
 ---
 
 When I set out to build my personal blog, I had four non-negotiable requirements:

@@ -4,6 +4,7 @@ date: "09-08-2025"
 archive-date: "01-03-2026"
 description: "Exploring the architecture and design decisions behind a proof-of-concept for automated bulk assignment grading using LLMs, FastAPI, and modern web technologies."
 tags: ["llm", "agentic-ui", "fastapi", "python", "architecture", "htmx", "docker"]
+project-description: "An AI-powered platform for automated bulk assignment grading using LLMs and FastAPI."
 ---
 
 ## The Grading Dilemma

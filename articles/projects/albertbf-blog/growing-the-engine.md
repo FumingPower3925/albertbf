@@ -185,7 +185,7 @@ The blog is in a good place. The reading experience is polished, articles connec
 
 - **Search improvements** — the client-side search works, but could benefit from fuzzy matching and keyboard navigation
 - **Analytics** — privacy-respecting visitor insights without third-party scripts
-- **Social sharing** — Open Graph meta tags and social media cards for better link previews
+- **Visual polish** — a thorough visual audit to catch inconsistencies and rough edges across desktop, mobile, and dark mode
 
 But for now, the engine is running smoothly. Sometimes the best thing you can do for a project is ship the small things that make it feel complete.
 

@@ -316,13 +316,8 @@ The Text Encoder establishes a pattern that every LibreUtils tool follows:
 
 New tools copy this template, implement their logic, and slot into the application. The architecture does the integration work.
 
-## What's Next
+## Closing Thoughts
 
-With the first tool complete and patterns established, LibreUtils v0.2.0 adds cryptographic operations: encryption/decryption and checksum generation. The next article covers the journey to v0.2.0 — new tools, shared components, and problems solved along the way.
+With the first tool complete and patterns established, the template is set. Every future LibreUtils tool follows this same structure: pure logic in `tool.ts`, UI in `page.ts`, standalone capability, and comprehensive tests. The architecture does the integration work.
 
 Try the Text Encoder yourself at [libreutils.org/tools/text-encoder](https://libreutils.org/tools/text-encoder). Your text stays in your browser. That's kind of the whole point.
-
----
-
-*Previous: Part 2 — Testing Infrastructure and Developer Experience*  
-*Next: Part 4 — Reaching v0.2.0: The Privacy Core*
