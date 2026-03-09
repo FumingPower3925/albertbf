@@ -1140,10 +1140,12 @@ th {
   visibility: visible;
 }
 
-.scroll-to-top:hover {
-  background: var(--accent-primary);
-  color: white;
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .scroll-to-top:hover {
+    background: var(--accent-primary);
+    color: white;
+    transform: translateY(-2px);
+  }
 }
 
 /* Project description */
