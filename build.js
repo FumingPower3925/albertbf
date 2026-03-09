@@ -117,8 +117,55 @@ class Article {
       this.url = `/articles/${year}/${fileName}`;
     }
 
+    this.projectUrl = frontmatter['project-url'] || frontmatter['project_url'] || '';
+    this.urls = frontmatter.urls || [];
+
+    let archiveDateInput = frontmatter['archive-date'] || frontmatter['archive_date'] || null;
+    if (archiveDateInput && typeof archiveDateInput === 'string' && /^\d{2}-\d{2}-\d{4}$/.test(archiveDateInput)) {
+      const [day, month, year] = archiveDateInput.split('-');
+      this.archiveDate = new Date(year, month - 1, day);
+    } else {
+      this.archiveDate = null;
+    }
+    this.isArchived = false;
+    if (this.projectUrl && this.urls.length === 0) {
+      this.urls.push({ label: 'Project URL', url: this.projectUrl });
+    }
+
+    this.related = [];
+    this.prevArticle = null;
+    this.nextArticle = null;
+    this.seriesIndex = 0;
+    this.seriesTotal = 0;
+
     const wordCount = this.content.split(/\s+/).filter(Boolean).length;
     this.readTime = Math.ceil(wordCount / 200);
+  }
+}
+
+function buildArticleSeries(articles) {
+  const projectGroups = new Map();
+  for (const article of articles) {
+    if (article.isProject && article.projectName) {
+      if (!projectGroups.has(article.projectName)) {
+        projectGroups.set(article.projectName, []);
+      }
+      projectGroups.get(article.projectName).push(article);
+    }
+  }
+
+  for (const [, group] of projectGroups) {
+    if (group.length < 2) continue;
+
+    group.sort((a, b) => a.date - b.date);
+
+    for (let i = 0; i < group.length; i++) {
+      group[i].seriesIndex = i + 1;
+      group[i].seriesTotal = group.length;
+      group[i].prevArticle = i > 0 ? group[i - 1] : null;
+      group[i].nextArticle = i < group.length - 1 ? group[i + 1] : null;
+      group[i].related = group.filter((_, j) => j !== i);
+    }
   }
 }
 
@@ -200,13 +247,51 @@ function generateArticleHTML(article, templates, styles) {
     ? `<span class="project-badge">${article.projectName}</span>`
     : '';
 
+  const archivedBadge = article.isArchived
+    ? `<span class="archived-badge">Archived</span>`
+    : '';
+
+  const archivedBanner = article.isArchived
+    ? `<div class="archived-banner">This article has been archived. The content may be outdated.</div>`
+    : '';
+
   const tagsBlock = article.tags.length > 0
     ? `<div class="tags-container">${article.tags.map(tag => `<span class="tag-badge">${tag}</span>`).join('')}</div>`
     : '';
 
   const descriptionBlock = article.description
-    ? `<p class="article-description">${article.description}</p>`
+    ? `<div class="article-lead"><p>${article.description}</p></div>`
     : '';
+
+  const externalLinkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`;
+
+  const urlsBlockTop = article.urls.length > 0
+    ? `<div class="article-urls">${article.urls.map(u => `<a href="${u.url}" class="article-url" target="_blank" rel="noopener noreferrer">${externalLinkIcon}<span>${u.label}</span></a>`).join('')}</div>`
+    : '';
+
+  const urlsBlockBottom = article.urls.length > 0
+    ? `<div class="article-urls">${article.urls.map(u => `<a href="${u.url}" class="article-url" target="_blank" rel="noopener noreferrer">${externalLinkIcon}<span>${u.label}</span></a>`).join('')}</div>`
+    : '';
+
+  let seriesNav = '';
+  if (article.seriesTotal > 1) {
+    const prevLink = article.prevArticle
+      ? `<a href="${article.prevArticle.url}" class="series-link series-link--prev">← ${article.prevArticle.title}</a>`
+      : `<div></div>`;
+    const nextLink = article.nextArticle
+      ? `<a href="${article.nextArticle.url}" class="series-link series-link--next">${article.nextArticle.title} →</a>`
+      : `<div></div>`;
+    seriesNav = `<nav class="series-nav"><div class="series-indicator">Part ${article.seriesIndex} of ${article.seriesTotal} in <strong>${article.projectName}</strong></div><div class="series-links">${prevLink}${nextLink}</div></nav>`;
+  }
+
+  let relatedArticles = '';
+  if (article.related.length > 0) {
+    const relatedList = article.related.map(r => {
+      const relDate = formatDateEuro(r.date);
+      return `<li><a href="${r.url}">${r.title}</a><span class="related-meta">${relDate} · ${r.readTime} min read</span></li>`;
+    }).join('');
+    relatedArticles = `<section class="related-articles"><h3>More in ${article.projectName}</h3><ul>${relatedList}</ul></section>`;
+  }
 
   const articleContent = renderTemplate(templates.article, {
     title: article.title,
@@ -214,8 +299,14 @@ function generateArticleHTML(article, templates, styles) {
     date: formattedDate,
     readTime: `${article.readTime} min read`,
     projectBadge: projectBadge,
+    archivedBadge: archivedBadge,
+    archivedBanner: archivedBanner,
     tagsBlock: tagsBlock,
-    descriptionBlock: descriptionBlock
+    descriptionBlock: descriptionBlock,
+    urlsBlockTop: urlsBlockTop,
+    urlsBlockBottom: urlsBlockBottom,
+    seriesNav: seriesNav,
+    relatedArticles: relatedArticles
   });
 
   return renderTemplate(templates.layout, {
@@ -236,6 +327,10 @@ function generateIndexHTML(articles, templates, styles) {
 
     const projectBadge = article.isProject
       ? `<span class="project-badge">${article.projectName}</span>`
+      : '';
+
+    const archivedBadge = article.isArchived
+      ? `<span class="archived-badge">Archived</span>`
       : '';
 
     const tagsList = article.tags.length > 0
@@ -259,7 +354,7 @@ function generateIndexHTML(articles, templates, styles) {
     const escapeAttr = (str) => str ? str.replace(/"/g, '&quot;') : '';
 
     return `
-      <article class="article-card"
+      <article class="article-card${article.isArchived ? ' article-card--archived' : ''}"
                data-title="${escapeAttr(article.title.toLowerCase())}"
                data-content="${escapeAttr(cleanContent.toLowerCase())}"
                data-project="${escapeAttr(article.projectName || '')}"
@@ -269,6 +364,7 @@ function generateIndexHTML(articles, templates, styles) {
           <span class="meta-separator">·</span>
           <span class="read-time">${readTime}</span>
           ${projectBadge}
+          ${archivedBadge}
         </div>
         <h2><a href="${article.url}">${article.title}</a></h2>
         <p class="article-description">${article.description}</p>
@@ -357,10 +453,44 @@ function generateSearchIndex(articles) {
     date: article.date.toISOString(),
     readTime: article.readTime,
     projectName: article.projectName,
+    isArchived: article.isArchived || false,
     content: article.content.replace(/```[\s\S]*?```/g, '').replace(/!\[.*?\]\(.*?\)/g, '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().substring(0, 300),
     languages: Array.from(article.languages || []),
     tags: article.tags || []
   }));
+}
+
+function generateRSSFeed(articles) {
+  const siteUrl = 'https://albertbf.com';
+  const sortedArticles = [...articles].sort((a, b) => b.date - a.date).slice(0, 20);
+
+  const escapeXml = (str) => str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+
+  const items = sortedArticles.map(article => `    <item>
+      <title>${escapeXml(article.title)}</title>
+      <link>${siteUrl}${article.url}</link>
+      <guid>${siteUrl}${article.url}</guid>
+      <pubDate>${article.date.toUTCString()}</pubDate>
+      <description>${escapeXml(article.description)}</description>
+    </item>`).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Albert BF's Blog</title>
+    <link>${siteUrl}</link>
+    <description>My personal minimalist technical blog</description>
+    <language>en</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <atom:link href="${siteUrl}/feed.xml" rel="self" type="application/rss+xml"/>
+${items}
+  </channel>
+</rss>`;
 }
 
 async function ensureDir(dir) {
@@ -406,8 +536,23 @@ async function build() {
       return true;
     });
 
+    let archivedCount = 0;
+    for (const article of publishedArticles) {
+      if (article.archiveDate) {
+        const archiveDate = new Date(article.archiveDate);
+        archiveDate.setHours(0, 0, 0, 0);
+        if (archiveDate <= now) {
+          article.isArchived = true;
+          archivedCount++;
+          console.log(`📦 Archived: ${article.title} (archived ${formatDateEuro(article.archiveDate)})`);
+        }
+      }
+    }
+
     const scheduledCount = articles.length - publishedArticles.length;
-    console.log(`📖 Found ${articles.length} articles (${publishedArticles.length} published${scheduledCount > 0 ? `, ${scheduledCount} scheduled` : ''})`);
+    console.log(`📖 Found ${articles.length} articles (${publishedArticles.length} published${scheduledCount > 0 ? `, ${scheduledCount} scheduled` : ''}${archivedCount > 0 ? `, ${archivedCount} archived` : ''})`);
+
+    buildArticleSeries(publishedArticles);
 
     console.log('📝 Generating article pages and copying images...');
     for (const article of publishedArticles) {
@@ -453,6 +598,10 @@ async function build() {
     console.log('🔍 Generating search index...');
     const searchIndex = generateSearchIndex(publishedArticles);
     await writeFile(join(DIST_DIR, 'search-index.json'), JSON.stringify(searchIndex, null, 2));
+
+    console.log('📡 Generating RSS feed...');
+    const rssFeed = generateRSSFeed(publishedArticles);
+    await writeFile(join(DIST_DIR, 'feed.xml'), rssFeed);
 
     console.log('📄 Generating 404 page...');
     const notFoundHTML = generate404HTML(templates, styles);
