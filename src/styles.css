@@ -925,6 +925,21 @@ th {
 
   nav {
     top: 1rem;
+    padding: 0.3rem;
+  }
+
+  nav a {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .theme-toggle {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .scroll-to-top {
+    width: 48px;
+    height: 48px;
   }
   
   h1 {

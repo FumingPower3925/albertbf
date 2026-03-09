@@ -304,6 +304,7 @@
       });
 
       scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: window.scrollY, behavior: 'instant' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     });
