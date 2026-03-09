@@ -276,12 +276,15 @@ function generateArticleHTML(article, templates, styles) {
   let seriesNav = '';
   if (article.seriesTotal > 1) {
     const prevLink = article.prevArticle
-      ? `<a href="${article.prevArticle.url}" class="series-link series-link--prev">← ${article.prevArticle.title}</a>`
-      : `<div></div>`;
+      ? `<a href="${article.prevArticle.url}" class="series-link series-link--prev"><span class="series-link-label">← Previous</span><span class="series-link-title">${article.prevArticle.title}</span></a>`
+      : '';
     const nextLink = article.nextArticle
-      ? `<a href="${article.nextArticle.url}" class="series-link series-link--next">${article.nextArticle.title} →</a>`
-      : `<div></div>`;
-    seriesNav = `<nav class="series-nav"><div class="series-indicator">Part ${article.seriesIndex} of ${article.seriesTotal} in <strong>${article.projectName}</strong></div><div class="series-links">${prevLink}${nextLink}</div></nav>`;
+      ? `<a href="${article.nextArticle.url}" class="series-link series-link--next"><span class="series-link-label">Next →</span><span class="series-link-title">${article.nextArticle.title}</span></a>`
+      : '';
+    seriesNav = `<nav class="series-nav">
+      <div class="series-indicator">Part ${article.seriesIndex} of ${article.seriesTotal} in <strong>${article.projectName}</strong></div>
+      <div class="series-links">${prevLink}${nextLink}</div>
+    </nav>`;
   }
 
   let relatedArticles = '';
