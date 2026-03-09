@@ -281,10 +281,10 @@ function generateArticleHTML(article, templates, styles) {
     const nextLink = article.nextArticle
       ? `<a href="${article.nextArticle.url}" class="series-link series-link--next"><span class="series-link-label">Next →</span><span class="series-link-title">${article.nextArticle.title}</span></a>`
       : '';
-    seriesNav = `<nav class="series-nav">
+    seriesNav = `<div class="series-nav">
       <div class="series-indicator">Part ${article.seriesIndex} of ${article.seriesTotal} in <strong>${article.projectName}</strong></div>
       <div class="series-links">${prevLink}${nextLink}</div>
-    </nav>`;
+    </div>`;
   }
 
   let relatedArticles = '';
