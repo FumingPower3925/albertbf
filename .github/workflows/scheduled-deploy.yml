@@ -16,8 +16,32 @@ jobs:
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Fetch current search index
+        id: old_index
+        run: |
+          curl -sf https://albertbf.com/search-index.json -o /tmp/old-search-index.json || echo "[]" > /tmp/old-search-index.json
+
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Detect new articles
+        id: detect
+        run: |
+          OLD=/tmp/old-search-index.json
+          NEW=dist/search-index.json
+          if [ ! -f "$NEW" ]; then
+            echo "has_new=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          NEW_ARTICLES=$(jq -r --slurpfile old "$OLD" '[.[] | select(.url as $u | ($old[0] // []) | map(.url) | index($u) | not)] | map(.title) | join(", ")' "$NEW")
+          if [ -n "$NEW_ARTICLES" ]; then
+            echo "has_new=true" >> "$GITHUB_OUTPUT"
+            echo "articles=$NEW_ARTICLES" >> "$GITHUB_OUTPUT"
+            echo "New articles detected: $NEW_ARTICLES"
+          else
+            echo "has_new=false" >> "$GITHUB_OUTPUT"
+            echo "No new articles detected."
+          fi
