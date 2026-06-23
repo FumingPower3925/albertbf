@@ -2,7 +2,7 @@
 
 import { marked } from 'marked';
 import hljs from 'highlight.js';
-import yaml from 'js-yaml';
+import * as yaml from 'js-yaml';
 import { readdir, readFile, writeFile, mkdir, stat, cp } from 'fs/promises';
 import { join, dirname, basename, extname } from 'path';
 
