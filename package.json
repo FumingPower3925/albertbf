@@ -12,11 +12,11 @@
   "dependencies": {
     "highlight.js": "^11.11.1",
     "hono": "^4.12.27",
-    "js-yaml": "^5.1.0",
+    "js-yaml": "^5.2.0",
     "marked": "^18.0.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260625.1",
+    "@cloudflare/workers-types": "^4.20260629.1",
     "wrangler": "^4.105.0"
   },
   "engines": {
