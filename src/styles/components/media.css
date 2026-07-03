@@ -1,0 +1,116 @@
+/* Figures, video, YouTube facade, lightbox, mermaid. */
+
+.media {
+  margin-block: var(--space-lg);
+}
+
+.media img,
+.media video {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: block;
+}
+
+.media img[data-lightbox] {
+  cursor: zoom-in;
+}
+
+.media figcaption {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+  text-align: center;
+}
+
+.youtube-facade {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.youtube-facade img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  border: none;
+  border-radius: 0;
+}
+
+.youtube-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #f03;
+  transition: transform var(--dur-1) var(--ease);
+}
+
+.youtube-facade:hover .youtube-play {
+  transform: scale(1.1);
+}
+
+.youtube-embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+.lightbox {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: transparent;
+  max-width: min(92vw, 1400px);
+  max-height: 92vh;
+}
+
+.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.lightbox img {
+  display: block;
+  max-width: 100%;
+  max-height: 92vh;
+  border-radius: var(--radius-lg);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mermaid-diagram {
+  margin-block: var(--space-lg);
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.mermaid-diagram pre.mermaid {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,59 @@
+/* Fake-terminal 404 page. */
+
+.notfound {
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+}
+
+.terminal {
+  width: min(100%, 40rem);
+  background: light-dark(#1c1a19, #0d0c0b);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+
+.terminal-bar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: light-dark(#2a2725, #1c1a19);
+}
+
+.terminal-bar span {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.terminal-bar span:nth-child(1) { background: #ff5f57; }
+.terminal-bar span:nth-child(2) { background: #febc2e; }
+.terminal-bar span:nth-child(3) { background: #28c840; }
+
+.terminal-body {
+  margin: 0;
+  padding: var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  color: #ece9e4;
+  overflow-x: auto;
+}
+
+.term-prompt { color: #57bb7f; }
+.term-err { color: #ff8a80; }
+
+.terminal-body a {
+  color: #6aaede;
+}
+
+.term-cursor {
+  color: #ef6a61;
+  animation: term-blink 1.1s steps(1) infinite;
+}
+
+@keyframes term-blink {
+  50% { opacity: 0; }
+}

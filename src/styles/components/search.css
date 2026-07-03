@@ -1,0 +1,45 @@
+/* Articles page search + controls. */
+
+.article-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.search-wrap {
+  position: relative;
+  max-width: 28rem;
+}
+
+#search-input {
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  padding-right: 2.5rem;
+  transition: border-color var(--dur-1) var(--ease);
+}
+
+#search-input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.search-kbd {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--color-text-muted);
+}
+
+.no-results {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-xl) 0;
+}

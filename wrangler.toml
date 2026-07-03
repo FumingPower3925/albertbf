@@ -1,5 +1,5 @@
 name = "albertbf-blog"
-main = "src/index.ts"
+main = "src/worker/index.ts"
 compatibility_date = "2025-06-01"
 workers_dev = false
 preview_urls = true
@@ -9,8 +9,10 @@ command = "bun run build"
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 html_handling = "auto-trailing-slash"
 not_found_handling = "404-page"
+run_worker_first = ["/api/*", "/health"]
 
 routes = [
   { pattern = "albertbf.com/*", custom_domain = true }

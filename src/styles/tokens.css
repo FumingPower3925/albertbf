@@ -1,0 +1,87 @@
+/* Design tokens — the single source of truth for color, type, space, motion. */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- Color (light-dark() resolves via color-scheme) --- */
+  --color-bg: light-dark(#faf9f7, #131211);
+  --color-surface: light-dark(#ffffff, #1c1a19);
+  --color-surface-subtle: light-dark(#f3f1ed, #242220);
+  --color-border: light-dark(#e7e4de, #2e2b28);
+  --color-border-strong: light-dark(#d3cfc7, #3d3935);
+  --color-text: light-dark(#1c1b1a, #ece9e4);
+  --color-text-secondary: light-dark(#45423e, #b8b3ac);
+  --color-text-muted: light-dark(#6e6a63, #918c84);
+  --color-accent: light-dark(#c22a2a, #ef6a61);
+  --color-accent-strong: light-dark(#9e1f1f, #ff8a80);
+  --color-accent-subtle: color-mix(in oklab, var(--color-accent) 9%, transparent);
+  --color-success: light-dark(#1e7d43, #57bb7f);
+  --color-warning: light-dark(#946200, #e0a63c);
+  --color-info: light-dark(#155e9c, #6aaede);
+  --color-selection: color-mix(in oklab, var(--color-accent) 22%, transparent);
+
+  --shadow-1: 0 1px 2px light-dark(rgb(28 27 26 / 0.06), rgb(0 0 0 / 0.3));
+  --shadow-2: 0 2px 8px light-dark(rgb(28 27 26 / 0.08), rgb(0 0 0 / 0.4));
+  --shadow-3: 0 8px 24px light-dark(rgb(28 27 26 / 0.12), rgb(0 0 0 / 0.5));
+
+  /* --- Typography --- */
+  --font-prose: "Newsreader", var(--font-prose-fallback);
+  --font-prose-fallback: "Newsreader Fallback", Georgia, "Times New Roman", serif;
+  --font-ui: "Inter", var(--font-ui-fallback);
+  --font-ui-fallback: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-xs: clamp(0.79rem, 0.77rem + 0.10vw, 0.84rem);
+  --text-sm: clamp(0.89rem, 0.86rem + 0.14vw, 0.95rem);
+  --text-base: clamp(1rem, 0.95rem + 0.24vw, 1.1875rem);
+  --text-lg: clamp(1.13rem, 1.06rem + 0.33vw, 1.38rem);
+  --text-xl: clamp(1.27rem, 1.17rem + 0.47vw, 1.62rem);
+  --text-2xl: clamp(1.42rem, 1.28rem + 0.66vw, 1.94rem);
+  --text-3xl: clamp(1.80rem, 1.55rem + 1.18vw, 2.72rem);
+  --text-4xl: clamp(2.20rem, 1.80rem + 1.90vw, 3.66rem);
+
+  /* --- Space / radius / motion --- */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --dur-1: 150ms;
+  --dur-2: 250ms;
+
+  --header-height: 3.5rem;
+  --measure: 70ch;
+  --container: 1200px;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+/* --- Syntax highlighting tokens (Shiki dual-theme) --- */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: transparent !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shiki,
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
+  }
+}
+
+:root[data-theme="dark"] .shiki,
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
+}

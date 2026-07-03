@@ -1,0 +1,31 @@
+/* Callouts / admonitions. */
+
+.callout {
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--callout-color, var(--color-info));
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--callout-color, var(--color-info)) 5%, var(--color-surface));
+  padding: var(--space-md) var(--space-lg);
+  margin-block: var(--space-lg);
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--callout-color, var(--color-info));
+  margin-bottom: var(--space-xs);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout--note { --callout-color: var(--color-info); }
+.callout--tip { --callout-color: var(--color-success); }
+.callout--important { --callout-color: var(--color-accent); }
+.callout--warning { --callout-color: var(--color-warning); }
+.callout--caution { --callout-color: light-dark(#b3261e, #ff6b62); }

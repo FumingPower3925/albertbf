@@ -1,0 +1,32 @@
+/* Home page. */
+
+.home > * + * {
+  margin-top: var(--space-2xl);
+}
+
+.hero h1 {
+  font-size: var(--text-4xl);
+  font-weight: 650;
+}
+
+.hero-role {
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.hero-intro {
+  font-family: var(--font-prose);
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  max-width: 48ch;
+  margin-top: var(--space-md);
+}
+
+.hero-links {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+  font-weight: 500;
+  font-size: var(--text-sm);
+}

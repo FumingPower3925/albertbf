@@ -1,0 +1,40 @@
+/* Print styles. */
+
+@media print {
+  .site-header,
+  .site-footer,
+  .scroll-top,
+  .toc,
+  .code-copy,
+  .code-run,
+  .series-nav,
+  .related,
+  .article-back,
+  .progress-bar {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  main {
+    padding-top: 0;
+  }
+
+  .prose {
+    max-width: none;
+    color: #222;
+  }
+
+  .prose a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  .code-block {
+    break-inside: avoid;
+  }
+}
