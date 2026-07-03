@@ -5,25 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test-build:
-    name: Test Build and Parsing
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Run build to check for errors
-        run: bun run build
-
   build:
-    name: Build & Upload Artifact
-    needs: test-build
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,7 +16,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Build static site
         run: bun run build
@@ -43,6 +26,23 @@ jobs:
         with:
           name: dist
           path: ./dist
+
+  html-validate:
+    name: HTML Validation
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: ./dist
+
+      - name: Validate HTML
+        run: npx --yes html-validate "dist/**/*.html"
 
   lighthouse:
     name: Lighthouse Audit
@@ -58,14 +58,10 @@ jobs:
           name: dist
           path: ./dist
 
-      - name: Create Lighthouse config
-        run: |
-          echo '{ "ci": { "collect": { "staticDistDir": "./dist" } } }' > ./lighthouserc.json
-
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
-          configPath: './lighthouserc.json'
+          configPath: './.github/lighthouse/lighthouserc.json'
           uploadArtifacts: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
