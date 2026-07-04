@@ -4,6 +4,9 @@
  *  - the worker (applies the same headers to API responses)
  */
 
+/** Restrictive CSP for JSON API responses (nothing should ever load). */
+export const API_CSP = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'";
+
 export function buildCsp(themeScriptHash: string): string {
   return [
     "default-src 'self'",
@@ -45,5 +48,8 @@ export function renderHeadersFile(themeScriptHash: string): string {
   for (const dir of ["/assets/*", "/fonts/*", "/vendor/*"]) {
     lines.push(dir, "  Cache-Control: public, max-age=31536000, immutable", "");
   }
+  // The raw Markdown twins exist for llms.txt consumers; keep them out of the
+  // search index so they don't compete with the canonical HTML articles.
+  lines.push("/articles/*/index.md", "  X-Robots-Tag: noindex", "");
   return lines.join("\n");
 }

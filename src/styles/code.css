@@ -70,12 +70,12 @@
   border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
 }
 
-.code-run:hover:not(:disabled) {
+.code-run:hover:not([aria-disabled="true"]) {
   color: var(--color-accent-strong);
   border-color: var(--color-accent);
 }
 
-.code-run:disabled {
+.code-run[aria-disabled="true"] {
   opacity: 0.6;
   cursor: wait;
 }

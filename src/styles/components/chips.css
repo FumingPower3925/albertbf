@@ -19,6 +19,14 @@
   background: var(--color-surface-subtle);
   color: var(--color-text-muted);
   border: 1px solid transparent;
+  text-decoration: none;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+
+a.tag:hover {
+  color: var(--color-accent);
+  border-color: var(--color-border-strong);
+  text-decoration: none;
 }
 
 .tag--filter {

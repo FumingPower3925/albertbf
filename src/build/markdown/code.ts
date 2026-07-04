@@ -135,12 +135,12 @@ export function renderCodeBlock(
   );
   if (!meta.nocopy) {
     head.push(
-      `<button type="button" class="code-copy" aria-label="Copy code">${COPY_ICON}<span>Copy</span></button>`,
+      `<button type="button" class="code-copy">${COPY_ICON}<span>Copy</span></button>`,
     );
   }
   if (runnable) {
     head.push(
-      `<button type="button" class="code-run" data-engine="${escapeAttr(engine)}"${meta.db ? ` data-db="${escapeAttr(meta.db)}"` : ""} aria-label="Run code">${RUN_ICON}<span>Run</span></button>`,
+      `<button type="button" class="code-run" data-engine="${escapeAttr(engine)}"${meta.db ? ` data-db="${escapeAttr(meta.db)}"` : ""}>${RUN_ICON}<span>Run</span></button>`,
     );
   }
 

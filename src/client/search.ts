@@ -14,12 +14,14 @@ const list = document.getElementById("article-list");
 const noResults = document.getElementById("no-results");
 const filterButtons = [...document.querySelectorAll<HTMLButtonElement>(".tag--filter")];
 
+function announce(message: string): void {
+  const region = document.getElementById("a11y-status");
+  if (region) region.textContent = message;
+}
+
 if (input && list) {
   let index: SearchEntry[] | null = null;
   const cards = [...list.querySelectorAll<HTMLElement>(".article-card")];
-  const cardByUrl = new Map(
-    cards.map((card) => [card.querySelector("a")?.getAttribute("href") ?? "", card]),
-  );
   const activeTags = new Set<string>();
 
   async function loadIndex(): Promise<SearchEntry[]> {
@@ -60,6 +62,9 @@ if (input && list) {
       if (show) visible++;
     }
     if (noResults) noResults.hidden = visible > 0;
+    if (query || activeTags.size) {
+      announce(visible === 0 ? "No articles match" : `${visible} of ${cards.length} articles shown`);
+    }
   }
 
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -107,15 +112,13 @@ if (input && list) {
     apply();
   });
 
-  // Deep link: ?tag=a,b
+  // Deep link: ?tag=a,b — activate the filter even for tags with no chip button
+  // (only the top-N tags get buttons, but any tag can be deep-linked from a card).
   const initial = new URLSearchParams(location.search).get("tag");
   if (initial) {
-    for (const tag of initial.split(",")) {
-      const btn = filterButtons.find((b) => b.dataset.tag === tag);
-      if (btn) {
-        activeTags.add(tag);
-        btn.setAttribute("aria-pressed", "true");
-      }
+    for (const tag of initial.split(",").filter(Boolean)) {
+      activeTags.add(tag);
+      filterButtons.find((b) => b.dataset.tag === tag)?.setAttribute("aria-pressed", "true");
     }
     apply();
   }

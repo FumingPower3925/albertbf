@@ -54,7 +54,9 @@ export function renderMedia(
   }
 
   ctx.usedLightbox = true;
-  return `<figure class="media"><img src="${escapeAttr(publicUrl)}" alt="${escapeAttr(alt)}"${dimensions} loading="lazy" decoding="async" data-lightbox>${caption}</figure>`;
+  // The image lives inside a real <button> so zoom is keyboard-operable and
+  // <dialog> restores focus to it on close.
+  return `<figure class="media"><button type="button" class="lightbox-trigger" aria-label="Zoom image${alt ? ": " + escapeAttr(alt) : ""}"><img src="${escapeAttr(publicUrl)}" alt="${escapeAttr(alt)}"${dimensions} loading="lazy" decoding="async" data-lightbox></button>${caption}</figure>`;
 }
 
 const PLAY_ICON =

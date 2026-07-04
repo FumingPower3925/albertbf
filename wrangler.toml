@@ -20,3 +20,11 @@ routes = [
 
 [vars]
 ENVIRONMENT = "production"
+
+# Account-level rate limiter shared across isolates, gating the Go-run proxy.
+# 6 requests / 60s per client IP.
+[[unsafe.bindings]]
+name = "RUN_RL"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 6, period = 60 }

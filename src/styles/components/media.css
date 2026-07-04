@@ -11,7 +11,17 @@
   display: block;
 }
 
-.media img[data-lightbox] {
+.lightbox-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: var(--radius-md);
+}
+
+.lightbox-trigger img[data-lightbox] {
   cursor: zoom-in;
 }
 

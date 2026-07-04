@@ -3,6 +3,15 @@ import { cp } from "fs/promises";
 import { paths, site, FEED_LIMIT } from "../config";
 import type { Article, SeriesMeta } from "../content";
 import { escapeHtml } from "../render/html";
+import { feedSafeHtml } from "./feed-html";
+
+const FEED_IMAGE = `${site.url}/images/icon-512.png`;
+
+/** Latest content change across published articles (for feed lastBuildDate). */
+function latestChange(articles: Article[]): Date {
+  const times = articles.map((a) => (a.fm.updated ?? a.fm.date).getTime());
+  return times.length ? new Date(Math.max(...times)) : new Date(0);
+}
 
 interface Page {
   path: string;
@@ -55,7 +64,8 @@ export async function writeLlmsTxt(articles: Article[], seriesList: SeriesMeta[]
   if (seriesList.length) {
     lines.push("", "## Projects", "");
     for (const s of seriesList) {
-      lines.push(`- ${s.title}: ${s.description}`);
+      const url = s.url ?? `${site.url}/projects/#${s.slug}`;
+      lines.push(`- [${s.title}](${url}): ${s.description}`);
     }
   }
   lines.push("", "## Pages", "", `- [About](${site.url}/about/): About ${site.author}`, "");
@@ -69,27 +79,35 @@ export async function writeLlmsTxt(articles: Article[], seriesList: SeriesMeta[]
 
 function rssItem(article: Article): string {
   const url = site.url + article.url;
+  const content = feedSafeHtml(article.html, article.url);
   return `    <item>
       <title>${escapeHtml(article.fm.title)}</title>
       <link>${url}</link>
       <guid>${url}</guid>
       <pubDate>${article.fm.date.toUTCString()}</pubDate>
       <description>${escapeHtml(article.fm.description)}</description>
-      <content:encoded><![CDATA[${article.html.replace(/\]\]>/g, "]]]]><![CDATA[>")}]]></content:encoded>
+      <content:encoded><![CDATA[${content.replace(/\]\]>/g, "]]]]><![CDATA[>")}]]></content:encoded>
     </item>`;
 }
 
 export async function writeFeeds(articles: Article[]): Promise<void> {
   const latest = articles.slice(0, FEED_LIMIT);
+  const built = latestChange(latest);
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/feed.xsl"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${escapeHtml(site.fullTitle)}</title>
     <link>${site.url}</link>
     <description>${escapeHtml(site.description)}</description>
     <language>${site.locale}</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${built.toUTCString()}</lastBuildDate>
+    <image>
+      <url>${FEED_IMAGE}</url>
+      <title>${escapeHtml(site.fullTitle)}</title>
+      <link>${site.url}</link>
+    </image>
     <atom:link href="${site.url}/feed.xml" rel="self" type="application/rss+xml"/>
 ${latest.map(rssItem).join("\n")}
   </channel>
@@ -103,13 +121,16 @@ ${latest.map(rssItem).join("\n")}
     home_page_url: site.url,
     feed_url: `${site.url}/feed.json`,
     description: site.description,
+    language: site.locale,
+    icon: FEED_IMAGE,
+    favicon: `${site.url}/images/icon-192.png`,
     authors: [{ name: site.author, url: `${site.url}/about/` }],
     items: latest.map((article) => ({
       id: site.url + article.url,
       url: site.url + article.url,
       title: article.fm.title,
       summary: article.fm.description,
-      content_html: article.html,
+      content_html: feedSafeHtml(article.html, article.url),
       date_published: article.fm.date.toISOString(),
       ...(article.fm.updated ? { date_modified: article.fm.updated.toISOString() } : {}),
       tags: article.fm.tags,
@@ -122,11 +143,17 @@ export async function writeManifest(): Promise<void> {
   const manifest = {
     name: site.fullTitle,
     short_name: site.title,
+    description: site.description,
     start_url: "/",
     display: "browser",
     background_color: "#faf9f7",
     theme_color: "#c22a2a",
-    icons: [{ src: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icons: [
+      { src: "/images/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/images/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/images/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   };
   await Bun.write(join(paths.dist, "manifest.webmanifest"), JSON.stringify(manifest, null, 2));
 }

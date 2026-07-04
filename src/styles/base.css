@@ -10,6 +10,25 @@
   margin: 0;
 }
 
+/* A component-level `display:` rule beats the UA [hidden] rule; this guard
+   keeps the `hidden` attribute authoritative (e.g. the scroll-to-top button). */
+[hidden] {
+  display: none !important;
+}
+
+/* Visually hidden but available to assistive tech. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-height) + 1rem);

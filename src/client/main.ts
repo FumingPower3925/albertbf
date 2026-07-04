@@ -24,6 +24,12 @@ themeToggle?.addEventListener("click", () => {
   document.dispatchEvent(new CustomEvent("themechange"));
 });
 
+/** Announce a message to assistive tech via the shared live region. */
+function announce(message: string): void {
+  const region = document.getElementById("a11y-status");
+  if (region) region.textContent = message;
+}
+
 // --- Code copy buttons ---
 document.addEventListener("click", async (event) => {
   const btn = (event.target as Element).closest?.(".code-copy") as HTMLButtonElement | null;
@@ -31,9 +37,10 @@ document.addEventListener("click", async (event) => {
   const pre = btn.closest(".code-block")?.querySelector("pre.shiki");
   if (!pre) return;
   const text = (pre as HTMLElement).innerText.replace(/\n$/, "");
+  const label = btn.querySelector("span");
   try {
     await navigator.clipboard.writeText(text);
-    const label = btn.querySelector("span");
+    announce("Code copied to clipboard");
     if (label) {
       const original = label.textContent;
       label.textContent = "Copied!";
@@ -44,7 +51,7 @@ document.addEventListener("click", async (event) => {
       }, 2000);
     }
   } catch {
-    // Clipboard unavailable (permissions/insecure context) — nothing to do.
+    announce("Copy failed");
   }
 });
 

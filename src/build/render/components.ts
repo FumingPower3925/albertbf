@@ -23,7 +23,7 @@ ${article.isArchived ? html`<span aria-hidden="true">·</span><span class="badge
 export function tagChips(tags: string[]): RawHtml {
   if (!tags.length) return html``;
   return html`<ul class="tag-list">
-${tags.map((tag) => html`<li><span class="tag">${tag}</span></li>`)}
+${tags.map((tag) => html`<li><a class="tag" href="/articles/?tag=${encodeURIComponent(tag)}">${tag}</a></li>`)}
 </ul>`;
 }
 

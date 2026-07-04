@@ -1,6 +1,18 @@
 import { html, raw, type RawHtml } from "./html";
+import { site } from "../config";
 import type { Article } from "../content";
 import { formatDate, metaRow, tagChips } from "./components";
+
+function colophon(article: Article): RawHtml {
+  const src = `${site.repo}/blob/main/content/articles/${article.slug}/index.md`;
+  const history = `${site.repo}/commits/main/content/articles/${article.slug}/index.md`;
+  const discuss = `${site.repo}/issues/new?title=${encodeURIComponent("Re: " + article.fm.title)}`;
+  return html`<footer class="article-colophon">
+<a href="${src}" rel="noopener" target="_blank">View source</a>
+<a href="${history}" rel="noopener" target="_blank">History</a>
+<a href="${discuss}" rel="noopener" target="_blank">Spotted an issue? Open one</a>
+</footer>`;
+}
 
 function tocBlock(article: Article): RawHtml {
   if (article.toc.length < 2) return html``;
@@ -77,6 +89,7 @@ ${raw(article.html)}
 ${seriesNav(article)}
 ${seriesMoreBlock(article)}
 ${relatedBlock(article)}
+${colophon(article)}
 <p class="article-back"><a href="/articles/">← All articles</a></p>
 </article>
 ${tocBlock(article)}

@@ -2,6 +2,7 @@ import { html, type RawHtml } from "./html";
 
 export function renderNotFound(): RawHtml {
   return html`<div class="notfound">
+<h1 class="sr-only">404 — Page not found</h1>
 <div class="terminal" role="presentation">
 <div class="terminal-bar"><span></span><span></span><span></span></div>
 <pre class="terminal-body"><code><span class="term-prompt">$</span> curl -s https://albertbf.com<span id="term-path"></span>

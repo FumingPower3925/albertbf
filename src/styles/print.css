@@ -1,14 +1,27 @@
 /* Print styles. */
 
 @media print {
+  /* Force light rendering even if the reader toggled dark mode, so code
+     blocks (Shiki dark tokens) don't print as near-white on white paper. */
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light !important;
+  }
+  :root[data-theme="dark"] .shiki,
+  :root[data-theme="dark"] .shiki span {
+    color: var(--shiki-light) !important;
+  }
+
   .site-header,
   .site-footer,
   .scroll-top,
   .toc,
   .code-copy,
   .code-run,
+  .code-output,
   .series-nav,
   .related,
+  .article-colophon,
   .article-back,
   .progress-bar {
     display: none !important;

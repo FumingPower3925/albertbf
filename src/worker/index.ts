@@ -1,5 +1,5 @@
 import { runGo } from "./routes/run-go";
-import { securityHeaders } from "./security";
+import { API_CSP, securityHeaders } from "./security";
 
 /**
  * Thin worker: a couple of API routes, everything else falls through to
@@ -19,7 +19,7 @@ export default {
     if (pathname === "/health") {
       return new Response(
         JSON.stringify({ status: "ok", environment: env.ENVIRONMENT }),
-        { headers: { "Content-Type": "application/json", ...securityHeaders() } },
+        { headers: { "Content-Type": "application/json", ...securityHeaders(API_CSP) } },
       );
     }
 

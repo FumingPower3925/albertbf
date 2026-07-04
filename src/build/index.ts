@@ -14,9 +14,11 @@ import { renderProjects } from "./render/projects";
 import { renderAbout } from "./render/about";
 import { renderNotFound } from "./render/notfound";
 import { writeSearchIndex } from "./search";
-import { websiteJsonLd, personJsonLd, blogPostingJsonLd, breadcrumbJsonLd } from "./seo/jsonld";
+import { websiteJsonLd, personJsonLd, blogPostingJsonLd, breadcrumbJsonLd, articleCrumbs } from "./seo/jsonld";
 import { writeSitemap, writeRobots, writeLlmsTxt, writeFeeds, writeManifest } from "./seo/artifacts";
 import { generateOgImage } from "./seo/og-image";
+
+const DEFAULT_OG = "/images/og-default.png";
 
 function articleExtraHead(article: Article) {
   return html`<meta property="article:published_time" content="${article.fm.date.toISOString()}">
@@ -73,7 +75,7 @@ async function main() {
         ogType: "article",
         ogImage,
         canonicalOverride: article.fm.canonical,
-        jsonLd: [blogPostingJsonLd(article, ogImage), breadcrumbJsonLd(article)],
+        jsonLd: [blogPostingJsonLd(article, ogImage), breadcrumbJsonLd(articleCrumbs(article))],
         extraHead: articleExtraHead(article),
         scripts,
         math: article.features.has("math"),
@@ -95,13 +97,16 @@ async function main() {
   }
 
   // 5. Site pages
+  const homeTitle = `${site.author} — Software & Systems Engineering`;
   await Bun.write(
     join(paths.dist, "index.html"),
     page(
       {
-        title: site.fullTitle,
+        title: homeTitle,
+        titleOverride: homeTitle,
         description: site.description,
         path: "/",
+        ogImage: DEFAULT_OG,
         jsonLd: [websiteJsonLd(), personJsonLd()],
         bodyClass: "page-home",
       },
@@ -119,7 +124,9 @@ async function main() {
         title: "Articles",
         description: `All articles by ${site.author} — systems programming, AI engineering, databases, and more.`,
         path: "/articles/",
+        ogImage: DEFAULT_OG,
         scripts: ["search.js"],
+        jsonLd: [breadcrumbJsonLd([{ name: "Articles", path: "/articles/" }])],
         bodyClass: "page-articles",
         activeNav: "articles",
       },
@@ -137,6 +144,8 @@ async function main() {
         title: "Projects",
         description: `Projects by ${site.author}, written up as article series.`,
         path: "/projects/",
+        ogImage: DEFAULT_OG,
+        jsonLd: [breadcrumbJsonLd([{ name: "Projects", path: "/projects/" }])],
         bodyClass: "page-projects",
         activeNav: "projects",
       },
@@ -152,9 +161,10 @@ async function main() {
     page(
       {
         title: "About",
-        description: `About ${site.author} — software engineer in Barcelona.`,
+        description: `About ${site.author} — software & systems engineer in Barcelona.`,
         path: "/about/",
-        jsonLd: [personJsonLd()],
+        ogImage: DEFAULT_OG,
+        jsonLd: [personJsonLd(), breadcrumbJsonLd([{ name: "About", path: "/about/" }])],
         bodyClass: "page-about",
         activeNav: "about",
       },
@@ -171,6 +181,9 @@ async function main() {
         title: "404 — Page not found",
         description: "This page does not exist.",
         path: "/404.html",
+        ogImage: DEFAULT_OG,
+        noCanonical: true,
+        noindex: true,
         bodyClass: "page-404",
       },
       renderNotFound(),

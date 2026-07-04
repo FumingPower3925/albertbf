@@ -7,11 +7,15 @@ document.body.appendChild(dialog);
 
 const img = dialog.querySelector("img")!;
 
+// The trigger is a real <button> wrapping the image, so Enter/Space activate it
+// natively and the dialog restores focus to it on close.
 document.addEventListener("click", (event) => {
-  const target = (event.target as Element).closest?.("[data-lightbox]") as HTMLImageElement | null;
-  if (!target) return;
-  img.src = target.currentSrc || target.src;
-  img.alt = target.alt;
+  const trigger = (event.target as Element).closest?.(".lightbox-trigger");
+  if (!trigger) return;
+  const source = trigger.querySelector("img[data-lightbox]") as HTMLImageElement | null;
+  if (!source) return;
+  img.src = source.currentSrc || source.src;
+  img.alt = source.alt;
   dialog.showModal();
 });
 

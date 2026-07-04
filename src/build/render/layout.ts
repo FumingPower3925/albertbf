@@ -27,6 +27,21 @@ export interface PageMeta {
   activeNav?: "articles" | "projects" | "about";
   /** Show the reading progress bar (article pages). */
   progressBar?: boolean;
+  /** Full override for the <title> (else "<title> · <site>"). */
+  titleOverride?: string;
+  /** Omit canonical/og:url (error pages). */
+  noCanonical?: boolean;
+  /** Emit <meta name="robots" content="noindex"> (error pages). */
+  noindex?: boolean;
+}
+
+/** X handle without the URL prefix, e.g. "@FumingPower". */
+const X_HANDLE = site.x ? "@" + site.x.replace(/^https?:\/\/(www\.)?x\.com\//, "") : "";
+const OG_LOCALE = site.locale === "en" ? "en_US" : site.locale;
+
+/** JSON.stringify escaping "<" so "</script>" can't break out of the block. */
+function safeJsonLd(obj: object): string {
+  return JSON.stringify(obj).replace(/</g, "\\u003c");
 }
 
 const THEME_ICONS = {
@@ -49,7 +64,7 @@ export function page(
   inlineCss: string,
 ): string {
   const canonical = meta.canonicalOverride ?? site.url + meta.path;
-  const fullTitle = meta.path === "/" ? `${site.title} — ${site.author}` : `${meta.title} · ${site.title}`;
+  const fullTitle = meta.titleOverride ?? `${meta.title} · ${site.title}`;
   const ogImage = meta.ogImage
     ? meta.ogImage.startsWith("http")
       ? meta.ogImage
@@ -66,22 +81,28 @@ export function page(
 <title>${fullTitle}</title>
 <meta name="description" content="${meta.description}">
 <meta name="author" content="${site.author}">
-<link rel="canonical" href="${canonical}">
+${meta.noindex ? html`<meta name="robots" content="noindex">` : null}
+${meta.noCanonical ? null : html`<link rel="canonical" href="${canonical}">`}
 <meta property="og:title" content="${meta.title}">
 <meta property="og:description" content="${meta.description}">
-<meta property="og:url" content="${canonical}">
+${meta.noCanonical ? null : html`<meta property="og:url" content="${canonical}">`}
 <meta property="og:type" content="${meta.ogType ?? "website"}">
 <meta property="og:site_name" content="${site.fullTitle}">
+<meta property="og:locale" content="${OG_LOCALE}">
 ${ogImage ? html`<meta property="og:image" content="${ogImage}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${meta.title}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${ogImage}">` : html`<meta name="twitter:card" content="summary">`}
 <meta name="twitter:title" content="${meta.title}">
 <meta name="twitter:description" content="${meta.description}">
+${X_HANDLE ? html`<meta name="twitter:site" content="${X_HANDLE}">
+<meta name="twitter:creator" content="${X_HANDLE}">` : null}
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#faf9f7">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#131211">
-<link rel="icon" href="/images/favicon.ico" sizes="32x32">
+<link rel="icon" href="/images/favicon.ico" sizes="64x64">
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 <link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="${site.fullTitle}" href="/feed.xml">
@@ -91,7 +112,7 @@ ${ogImage ? html`<meta property="og:image" content="${ogImage}">
 ${meta.math ? html`<link id="katex-css" rel="preload" href="/vendor/katex/katex.min.css" as="style"><noscript><link rel="stylesheet" href="/vendor/katex/katex.min.css"></noscript>` : null}
 ${meta.extraHead ?? null}
 ${(meta.jsonLd ?? []).map(
-  (obj) => html`<script type="application/ld+json">${raw(JSON.stringify(obj))}</script>`,
+  (obj) => html`<script type="application/ld+json">${raw(safeJsonLd(obj))}</script>`,
 )}
 </head>
 <body${meta.bodyClass ? html` class="${meta.bodyClass}"` : null}>
@@ -139,6 +160,7 @@ ${site.email ? html`<a href="mailto:${site.email}">Email</a>` : null}
 <button type="button" class="scroll-top" id="scroll-top" aria-label="Scroll to top" hidden>
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"></polyline></svg>
 </button>
+<div id="a11y-status" class="sr-only" role="status" aria-live="polite"></div>
 ${assets.get("main.js") ? html`<script type="module" src="${assets.get("main.js")}"></script>` : null}
 ${scripts.map((src) => html`<script type="module" src="${src}"></script>`)}
 ${site.cfAnalyticsToken ? html`<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${site.cfAnalyticsToken}"}'></script>` : null}

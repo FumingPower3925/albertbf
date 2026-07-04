@@ -50,9 +50,15 @@ function outputPanel(block: Element): HTMLElement {
   return panel;
 }
 
+function announce(message: string): void {
+  const region = document.getElementById("a11y-status");
+  if (region) region.textContent = message;
+}
+
 document.addEventListener("click", async (event) => {
   const btn = (event.target as Element).closest?.(".code-run") as HTMLButtonElement | null;
-  if (!btn || btn.disabled) return;
+  // aria-disabled (not the disabled property) so keyboard focus stays on the button.
+  if (!btn || btn.getAttribute("aria-disabled") === "true") return;
 
   const block = btn.closest(".code-block")!;
   const pre = block.querySelector("pre.shiki") as HTMLElement | null;
@@ -63,10 +69,11 @@ document.addEventListener("click", async (event) => {
   const out = panel.querySelector("pre")!;
   out.textContent = "";
   panel.classList.add("running");
-  btn.disabled = true;
+  btn.setAttribute("aria-disabled", "true");
   const label = btn.querySelector("span");
   const originalLabel = label?.textContent ?? "Run";
   if (label) label.textContent = "Running…";
+  announce("Running code");
 
   const append = (event: OutputEvent) => {
     const span = document.createElement("span");
@@ -90,7 +97,8 @@ document.addEventListener("click", async (event) => {
     append({ kind: "stderr", text: `\n${err instanceof Error ? err.message : String(err)}` });
   } finally {
     panel.classList.remove("running");
-    btn.disabled = false;
+    btn.removeAttribute("aria-disabled");
     if (label) label.textContent = originalLabel;
+    announce("Run finished");
   }
 });

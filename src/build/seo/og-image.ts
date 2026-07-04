@@ -91,10 +91,13 @@ export async function generateOgImage(article: Article): Promise<string> {
   }
 
   const date = article.fm.date.toISOString().slice(0, 10);
-  const key = Bun.hash(`${article.fm.title}|${date}|v1`).toString(16);
+  const key = Bun.hash(`${article.fm.title}|${date}|v1`).toString(16).slice(0, 8);
   const cachePath = join(paths.cache, "og", `${article.slug}-${key}.png`);
-  const outPath = join(paths.dist, "assets", "og", `${article.slug}.png`);
-  const publicPath = `/assets/og/${article.slug}.png`;
+  // Content-hashed public name so editing a title busts the 1-year immutable
+  // cache on /assets/og/ (the og:image meta is regenerated each build).
+  const fileName = `${article.slug}-${key}.png`;
+  const outPath = join(paths.dist, "assets", "og", fileName);
+  const publicPath = `/assets/og/${fileName}`;
 
   await mkdir(join(paths.dist, "assets", "og"), { recursive: true });
 

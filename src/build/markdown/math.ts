@@ -12,7 +12,8 @@ function renderKatex(src: string, displayMode: boolean): string {
   return katex.renderToString(src, {
     displayMode,
     throwOnError: false,
-    output: "html",
+    // htmlAndMathml keeps the MathML twin so screen readers can read the math.
+    output: "htmlAndMathml",
   });
 }
 
