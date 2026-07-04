@@ -90,8 +90,9 @@ jobs:
           # to the local server via --base), plus external links. Excludes:
           #  - self-referential absolute albertbf.com URLs (canonical/OG/JSON-LD
           #    and same-site links): the new deep paths resolve only after merge;
-          #  - linkedin.com and x.com: both reject automated checkers
-          #    (LinkedIn returns HTTP 999), so they always false-positive.
-          args: "--base http://localhost:8080 --verbose --no-progress --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' './**/*.html'"
+          #  - hosts that throttle or deny automated checkers and thus flake:
+          #    linkedin.com (HTTP 999), x.com, and upc.edu (times out on CI).
+          #    All are stable, human-verified links.
+          args: "--base http://localhost:8080 --verbose --no-progress --timeout 30 --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' --exclude 'upc\\.edu' './**/*.html'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
