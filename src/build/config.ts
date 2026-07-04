@@ -13,8 +13,9 @@ export const site = {
   github: "https://github.com/FumingPower3925",
   githubHandle: "FumingPower3925",
   repo: "https://github.com/FumingPower3925/albertbf",
-  // USER ACTION: fill in when available (footer/about render placeholders until then).
-  linkedin: "",
+  linkedin: "https://www.linkedin.com/in/albert-bausili",
+  x: "https://x.com/FumingPower",
+  // Kept private by choice — no public email link.
   email: "",
   // USER ACTION: Cloudflare Web Analytics token (Dashboard → Analytics → Web Analytics).
   cfAnalyticsToken: "",

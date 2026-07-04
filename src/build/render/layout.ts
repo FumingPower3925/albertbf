@@ -133,6 +133,7 @@ ${NAV_ITEMS.map((item) => html`<li><a href="${item.href}">${item.label}</a></li>
 <div class="footer-social">
 <a href="${site.github}" rel="me noopener" target="_blank">GitHub</a>
 ${site.linkedin ? html`<a href="${site.linkedin}" rel="me noopener" target="_blank">LinkedIn</a>` : null}
+${site.x ? html`<a href="${site.x}" rel="me noopener" target="_blank">X</a>` : null}
 ${site.email ? html`<a href="mailto:${site.email}">Email</a>` : null}
 <a href="/feed.xml">RSS</a>
 </div>

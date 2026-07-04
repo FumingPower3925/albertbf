@@ -19,7 +19,11 @@ export function personJsonLd(): object {
     "@id": `${site.url}/about/#person`,
     name: site.author,
     url: `${site.url}/about/`,
-    sameAs: [site.github, ...(site.linkedin ? [site.linkedin] : [])],
+    sameAs: [
+      site.github,
+      ...(site.linkedin ? [site.linkedin] : []),
+      ...(site.x ? [site.x] : []),
+    ],
     jobTitle: "Software Engineer",
     alumniOf: {
       "@type": "CollegeOrUniversity",
