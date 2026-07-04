@@ -46,10 +46,10 @@ export function renderMedia(
       }
       const bytes = statSync(filePath).size;
       if (bytes > LARGE_IMAGE_BYTES) {
-        console.warn(`⚠️  Large image (${Math.round(bytes / 1024)}KB): ${filePath} — consider compressing to <200KB`);
+        console.warn(`Large image (${Math.round(bytes / 1024)}KB): ${filePath} — consider compressing to <200KB`);
       }
     } catch {
-      console.warn(`⚠️  Image not found: ${filePath}`);
+      console.warn(`Image not found: ${filePath}`);
     }
   }
 

@@ -1,6 +1,6 @@
 import { readdir } from "fs/promises";
 import { join } from "path";
-import { YAML } from "bun";
+import { load as parseYaml } from "js-yaml";
 import { buildFlags, paths, WORDS_PER_MINUTE } from "./config";
 
 export interface ArticleLink {
@@ -102,7 +102,7 @@ function parseDate(value: unknown, file: string, field: string): Date {
 function parseFrontmatter(rawYaml: string, file: string): Frontmatter {
   let data: Record<string, unknown>;
   try {
-    data = YAML.parse(rawYaml) as Record<string, unknown>;
+    data = parseYaml(rawYaml) as Record<string, unknown>;
   } catch (err) {
     throw new ContentError(file, `frontmatter YAML parse error: ${err}`);
   }
@@ -117,7 +117,7 @@ function parseFrontmatter(rawYaml: string, file: string): Frontmatter {
     throw new ContentError(file, "missing required field: description");
   }
   if (data.description.length > 200) {
-    console.warn(`⚠️  ${file}: description is ${data.description.length} chars (aim for ≤160 for search snippets)`);
+    console.warn(`${file}: description is ${data.description.length} chars (aim for ≤160 for search snippets)`);
   }
   if (data.date === undefined) {
     throw new ContentError(file, "missing required field: date");
@@ -161,7 +161,7 @@ function computeReadTime(markdown: string): number {
 async function loadSeries(): Promise<SeriesMeta[]> {
   const file = Bun.file(paths.seriesFile);
   if (!(await file.exists())) return [];
-  const data = YAML.parse(await file.text()) as Record<string, any> | null;
+  const data = parseYaml(await file.text()) as Record<string, any> | null;
   if (!data) return [];
   return Object.entries(data).map(([slug, meta]) => {
     if (!meta || typeof meta.title !== "string" || typeof meta.description !== "string") {
@@ -230,11 +230,11 @@ export async function loadContent(): Promise<Content> {
     const isDraft = fm.draft === true;
 
     if (isDraft && !buildFlags.includeDrafts) {
-      console.log(`📝 Skipped (draft): ${fm.title}`);
+      console.log(`Skipped (draft): ${fm.title}`);
       continue;
     }
     if (isScheduled) {
-      console.log(`⏭️  Skipped (scheduled for ${fm.date.toISOString().slice(0, 10)}): ${fm.title}`);
+      console.log(`Skipped (scheduled for ${fm.date.toISOString().slice(0, 10)}): ${fm.title}`);
       continue;
     }
 

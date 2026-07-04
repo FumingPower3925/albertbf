@@ -122,7 +122,7 @@ async function copyFonts(): Promise<void> {
     if (await Bun.file(src).exists()) {
       await cp(src, join(outDir, file));
     } else {
-      console.warn(`⚠️  Font file missing: ${pkg}/files/${file}`);
+      console.warn(`Font file missing: ${pkg}/files/${file}`);
     }
   }
 }

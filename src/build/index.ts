@@ -27,14 +27,14 @@ ${article.fm.tags.map((tag) => html`<meta property="article:tag" content="${tag}
 
 async function main() {
   const started = performance.now();
-  console.log("🚀 Building albertbf.com…");
+  console.log("Building albertbf.com…");
 
   await rm(paths.dist, { recursive: true, force: true });
   await mkdir(paths.dist, { recursive: true });
 
   // 1. Content
   const { articles, seriesList, bySeries } = await loadContent();
-  console.log(`📚 ${articles.length} article(s), ${seriesList.length} series`);
+  console.log(`${articles.length} article(s), ${seriesList.length} series`);
 
   // 2. Markdown rendering
   const render = await createRenderer();
@@ -46,7 +46,7 @@ async function main() {
     article.features = result.features;
     article.plainText = result.plainText;
     for (const f of result.features) usedFeatures.add(f);
-    console.log(`✅ ${article.fm.title}${result.features.size ? ` (${[...result.features].join(", ")})` : ""}`);
+    console.log(`${article.fm.title}${result.features.size ? ` (${[...result.features].join(", ")})` : ""}`);
   }
 
   // 3. Assets (styles, client bundles, fonts, vendor, _headers, static files)
@@ -189,10 +189,10 @@ async function main() {
     writeSearchIndex(articles),
   ]);
 
-  console.log(`✨ Build completed in ${Math.round(performance.now() - started)}ms`);
+  console.log(`Build completed in ${Math.round(performance.now() - started)}ms`);
 }
 
 main().catch((err) => {
-  console.error(`\n❌ Build failed: ${err.message ?? err}`);
+  console.error(`\nBuild failed: ${err.message ?? err}`);
   process.exit(1);
 });

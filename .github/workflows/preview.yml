@@ -57,7 +57,7 @@ jobs:
         with:
           header: preview
           message: |
-            ### ☁️ Cloudflare preview
+            ### Cloudflare preview
 
             | | |
             |---|---|

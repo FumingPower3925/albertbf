@@ -77,7 +77,7 @@ async function renderPng(svg: string): Promise<Uint8Array | null> {
     return resvg.render().asPng();
   } catch (err) {
     if (resvgAvailable === undefined) {
-      console.warn(`⚠️  OG image rendering unavailable (${err}); using static fallback`);
+      console.warn(`OG image rendering unavailable (${err}); using static fallback`);
     }
     resvgAvailable = false;
     return null;
