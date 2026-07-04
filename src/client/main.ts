@@ -97,6 +97,12 @@ if (progress) {
   update();
 }
 
+// --- Activate preloaded KaTeX stylesheet (kept off the critical path) ---
+const katexCss = document.getElementById("katex-css") as HTMLLinkElement | null;
+if (katexCss && katexCss.rel === "preload") {
+  katexCss.rel = "stylesheet";
+}
+
 // --- 404 terminal: print the missed path ---
 const termPath = document.getElementById("term-path");
 if (termPath) {

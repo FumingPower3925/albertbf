@@ -50,16 +50,34 @@ function shortHash(content: string | Uint8Array): string {
   return Bun.hash(content).toString(16).slice(0, 8);
 }
 
-async function bundleStyles(manifest: AssetManifest): Promise<void> {
+/**
+ * Conservative CSS minifier: safe for nesting, light-dark(), calc(), and
+ * container queries. Strips comments, collapses whitespace to single spaces,
+ * and trims around structural punctuation only.
+ */
+function minifyCss(css: string): string {
+  return css
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\s+/g, " ")
+    .replace(/\s*([{}:;,>])\s*/g, "$1")
+    .replace(/;}/g, "}")
+    .trim();
+}
+
+async function bundleStyles(manifest: AssetManifest): Promise<string> {
   let css = "";
   for (const partial of STYLE_ORDER) {
     const file = Bun.file(join(paths.styles, partial));
     if (!(await file.exists())) continue;
-    css += `/* ${partial} */\n${await file.text()}\n`;
+    css += `${await file.text()}\n`;
   }
-  const name = `styles.${shortHash(css)}.css`;
-  await Bun.write(join(paths.dist, "assets", name), css);
+  const out = minifyCss(css);
+  // Also emit a hashed file (useful for debugging / direct linking), but the
+  // stylesheet is inlined into each page to remove a render-blocking request.
+  const name = `styles.${shortHash(out)}.css`;
+  await Bun.write(join(paths.dist, "assets", name), out);
   manifest.set("styles.css", `/assets/${name}`);
+  return out;
 }
 
 async function bundleClient(manifest: AssetManifest): Promise<void> {
@@ -144,6 +162,7 @@ async function copyStatic(): Promise<void> {
 export interface BuiltAssets {
   manifest: AssetManifest;
   themeHash: string;
+  inlineCss: string;
 }
 
 export async function buildAssets(features: {
@@ -153,7 +172,7 @@ export async function buildAssets(features: {
 }): Promise<BuiltAssets> {
   const manifest: AssetManifest = new Map();
   await mkdir(join(paths.dist, "assets"), { recursive: true });
-  await Promise.all([
+  const [inlineCss] = await Promise.all([
     bundleStyles(manifest),
     bundleClient(manifest),
     copyFonts(),
@@ -162,5 +181,5 @@ export async function buildAssets(features: {
   ]);
   const themeHash = await themeSnippetHash();
   await Bun.write(join(paths.dist, "_headers"), renderHeadersFile(themeHash));
-  return { manifest, themeHash };
+  return { manifest, themeHash, inlineCss };
 }

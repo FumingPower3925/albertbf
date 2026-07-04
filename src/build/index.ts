@@ -50,7 +50,7 @@ async function main() {
   }
 
   // 3. Assets (styles, client bundles, fonts, vendor, _headers, static files)
-  const { manifest } = await buildAssets({
+  const { manifest, inlineCss } = await buildAssets({
     sql: usedFeatures.has("run:sql"),
     mermaid: usedFeatures.has("mermaid"),
     katex: usedFeatures.has("math"),
@@ -83,6 +83,7 @@ async function main() {
       },
       renderArticlePage(article),
       manifest,
+      inlineCss,
     );
     const outDir = join(paths.dist, article.url.slice(1));
     await mkdir(outDir, { recursive: true });
@@ -106,6 +107,7 @@ async function main() {
       },
       renderHome(articles, seriesList, bySeries),
       manifest,
+      inlineCss,
     ),
   );
 
@@ -123,6 +125,7 @@ async function main() {
       },
       renderArticlesList(articles),
       manifest,
+      inlineCss,
     ),
   );
 
@@ -139,6 +142,7 @@ async function main() {
       },
       renderProjects(seriesList, bySeries),
       manifest,
+      inlineCss,
     ),
   );
 
@@ -156,6 +160,7 @@ async function main() {
       },
       renderAbout(),
       manifest,
+      inlineCss,
     ),
   );
 
@@ -170,6 +175,7 @@ async function main() {
       },
       renderNotFound(),
       manifest,
+      inlineCss,
     ),
   );
 

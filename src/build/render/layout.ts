@@ -44,7 +44,12 @@ const NAV_ITEMS = [
   { key: "about", label: "About", href: "/about/" },
 ] as const;
 
-export function page(meta: PageMeta, body: RawHtml, assets: AssetManifest): string {
+export function page(
+  meta: PageMeta,
+  body: RawHtml,
+  assets: AssetManifest,
+  inlineCss: string,
+): string {
   const canonical = meta.canonicalOverride ?? site.url + meta.path;
   const fullTitle = meta.path === "/" ? `${site.title} — ${site.author}` : `${meta.title} · ${site.title}`;
   const ogImage = meta.ogImage
@@ -53,7 +58,6 @@ export function page(meta: PageMeta, body: RawHtml, assets: AssetManifest): stri
       : site.url + meta.ogImage
     : undefined;
 
-  const stylesHref = assets.get("styles.css");
   const scripts = (meta.scripts ?? []).map((s) => assets.get(s)).filter(Boolean) as string[];
 
   const doc = html`<!DOCTYPE html>
@@ -87,8 +91,8 @@ ${ogImage ? html`<meta property="og:image" content="${ogImage}">
 <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>${raw(THEME_SNIPPET)}</script>
-${stylesHref ? html`<link rel="stylesheet" href="${stylesHref}">` : null}
-${meta.math ? html`<link rel="stylesheet" href="/vendor/katex/katex.min.css">` : null}
+<style>${raw(inlineCss)}</style>
+${meta.math ? html`<link id="katex-css" rel="preload" href="/vendor/katex/katex.min.css" as="style"><noscript><link rel="stylesheet" href="/vendor/katex/katex.min.css"></noscript>` : null}
 ${meta.extraHead ?? null}
 ${(meta.jsonLd ?? []).map(
   (obj) => html`<script type="application/ld+json">${raw(JSON.stringify(obj))}</script>`,
