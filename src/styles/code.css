@@ -93,11 +93,38 @@
 .code-block pre.shiki code {
   display: block;
   font-family: inherit;
+  counter-reset: line;
 }
 
 .code-block .line {
   display: inline-block;
   width: 100%;
+}
+
+/* Editor-style line numbers via a counter. Pseudo-element content is never
+   part of a text selection, so it is not included when copying the code. */
+.code-block .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 2ch;
+  margin-right: 1.5em;
+  text-align: right;
+  color: var(--color-text-muted);
+  opacity: 0.55;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* No line numbers on diffs — the +/- gutter is the affordance there. */
+.code-block[data-lang="diff"] .line::before,
+.code-block:has(.line.diff) .line::before {
+  content: none;
+}
+
+/* Don't number a trailing blank line Shiki may emit. */
+.code-block .line:last-child:empty::before {
+  content: none;
 }
 
 .code-block .line.highlighted {

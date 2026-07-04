@@ -65,52 +65,110 @@
 }
 
 .lightbox {
+  /* margin:auto restores centering that the global `* { margin: 0 }` reset
+     strips from the native <dialog>. */
+  margin: auto;
   border: none;
   border-radius: var(--radius-lg);
   padding: 0;
   background: transparent;
-  max-width: min(92vw, 1400px);
+  max-width: 92vw;
   max-height: 92vh;
+  overflow: visible;
 }
 
 .lightbox::backdrop {
-  background: rgb(0 0 0 / 0.8);
+  background: rgb(0 0 0 / 0.82);
   backdrop-filter: blur(4px);
 }
 
 .lightbox img {
   display: block;
-  max-width: 100%;
+  max-width: 92vw;
   max-height: 92vh;
+  width: auto;
+  height: auto;
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
 }
 
 .lightbox-close {
-  position: absolute;
-  top: var(--space-xs);
-  right: var(--space-xs);
-  width: 2.25rem;
-  height: 2.25rem;
+  position: fixed;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 2.5rem;
+  height: 2.5rem;
   border: none;
   border-radius: var(--radius-full);
   background: rgb(0 0 0 / 0.6);
   color: #fff;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
 }
 
+/* Seamless fade + zoom on open (dialog + backdrop), reduced-motion aware. */
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox {
+    opacity: 0;
+    transform: scale(0.94);
+    transition:
+      opacity var(--dur-2) var(--ease),
+      transform var(--dur-2) var(--ease),
+      overlay var(--dur-2) var(--ease) allow-discrete,
+      display var(--dur-2) var(--ease) allow-discrete;
+  }
+  .lightbox[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .lightbox::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease),
+      overlay var(--dur-2) var(--ease) allow-discrete,
+      display var(--dur-2) var(--ease) allow-discrete;
+  }
+  .lightbox[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .lightbox[open] {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    .lightbox[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
 .mermaid-diagram {
   margin-block: var(--space-lg);
-  display: flex;
-  justify-content: center;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   overflow-x: auto;
 }
 
 .mermaid-diagram pre.mermaid {
   background: none;
   border: none;
+  margin: 0;
+  display: flex;
+  justify-content: center;
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
+}
+
+/* Let diagrams render at their natural size, filling the container when
+   they're wide (crisp — it's vector). !important overrides Mermaid's inline
+   max-width; width:auto avoids the flex-collapse that made them tiny. */
+.mermaid-diagram svg {
+  width: auto;
+  max-width: 100% !important;
+  height: auto;
+  margin-inline: auto;
 }
