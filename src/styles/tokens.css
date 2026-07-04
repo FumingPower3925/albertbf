@@ -71,6 +71,11 @@
 .shiki,
 .shiki span {
   color: var(--shiki-light);
+}
+
+/* Strip Shiki's own background from the block only — NOT the line spans, or
+   it would clobber line-highlight and diff backgrounds. */
+.shiki {
   background-color: transparent !important;
 }
 

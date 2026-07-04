@@ -131,8 +131,8 @@
 }
 
 .code-block .line.highlighted {
-  background: var(--color-accent-subtle);
-  box-shadow: inset 2px 0 0 var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 13%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-accent);
 }
 
 .code-block .line.diff.add {
