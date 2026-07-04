@@ -53,7 +53,7 @@ export function transformCallouts(tokens: Token[]): void {
 }
 
 export function renderCallout(kind: CalloutKind, body: string): string {
-  return `<aside class="callout callout--${kind}">
+  return `<div class="callout callout--${kind}" role="note" aria-label="${LABELS[kind]}">
 <p class="callout-title">${ICONS[kind]}<span>${LABELS[kind]}</span></p>
-${body}</aside>\n`;
+${body}</div>\n`;
 }

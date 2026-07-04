@@ -93,6 +93,15 @@ export async function createRenderer(): Promise<(article: Article) => RenderResu
   marked.use({
     gfm: true,
     extensions: [blockMath, inlineMath, youtubeDirective],
+    hooks: {
+      // Runs after lexing, before parsing — composes with marked-footnote's
+      // own processAllTokens (which moves footnote definitions to the end).
+      processAllTokens(tokens: Token[]) {
+        attachOutputFences(tokens);
+        walkAllTokens(tokens);
+        return tokens;
+      },
+    },
     renderer: {
       heading(token: Tokens.Heading): string {
         const inner = this.parser.parseInline(token.tokens);
@@ -113,6 +122,13 @@ export async function createRenderer(): Promise<(article: Article) => RenderResu
         if (kind) return renderCallout(kind, body);
         return `<blockquote>\n${body}</blockquote>\n`;
       },
+      paragraph(token: Tokens.Paragraph): string {
+        const inner = this.parser.parseInline(token.tokens);
+        // A paragraph that is just a figure (image/video) must not be wrapped
+        // in <p> — <figure> is block-level and invalid inside <p>.
+        if (/^\s*<figure\b/.test(inner)) return `${inner}\n`;
+        return `<p>${inner}</p>\n`;
+      },
     },
   });
 
@@ -123,10 +139,7 @@ export async function createRenderer(): Promise<(article: Article) => RenderResu
       features: new Set<Feature>(),
     };
 
-    const tokens = marked.lexer(article.markdown);
-    attachOutputFences(tokens);
-    walkAllTokens(tokens);
-    const htmlOut = marked.parser(tokens) as string;
+    const htmlOut = marked.parse(article.markdown) as string;
 
     if (htmlOut.includes('class="math')) ctx.features.add("math");
     if (ctx.media.usedLightbox) ctx.features.add("lightbox");
