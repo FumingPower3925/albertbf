@@ -15,8 +15,7 @@ export function renderHome(
   return html`<div class="home">
 <section class="hero">
 <h1>${site.author}</h1>
-<!-- USER ACTION: confirm the role line below -->
-<p class="hero-role">Software engineer · Barcelona · Master's @ UPC</p>
+<p class="hero-role">Software &amp; systems engineer · Barcelona · BSc &amp; MSc @ UPC</p>
 <p class="hero-intro">I build high-performance software, AI tooling, and privacy-first systems. This blog is a space where I document my technical journey and write about whatever piques my interest.</p>
 <p class="hero-links">
 <a href="${site.github}" rel="me noopener" target="_blank">GitHub</a>

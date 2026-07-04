@@ -5,7 +5,7 @@ const ROOT = join(import.meta.dir, "..", "..");
 export const site = {
   title: "Albert BF",
   fullTitle: "Albert BF's Blog",
-  author: "Albert Bausili",
+  author: "Albert Bausili Fernández",
   url: "https://albertbf.com",
   description:
     "Personal technical blog of Albert Bausili — systems programming, AI engineering, databases, and the occasional deep dive.",

@@ -6,11 +6,14 @@ import {
 import { escapeAttr, escapeHtml } from "../render/html";
 import type { Feature } from "../content";
 
-/** Languages preloaded into the highlighter. Others fall back to plaintext. */
+/** Languages (and common aliases) preloaded into the highlighter. Others
+ *  fall back to plaintext. Aliases must be listed so the fence-info guard
+ *  below accepts them before Shiki resolves them to a grammar. */
 const LANGS = [
-  "go", "rust", "c", "cpp", "zig", "python", "javascript", "typescript",
-  "jsx", "tsx", "sql", "bash", "shell", "yaml", "toml", "json", "html",
-  "css", "diff", "dockerfile", "makefile", "markdown", "mermaid", "text",
+  "go", "rust", "c", "cpp", "zig", "python", "py", "javascript", "js",
+  "typescript", "ts", "jsx", "tsx", "sql", "bash", "shell", "sh", "yaml",
+  "yml", "toml", "json", "jsonc", "html", "css", "diff", "dockerfile",
+  "makefile", "markdown", "md", "mermaid", "text",
 ] as const;
 
 const RUNNABLE = new Set(["go", "sql", "js", "javascript"]);

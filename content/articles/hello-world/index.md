@@ -39,8 +39,14 @@ Lists, of course:
 > [!TIP]
 > Use `hl={3-5}` on a code fence to highlight lines three through five.
 
+> [!IMPORTANT]
+> Runnable blocks need complete programs — a Go snippet must be a full `package main`.
+
 > [!WARNING]
 > The Go snippets on this page execute on the public Go Playground via a proxy. Don't paste secrets into things you run.
+
+> [!CAUTION]
+> JavaScript you run executes in your own browser (sandboxed in a Web Worker). Only run code you understand.
 
 ## Footnotes
 
@@ -110,7 +116,7 @@ worker 3 finished
 
 SQL runs entirely in your browser — a fresh in-memory SQLite database every time, courtesy of WebAssembly. No server involved:
 
-```sql run
+```sql run title="languages.sql"
 CREATE TABLE langs (name TEXT, born INTEGER, systems BOOLEAN);
 
 INSERT INTO langs VALUES
@@ -134,7 +140,7 @@ Zig   2016
 
 JavaScript runs in a sandboxed Web Worker with a five-second watchdog:
 
-```js run
+```js run title="fib.js"
 const fib = (n) => n < 2 ? n : fib(n - 1) + fib(n - 2);
 
 for (let i = 10; i <= 14; i++) {

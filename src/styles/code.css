@@ -82,7 +82,9 @@
 
 .code-block pre.shiki {
   margin: 0;
-  padding: var(--space-md);
+  /* Horizontal padding lives on each .line so highlights span the full width. */
+  padding-block: var(--space-md);
+  padding-inline: 0;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
@@ -99,6 +101,7 @@
 .code-block .line {
   display: inline-block;
   width: 100%;
+  padding-inline: var(--space-md);
 }
 
 /* Editor-style line numbers via a counter. Pseudo-element content is never
@@ -129,7 +132,7 @@
 
 .code-block .line.highlighted {
   background: var(--color-accent-subtle);
-  box-shadow: -1rem 0 0 var(--color-accent-subtle), 1rem 0 0 var(--color-accent-subtle);
+  box-shadow: inset 2px 0 0 var(--color-accent);
 }
 
 .code-block .line.diff.add {
