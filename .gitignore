@@ -2,3 +2,5 @@ node_modules/
 dist/
 .wrangler
 .DS_Store
+# Lighthouse CI local output
+.lighthouseci/
