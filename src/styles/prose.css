@@ -44,6 +44,17 @@
   opacity: 1;
 }
 
+/* Inline links must be distinguishable by more than color (WCAG). */
+.prose a {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  text-underline-offset: 0.15em;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
 .prose strong {
   color: var(--color-text);
   font-weight: 650;
