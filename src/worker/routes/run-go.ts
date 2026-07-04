@@ -43,15 +43,12 @@ interface PlaygroundResponse {
   VetErrors?: string;
 }
 
-// Fallback in-memory limiter (per-isolate; approximate) when the ratelimit
-// binding is unavailable.
+// Per-isolate in-memory counter. It is exact within a single isolate, so it
+// clamps tight bursts that land on the same warm isolate immediately and with
+// no network round-trip.
 const memoryHits = new Map<string, { count: number; reset: number }>();
 
-async function isRateLimited(env: Env, ip: string): Promise<boolean> {
-  if (env.RUN_RL) {
-    const { success } = await env.RUN_RL.limit({ key: ip });
-    return !success;
-  }
+function memoryLimited(ip: string): boolean {
   const now = Date.now();
   // Evict expired entries so the Map can't grow unbounded across many IPs.
   if (memoryHits.size > 5000) {
@@ -64,6 +61,21 @@ async function isRateLimited(env: Env, ip: string): Promise<boolean> {
   }
   entry.count++;
   return entry.count > RATE_LIMIT;
+}
+
+async function isRateLimited(env: Env, ip: string): Promise<boolean> {
+  // Two layers, limited if either trips:
+  //  1. the per-isolate counter (above) — exact, instant, catches same-isolate
+  //     bursts that the account limiter's lag would otherwise let through;
+  //  2. the account-level ratelimit binding — shared across isolates/colos but
+  //     only eventually consistent, so it catches distributed abuse the
+  //     per-isolate counter can't see.
+  if (memoryLimited(ip)) return true;
+  if (env.RUN_RL) {
+    const { success } = await env.RUN_RL.limit({ key: ip });
+    return !success;
+  }
+  return false;
 }
 
 function json(body: object, status = 200, extra: Record<string, string> = {}): Response {
