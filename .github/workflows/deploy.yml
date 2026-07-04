@@ -1,10 +1,11 @@
 name: Deploy
 
+# Push-to-main deploys are handled by the Cloudflare Workers Builds git
+# integration. This workflow only covers what that integration cannot:
+# the daily rebuild that publishes future-dated (scheduled) articles, plus
+# a manual trigger. Both are followed by a production health check.
 on:
-  push:
-    branches: [ main ]
   schedule:
-    # Daily rebuild publishes future-dated (scheduled) articles.
     - cron: "0 0 * * *"
   workflow_dispatch:
 
