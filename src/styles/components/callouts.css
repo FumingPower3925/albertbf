@@ -24,8 +24,9 @@
   margin-bottom: 0;
 }
 
+/* Five distinct hues (GitHub's convention): blue, green, purple, amber, red. */
 .callout--note { --callout-color: var(--color-info); }
 .callout--tip { --callout-color: var(--color-success); }
-.callout--important { --callout-color: var(--color-accent); }
+.callout--important { --callout-color: light-dark(#8250df, #a371f7); }
 .callout--warning { --callout-color: var(--color-warning); }
 .callout--caution { --callout-color: light-dark(#b3261e, #ff6b62); }
