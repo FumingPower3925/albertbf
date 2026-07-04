@@ -6,6 +6,7 @@ import { transformCallouts, renderCallout, type CalloutKind } from "./callouts";
 import { initHighlighter, isOutputFence, renderCodeBlock } from "./code";
 import { renderMedia, renderYouTube, type MediaContext } from "./media";
 import { blockMath, inlineMath } from "./math";
+import { escapeAttr } from "../render/html";
 
 export interface RenderResult {
   html: string;
@@ -115,6 +116,17 @@ export async function createRenderer(): Promise<(article: Article) => RenderResu
       },
       image(token: Tokens.Image): string {
         return renderMedia(ctx.media, token.href, token.title, token.text);
+      },
+      link(token: Tokens.Link): string {
+        const text = this.parser.parseInline(token.tokens);
+        let href = token.href;
+        // Resolve document-relative links (e.g. colocated index.md) against
+        // the article URL so they work in the browser and pass link checks.
+        if (!/^(https?:|mailto:|tel:|#|\/)/.test(href)) {
+          href = ctx.media.url + href.replace(/^\.\//, "");
+        }
+        const title = token.title ? ` title="${escapeAttr(token.title)}"` : "";
+        return `<a href="${escapeAttr(href)}"${title}>${text}</a>`;
       },
       blockquote(token: Tokens.Blockquote): string {
         const kind = (token as Tokens.Blockquote & { calloutKind?: CalloutKind }).calloutKind;
