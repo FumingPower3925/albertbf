@@ -57,11 +57,16 @@ export function parseFenceMeta(info: string): FenceMeta {
   return meta;
 }
 
+// High-contrast GitHub themes: same look, but token colors meet WCAG AA
+// against the code-block background (plain github-light fails on red/orange).
+const LIGHT_THEME = "github-light-high-contrast";
+const DARK_THEME = "github-dark-high-contrast";
+
 let highlighter: Highlighter | undefined;
 
 export async function initHighlighter(): Promise<void> {
   highlighter = await createHighlighter({
-    themes: ["github-light", "github-dark"],
+    themes: [LIGHT_THEME, DARK_THEME],
     langs: [...LANGS],
   });
 }
@@ -102,7 +107,7 @@ export function renderCodeBlock(
   const lang = (LANGS as readonly string[]).includes(meta.lang) ? meta.lang : "text";
   const highlighted = highlighter.codeToHtml(code, {
     lang,
-    themes: { light: "github-light", dark: "github-dark" },
+    themes: { light: LIGHT_THEME, dark: DARK_THEME },
     defaultColor: false,
     transformers: [
       transformerNotationDiff(),
