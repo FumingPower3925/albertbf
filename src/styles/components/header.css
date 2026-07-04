@@ -84,13 +84,31 @@
   color: var(--color-text);
 }
 
+/* Icons follow the <html> theme (set synchronously before paint), so the
+   correct icon shows immediately with no flash and no dead first click. */
 .theme-icon {
   display: none;
 }
 
-.theme-toggle[data-mode="system"] .theme-icon--system,
-.theme-toggle[data-mode="light"] .theme-icon--light,
-.theme-toggle[data-mode="dark"] .theme-icon--dark {
+/* No explicit choice yet → follow the system preference. */
+:root:not([data-theme]) .theme-icon--light {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .theme-icon--light {
+    display: none;
+  }
+  :root:not([data-theme]) .theme-icon--dark {
+    display: block;
+  }
+}
+
+:root[data-theme="light"] .theme-icon--light {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-icon--dark {
   display: block;
 }
 

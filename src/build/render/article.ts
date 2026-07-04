@@ -34,18 +34,28 @@ ${s.next ? html`<a class="series-next" href="${s.next.url}"><span>Next →</span
 </nav>`;
 }
 
-function relatedBlock(article: Article): RawHtml {
-  const others = article.series?.others ?? [];
-  if (!others.length) return html``;
-  return html`<section class="related" aria-label="Related articles">
-<h2>More in ${article.series!.meta.title}</h2>
+function articleListBlock(heading: string, articles: Article[]): RawHtml {
+  if (!articles.length) return html``;
+  return html`<section class="related" aria-label="${heading}">
+<h2>${heading}</h2>
 <ul>
-${others.map(
+${articles.map(
     (other) =>
       html`<li><a href="${other.url}">${other.fm.title}</a><span class="related-meta">${formatDate(other.fm.date)} · ${other.readTime} min read</span></li>`,
   )}
 </ul>
 </section>`;
+}
+
+/** "More in this series" — other entries of the same series. */
+function seriesMoreBlock(article: Article): RawHtml {
+  const others = article.series?.others ?? [];
+  return articleListBlock(`More in ${article.series?.meta.title ?? "this series"}`, others);
+}
+
+/** "Related articles" — cross-series recommendations by shared tags. */
+function relatedBlock(article: Article): RawHtml {
+  return articleListBlock("Related articles", article.related);
 }
 
 export function renderArticlePage(article: Article): RawHtml {
@@ -65,6 +75,7 @@ ${article.fm.updated ? html`<p class="article-updated">Last updated <time dateti
 ${raw(article.html)}
 </div>
 ${seriesNav(article)}
+${seriesMoreBlock(article)}
 ${relatedBlock(article)}
 <p class="article-back"><a href="/articles/">← All articles</a></p>
 </article>

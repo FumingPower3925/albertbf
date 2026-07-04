@@ -43,7 +43,10 @@ export interface SeriesMeta {
   slug: string;
   title: string;
   description: string;
+  /** The project's live website. */
   url?: string;
+  /** The project's source repository. */
+  repo?: string;
 }
 
 export interface Article {
@@ -66,6 +69,8 @@ export interface Article {
     next?: Article;
     others: Article[];
   };
+  /** Cross-series recommendations by shared tags (excludes same-series). */
+  related: Article[];
   isArchived: boolean;
   isScheduled: boolean;
 }
@@ -167,6 +172,7 @@ async function loadSeries(): Promise<SeriesMeta[]> {
       title: meta.title,
       description: meta.description,
       url: typeof meta.url === "string" ? meta.url : undefined,
+      repo: typeof meta.repo === "string" ? meta.repo : undefined,
     };
   });
 }
@@ -246,6 +252,7 @@ export async function loadContent(): Promise<Content> {
       readTime: computeReadTime(markdown),
       features: new Set(),
       assets,
+      related: [],
       isArchived: fm.archived !== undefined && fm.archived.getTime() <= now.getTime(),
       isScheduled,
     });
@@ -274,6 +281,31 @@ export async function loadContent(): Promise<Content> {
         others: group.filter((other) => other !== article),
       };
     });
+  }
+
+  // Related articles: cross-series discovery by shared tags. Same-series
+  // articles are excluded (the series navigation already surfaces those).
+  const RELATED_LIMIT = 3;
+  for (const article of articles) {
+    const tags = new Set(article.fm.tags);
+    if (!tags.size) continue;
+    article.related = articles
+      .filter(
+        (other) =>
+          other !== article &&
+          !(article.fm.series && other.fm.series === article.fm.series),
+      )
+      .map((other) => ({
+        article: other,
+        shared: other.fm.tags.filter((t) => tags.has(t)).length,
+      }))
+      .filter((entry) => entry.shared > 0)
+      .sort(
+        (a, b) =>
+          b.shared - a.shared || b.article.fm.date.getTime() - a.article.fm.date.getTime(),
+      )
+      .slice(0, RELATED_LIMIT)
+      .map((entry) => entry.article);
   }
 
   return { articles, seriesList, bySeries };

@@ -20,10 +20,27 @@
   font-size: var(--text-xl);
 }
 
+.project-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
 .project-link {
   font-size: var(--text-sm);
   font-weight: 500;
   white-space: nowrap;
+}
+
+.project-repo {
+  display: inline-flex;
+  color: var(--color-text-muted);
+  transition: color var(--dur-1) var(--ease);
+}
+
+.project-repo:hover {
+  color: var(--color-text);
 }
 
 .project-description {

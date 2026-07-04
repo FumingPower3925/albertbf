@@ -9,7 +9,7 @@ links:
   - { label: "Source on GitHub", url: "https://github.com/FumingPower3925/albertbf" }
 ---
 
-This site just went through a complete rebuild, and this article doubles as its living documentation: every feature the engine supports appears somewhere on this page. If you are reading this in the repository, [index.md](https://github.com/FumingPower3925/albertbf/blob/main/content/articles/hello-world/index.md) is also the reference for how each block is written.
+This site just went through a complete rebuild, and this article doubles as its living documentation: every feature the engine supports appears somewhere on this page. The [raw Markdown source](index.md) of this page is served alongside it, so it's also the reference for how each block is written.
 
 ## Typography and prose
 

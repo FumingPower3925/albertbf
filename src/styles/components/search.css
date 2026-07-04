@@ -30,12 +30,26 @@
   outline: none;
 }
 
+/* Hide the browser's default (unstyled) search clear button — Escape clears. */
+#search-input::-webkit-search-cancel-button,
+#search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .search-kbd {
   position: absolute;
   right: 0.6rem;
   top: 50%;
   translate: 0 -50%;
   color: var(--color-text-muted);
+  transition: opacity var(--dur-1) var(--ease);
+}
+
+/* The hint is only useful before you engage the field. */
+#search-input:focus ~ .search-kbd,
+#search-input:not(:placeholder-shown) ~ .search-kbd {
+  opacity: 0;
 }
 
 .no-results {

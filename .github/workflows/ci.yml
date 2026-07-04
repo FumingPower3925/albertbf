@@ -86,11 +86,12 @@ jobs:
       - name: Run Lychee Link Checker
         uses: lycheeverse/lychee-action@v2
         with:
-          # Excludes:
-          #  - self-referential canonical/OG/JSON-LD URLs (production) and repo
-          #    blob links: they resolve only after this branch merges;
+          # Checks every internal link across all pages and articles (rewritten
+          # to the local server via --base), plus external links. Excludes:
+          #  - self-referential absolute albertbf.com URLs (canonical/OG/JSON-LD
+          #    and same-site links): the new deep paths resolve only after merge;
           #  - linkedin.com and x.com: both reject automated checkers
           #    (LinkedIn returns HTTP 999), so they always false-positive.
-          args: "--base http://localhost:8080 --verbose --no-progress --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'github\\.com/FumingPower3925/albertbf/blob' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' './**/*.html'"
+          args: "--base http://localhost:8080 --verbose --no-progress --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' './**/*.html'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

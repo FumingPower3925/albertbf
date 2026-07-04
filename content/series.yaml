@@ -4,4 +4,5 @@
 blog-engine:
   title: Blog Engine
   description: Building and evolving this zero-cost, framework-free blog on Cloudflare Workers.
-  url: https://github.com/FumingPower3925/albertbf
+  url: https://albertbf.com
+  repo: https://github.com/FumingPower3925/albertbf

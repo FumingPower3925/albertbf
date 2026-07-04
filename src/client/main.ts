@@ -1,36 +1,28 @@
 /** Global client behavior: theme toggle, code copy, scroll-top, progress bar, 404 path. */
 
-// --- Theme (3-state: system → light → dark) ---
-type ThemeMode = "system" | "light" | "dark";
-const MODES: ThemeMode[] = ["system", "light", "dark"];
-
-function currentMode(): ThemeMode {
+// --- Theme (light ↔ dark; defaults to the system preference) ---
+function effectiveTheme(): "light" | "dark" {
   const stored = localStorage.getItem("theme");
-  return stored === "light" || stored === "dark" ? stored : "system";
+  if (stored === "light" || stored === "dark") return stored;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function applyMode(mode: ThemeMode): void {
-  if (mode === "system") {
-    delete document.documentElement.dataset.theme;
-    localStorage.removeItem("theme");
-  } else {
-    document.documentElement.dataset.theme = mode;
-    localStorage.setItem("theme", mode);
-  }
-  const toggle = document.getElementById("theme-toggle");
-  if (toggle) {
-    toggle.dataset.mode = mode;
-    toggle.setAttribute("aria-label", `Theme: ${mode}`);
-  }
+function labelFor(theme: "light" | "dark"): string {
+  return theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
 }
 
-document.getElementById("theme-toggle")?.addEventListener("click", () => {
-  const next = MODES[(MODES.indexOf(currentMode()) + 1) % MODES.length];
-  applyMode(next);
+const themeToggle = document.getElementById("theme-toggle");
+themeToggle?.setAttribute("aria-label", labelFor(effectiveTheme()));
+
+themeToggle?.addEventListener("click", () => {
+  const next = effectiveTheme() === "dark" ? "light" : "dark";
+  // Icons follow :root[data-theme] in CSS, so this updates the button too.
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("theme", next);
+  themeToggle.setAttribute("aria-label", labelFor(next));
   // Re-render mermaid diagrams for the new effective theme, if present.
   document.dispatchEvent(new CustomEvent("themechange"));
 });
-applyMode(currentMode());
 
 // --- Code copy buttons ---
 document.addEventListener("click", async (event) => {
