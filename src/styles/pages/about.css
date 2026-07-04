@@ -36,6 +36,12 @@
   color: var(--color-accent);
 }
 
+.about-photo--img {
+  object-fit: cover;
+  display: block;
+  box-shadow: var(--shadow-2);
+}
+
 .about-projects li + li {
   margin-top: var(--space-xs);
 }

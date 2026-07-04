@@ -1,14 +1,31 @@
-import { html, type RawHtml } from "./html";
-import { site } from "../config";
+import { existsSync } from "fs";
+import { join } from "path";
+import { html, raw, type RawHtml } from "./html";
+import { site, paths } from "../config";
 
 /**
- * About page. USER ACTION: replace the initials circle with a real photo
- * (drop it in src/static/images/ and swap the markup).
+ * Looks for a portrait at src/static/images/avatar.{jpg,jpeg,png,webp,avif}
+ * (copied to /images/ at build time). Drop a file there and it replaces the
+ * initials automatically — no code change needed.
  */
+function findAvatar(): string | null {
+  for (const ext of ["jpg", "jpeg", "png", "webp", "avif"]) {
+    if (existsSync(join(paths.staticDir, "images", `avatar.${ext}`))) {
+      return `/images/avatar.${ext}`;
+    }
+  }
+  return null;
+}
+
 export function renderAbout(): RawHtml {
+  const avatar = findAvatar();
+  const photo = avatar
+    ? html`<img class="about-photo about-photo--img" src="${avatar}" alt="${site.author}" width="88" height="88" decoding="async">`
+    : html`<div class="about-photo" aria-hidden="true"><span>AB</span></div>`;
+
   return html`<div class="about-page">
 <header class="about-header">
-<div class="about-photo" aria-hidden="true"><span>AB</span></div>
+${photo}
 <div>
 <h1>${site.author}</h1>
 <p class="about-tagline">Software &amp; systems engineer in Barcelona. I care about performance, privacy, and understanding systems all the way down.</p>
