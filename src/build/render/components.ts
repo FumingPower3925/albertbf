@@ -22,8 +22,14 @@ ${article.isArchived ? html`<span aria-hidden="true">·</span><span class="badge
 
 export function tagChips(tags: string[]): RawHtml {
   if (!tags.length) return html``;
+  // The sr-only prefix makes the link text descriptive ("Articles tagged go")
+  // — a bare one-word tag like "go" otherwise trips Lighthouse's
+  // non-descriptive-link-text audit — while the chip still shows just the tag.
   return html`<ul class="tag-list">
-${tags.map((tag) => html`<li><a class="tag" href="/articles/?tag=${encodeURIComponent(tag)}">${tag}</a></li>`)}
+${tags.map(
+    (tag) =>
+      html`<li><a class="tag" href="/articles/?tag=${encodeURIComponent(tag)}"><span class="sr-only">Articles tagged </span>${tag}</a></li>`,
+  )}
 </ul>`;
 }
 
