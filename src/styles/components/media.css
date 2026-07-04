@@ -1,0 +1,184 @@
+/* Figures, video, YouTube facade, lightbox, mermaid. */
+
+.media {
+  margin-block: var(--space-lg);
+}
+
+.media img,
+.media video {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: block;
+}
+
+.lightbox-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  border-radius: var(--radius-md);
+}
+
+.lightbox-trigger img[data-lightbox] {
+  cursor: zoom-in;
+}
+
+.media figcaption {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+  text-align: center;
+}
+
+.youtube-facade {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.youtube-facade img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  border: none;
+  border-radius: 0;
+}
+
+.youtube-play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #f03;
+  transition: transform var(--dur-1) var(--ease);
+}
+
+.youtube-facade:hover .youtube-play {
+  transform: scale(1.1);
+}
+
+.youtube-embed {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+.lightbox {
+  /* margin:auto restores centering that the global `* { margin: 0 }` reset
+     strips from the native <dialog>. */
+  margin: auto;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: transparent;
+  max-width: 92vw;
+  max-height: 92vh;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.lightbox img {
+  display: block;
+  max-width: 92vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Seamless fade + zoom on open (dialog + backdrop), reduced-motion aware. */
+@media (prefers-reduced-motion: no-preference) {
+  .lightbox {
+    opacity: 0;
+    transform: scale(0.94);
+    transition:
+      opacity var(--dur-2) var(--ease),
+      transform var(--dur-2) var(--ease),
+      overlay var(--dur-2) var(--ease) allow-discrete,
+      display var(--dur-2) var(--ease) allow-discrete;
+  }
+  .lightbox[open] {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .lightbox::backdrop {
+    opacity: 0;
+    transition:
+      opacity var(--dur-2) var(--ease),
+      overlay var(--dur-2) var(--ease) allow-discrete,
+      display var(--dur-2) var(--ease) allow-discrete;
+  }
+  .lightbox[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .lightbox[open] {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    .lightbox[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+.mermaid-diagram {
+  margin-block: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.mermaid-diagram pre.mermaid {
+  background: none;
+  border: none;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Let diagrams render at their natural size, filling the container when
+   they're wide (crisp — it's vector). !important overrides Mermaid's inline
+   max-width; width:auto avoids the flex-collapse that made them tiny. */
+.mermaid-diagram svg {
+  width: auto;
+  max-width: 100% !important;
+  height: auto;
+  margin-inline: auto;
+}

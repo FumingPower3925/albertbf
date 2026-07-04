@@ -5,25 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test-build:
-    name: Test Build and Parsing
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Run build to check for errors
-        run: bun run build
-
   build:
-    name: Build & Upload Artifact
-    needs: test-build
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,7 +16,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Build static site
         run: bun run build
@@ -43,6 +26,23 @@ jobs:
         with:
           name: dist
           path: ./dist
+
+  html-validate:
+    name: HTML Validation
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: ./dist
+
+      - name: Validate HTML
+        run: npx --yes html-validate "dist/**/*.html"
 
   lighthouse:
     name: Lighthouse Audit
@@ -58,14 +58,10 @@ jobs:
           name: dist
           path: ./dist
 
-      - name: Create Lighthouse config
-        run: |
-          echo '{ "ci": { "collect": { "staticDistDir": "./dist" } } }' > ./lighthouserc.json
-
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
-          configPath: './lighthouserc.json'
+          configPath: './.github/lighthouse/lighthouserc.json'
           uploadArtifacts: true
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,6 +86,15 @@ jobs:
       - name: Run Lychee Link Checker
         uses: lycheeverse/lychee-action@v2
         with:
-          args: "--base http://localhost:8080 --verbose --no-progress --max-retries 3 --retry-wait-time 5 './**/*.html'"
+          # Checks every internal link across all pages and articles (rewritten
+          # to the local server via --base), plus external links. Excludes:
+          #  - self-referential absolute albertbf.com URLs (canonical/OG/JSON-LD
+          #    and same-site links) and the repo's own blob/commits links (the
+          #    per-article "View source"/"History" colophon): these point at
+          #    content on main and resolve only after this branch merges;
+          #  - hosts that throttle or deny automated checkers and thus flake:
+          #    linkedin.com (HTTP 999), x.com, and upc.edu (times out on CI).
+          #    All are stable, human-verified links.
+          args: "--base http://localhost:8080 --verbose --no-progress --timeout 30 --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'github\\.com/FumingPower3925/albertbf/(blob|commits)' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' --exclude 'upc\\.edu' './**/*.html'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

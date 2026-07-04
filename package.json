@@ -1,22 +1,32 @@
 {
   "name": "albertbf-blog",
-  "version": "1.0.0",
-  "description": "My minimalist personal technical blog",
+  "version": "2.0.0",
+  "description": "Personal technical blog of Albert Bausili — framework-free, zero-cost, on Cloudflare Workers",
   "main": "src/index.ts",
   "scripts": {
-    "build": "bun run build.js",
-    "dev": "wrangler dev --env development",
+    "build": "bun run src/build/index.ts",
+    "build:drafts": "bun run src/build/index.ts --drafts",
+    "dev": "bun run build && wrangler dev",
     "deploy": "bun run build && wrangler deploy",
     "preview": "wrangler dev --local"
   },
   "dependencies": {
-    "highlight.js": "^11.11.1",
-    "hono": "^4.12.27",
-    "js-yaml": "^5.2.0",
-    "marked": "^18.0.5"
+    "@resvg/resvg-js": "^2.6.2",
+    "@shikijs/transformers": "^4.3.1",
+    "image-size": "^2.0.2",
+    "js-yaml": "^5.2.1",
+    "katex": "^0.17.0",
+    "marked": "^18.0.5",
+    "marked-footnote": "^1.4.0",
+    "shiki": "^4.3.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260630.1",
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@fontsource-variable/newsreader": "^5.2.10",
+    "mermaid": "^11.16.0",
+    "sql.js": "^1.14.1",
     "wrangler": "^4.106.0"
   },
   "engines": {

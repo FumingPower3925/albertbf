@@ -1,0 +1,5 @@
+/* Article page: view-transition name for the title (card → article morph). */
+
+.page-article .article-header h1 {
+  view-transition-name: article-title;
+}

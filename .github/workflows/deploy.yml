@@ -1,0 +1,83 @@
+name: Deploy
+
+# Push-to-main deploys are handled by the Cloudflare Workers Builds git
+# integration. This workflow only covers what that integration cannot:
+# the daily rebuild that publishes future-dated (scheduled) articles, plus
+# a manual trigger. Both are followed by a production health check.
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Worker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Fetch current search index
+        run: |
+          curl -sf https://albertbf.com/search-index.json -o /tmp/old-search-index.json || echo "[]" > /tmp/old-search-index.json
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Detect new articles
+        run: |
+          OLD=/tmp/old-search-index.json
+          NEW=dist/search-index.json
+          if [ ! -f "$NEW" ]; then
+            echo "No search index in build output."
+            exit 0
+          fi
+          NEW_ARTICLES=$(jq -r --slurpfile old "$OLD" '[.[] | select(.url as $u | ($old[0] // []) | map(.url) | index($u) | not)] | map(.title) | join(", ")' "$NEW")
+          if [ -n "$NEW_ARTICLES" ]; then
+            echo "New articles detected: $NEW_ARTICLES"
+          else
+            echo "No new articles detected."
+          fi
+
+  verify:
+    name: Verify Production
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check site availability
+        run: curl -s --fail https://albertbf.com/ > /dev/null
+
+      - name: Run Lighthouse audit on production
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://albertbf.com/
+            https://albertbf.com/articles/
+            https://albertbf.com/projects/
+            https://albertbf.com/about/
+          budgetPath: ./.github/lighthouse/budget.json
+          uploadArtifacts: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check response time
+        run: |
+          response_time=$(curl -o /dev/null -s -w '%{time_total}\n' https://albertbf.com/)
+          echo "Response time: ${response_time}s"
+          if (( $(echo "$response_time > 1.0" | bc -l) )); then
+            echo "Error: Response time is too slow."
+            exit 1
+          fi

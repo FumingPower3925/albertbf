@@ -1,0 +1,6 @@
+# Security contact for albertbf.com
+Contact: https://github.com/FumingPower3925/albertbf/security/advisories/new
+Contact: https://github.com/FumingPower3925
+Preferred-Languages: en, es, ca
+Canonical: https://albertbf.com/.well-known/security.txt
+Expires: 2027-12-31T23:59:59Z
