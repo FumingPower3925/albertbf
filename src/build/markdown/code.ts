@@ -42,7 +42,8 @@ export function parseFenceMeta(info: string): FenceMeta {
   const title = rest.match(/title="([^"]*)"/);
   if (title) meta.title = title[1];
 
-  const db = rest.match(/db=([\w./-]+)/);
+  // db=seed.sql | db=data/seed.sqlite | db=@shared | db=@shared:seed.sql
+  const db = rest.match(/db=(@shared(?::[\w./-]+)?|[\w./-]+)/);
   if (db) meta.db = db[1];
 
   const hl = rest.match(/hl=\{([\d,\s-]+)\}/);

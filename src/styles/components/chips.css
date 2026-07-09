@@ -53,3 +53,25 @@ a.tag:hover {
   flex-wrap: wrap;
   gap: var(--space-2xs);
 }
+
+/* /tags/ index: larger, comfortable click targets with counts */
+.tag-list--index {
+  gap: var(--space-xs);
+  margin-top: var(--space-lg);
+}
+
+.tag-list--index .tag {
+  font-size: var(--text-sm);
+  padding: 0.3em 0.9em;
+}
+
+.tag-count {
+  margin-left: 0.35em;
+  opacity: 0.6;
+}
+
+/* Tag landing page: the tag name in the H1 reads as the accent term */
+.tag-title {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+}

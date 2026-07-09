@@ -13,6 +13,7 @@ import { renderArticlesList } from "./render/articles-list";
 import { renderProjects } from "./render/projects";
 import { renderAbout } from "./render/about";
 import { renderNotFound } from "./render/notfound";
+import { collectTags, renderTagPage, renderTagsIndex } from "./render/tags";
 import { writeSearchIndex } from "./search";
 import { websiteJsonLd, personJsonLd, blogPostingJsonLd, breadcrumbJsonLd, articleCrumbs } from "./seo/jsonld";
 import { writeSitemap, writeRobots, writeLlmsTxt, writeFeeds, writeManifest } from "./seo/artifacts";
@@ -192,9 +193,58 @@ async function main() {
     ),
   );
 
+  // 5b. Tag pages (crawlable topic landing pages + index)
+  const tagGroups = collectTags(articles);
+  await mkdir(join(paths.dist, "tags"), { recursive: true });
+  await Bun.write(
+    join(paths.dist, "tags", "index.html"),
+    page(
+      {
+        title: "Tags",
+        description: `Browse articles by ${site.author} by topic.`,
+        path: "/tags/",
+        ogImage: DEFAULT_OG,
+        jsonLd: [breadcrumbJsonLd([{ name: "Tags", path: "/tags/" }])],
+        bodyClass: "page-tags",
+        activeNav: "articles",
+      },
+      renderTagsIndex(tagGroups),
+      manifest,
+      inlineCss,
+    ),
+  );
+  for (const group of tagGroups) {
+    const count = group.articles.length;
+    const outDir = join(paths.dist, "tags", group.slug);
+    await mkdir(outDir, { recursive: true });
+    await Bun.write(
+      join(outDir, "index.html"),
+      page(
+        {
+          title: `Tagged: ${group.label}`,
+          description: `${count} article${count === 1 ? "" : "s"} tagged “${group.label}” by ${site.author}.`,
+          path: `/tags/${group.slug}/`,
+          ogImage: DEFAULT_OG,
+          jsonLd: [
+            breadcrumbJsonLd([
+              { name: "Articles", path: "/articles/" },
+              { name: `Tagged: ${group.label}`, path: `/tags/${group.slug}/` },
+            ]),
+          ],
+          bodyClass: "page-tags",
+          activeNav: "articles",
+        },
+        renderTagPage(group),
+        manifest,
+        inlineCss,
+      ),
+    );
+  }
+
   // 6. SEO artifacts + search index
+  const tagPaths = ["/tags/", ...tagGroups.map((g) => `/tags/${g.slug}/`)];
   await Promise.all([
-    writeSitemap(articles),
+    writeSitemap(articles, tagPaths),
     writeRobots(),
     writeLlmsTxt(articles, seriesList),
     writeFeeds(articles),

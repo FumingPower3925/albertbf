@@ -17,13 +17,21 @@ console.warn = (...a) => __post("stderr", a);
 console.error = (...a) => __post("stderr", a);
 self.onerror = (e) => { __post("stderr", [String(e)]); };
 self.addEventListener("unhandledrejection", (e) => __post("stderr", ["Unhandled rejection: " + e.reason]));
+// Signal completion one macrotask after the user code settles, so pending
+// microtasks (resolved promises) and zero-delay timers flush their output first.
+const __finish = () => setTimeout(() => self.postMessage({ kind: "__done" }), 0);
 `;
+
+// The user source runs inside an async wrapper: top-level await works, and
+// awaited output is captured because __finish only runs once the body settles.
+const wrap = (source: string) =>
+  `Promise.resolve().then(async () => {\n${source}\n}).catch((e) => __post("stderr", [(e && e.stack) || String(e)])).finally(__finish);`;
 
 const TIMEOUT_MS = 5000;
 
 export const engine: Engine = {
   async *run(source: string): AsyncIterable<OutputEvent> {
-    const blob = new Blob([PRELUDE, "\n", source, `\n;self.postMessage({kind:"__done"});`], {
+    const blob = new Blob([PRELUDE, "\n", wrap(source)], {
       type: "application/javascript",
     });
     const url = URL.createObjectURL(blob);

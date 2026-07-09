@@ -20,15 +20,25 @@ ${article.isArchived ? html`<span aria-hidden="true">·</span><span class="badge
 </p>`;
 }
 
+/** URL-safe slug for a tag, e.g. "Go 1.22" -> "go-1-22". Shared by chips and page routing. */
+export function slugifyTag(tag: string): string {
+  return tag
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function tagChips(tags: string[]): RawHtml {
   if (!tags.length) return html``;
   // The sr-only prefix makes the link text descriptive ("Articles tagged go")
   // — a bare one-word tag like "go" otherwise trips Lighthouse's
   // non-descriptive-link-text audit — while the chip still shows just the tag.
+  // Chips point at the crawlable static tag page, not the JS-only ?tag= filter.
   return html`<ul class="tag-list">
 ${tags.map(
     (tag) =>
-      html`<li><a class="tag" href="/articles/?tag=${encodeURIComponent(tag)}"><span class="sr-only">Articles tagged </span>${tag}</a></li>`,
+      html`<li><a class="tag" href="/tags/${slugifyTag(tag)}/"><span class="sr-only">Articles tagged </span>${tag}</a></li>`,
   )}
 </ul>`;
 }
