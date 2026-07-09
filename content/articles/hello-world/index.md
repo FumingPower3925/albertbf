@@ -114,7 +114,7 @@ worker 2 finished
 worker 3 finished
 ```
 
-SQL runs entirely in your browser — a fresh in-memory SQLite database every time, courtesy of WebAssembly. No server involved:
+SQL runs entirely in your browser — a fresh in-memory SQLite database, courtesy of WebAssembly. No server involved:
 
 ```sql run title="languages.sql"
 CREATE TABLE langs (name TEXT, born INTEGER, systems BOOLEAN);
@@ -138,6 +138,84 @@ Rust  2010
 Zig   2016
 ```
 
+A block can also draw on data that ships beside the article. When a fence names a `.sql` file with `db=`, the engine runs that file before the block. This page carries one — `seed.sql`:
+
+```sql title="seed.sql"
+CREATE TABLE elements (number INTEGER, symbol TEXT, name TEXT);
+
+INSERT INTO elements (number, symbol, name) VALUES
+  (1, 'H',  'Hydrogen'),
+  (2, 'He', 'Helium'),
+  (3, 'Li', 'Lithium'),
+  (4, 'Be', 'Beryllium'),
+  (5, 'B',  'Boron');
+```
+
+So the query below opens onto a table that already exists:
+
+```sql run title="periodic.sql" db=seed.sql
+SELECT number, symbol, name
+FROM elements
+ORDER BY number;
+```
+
+```output
+-- loaded seed.sql
+
+number  symbol  name
+------  ------  ---------
+1       H       Hydrogen
+2       He      Helium
+3       Li      Lithium
+4       Be      Beryllium
+5       B       Boron
+```
+
+A script suits a handful of rows; a real dataset is better shipped as an actual SQLite file. `status.sqlite`, also next to this page, is one such file — a single `http_status(code, phrase)` table — and a fence pointed at it opens the database directly, no script step:
+
+```sql run title="http.sql" db=status.sqlite
+SELECT code, phrase
+FROM http_status
+WHERE code >= 500
+ORDER BY code;
+```
+
+```output
+-- opened status.sqlite
+
+code  phrase
+----  --------------------------
+500   Internal Server Error
+501   Not Implemented
+502   Bad Gateway
+503   Service Unavailable
+504   Gateway Timeout
+505   HTTP Version Not Supported
+```
+
+And with `db=@shared`, every SQL block on the page talks to one database, so a walkthrough can build it up in stages. This block fills a table:
+
+```sql run title="stash.sql" db=@shared
+CREATE TABLE stash (word TEXT);
+INSERT INTO stash VALUES ('mise'), ('en'), ('place');
+```
+
+```output
+3 row(s) modified
+```
+
+…and this one, further down the page, still sees what the last one left behind:
+
+```sql run title="recall.sql" db=@shared
+SELECT group_concat(word, ' ') AS assembled FROM stash;
+```
+
+```output
+assembled
+-------------
+mise en place
+```
+
 JavaScript runs in a sandboxed Web Worker with a five-second watchdog:
 
 ```js run title="fib.js"
@@ -146,6 +224,21 @@ const fib = (n) => n < 2 ? n : fib(n - 1) + fib(n - 2);
 for (let i = 10; i <= 14; i++) {
   console.log(`fib(${i}) = ${fib(i)}`);
 }
+```
+
+Top-level `await` works, and anything that resolves after it still lands in the output:
+
+```js run title="await.js"
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+console.log("working…");
+await wait(400);
+console.log("…and back, 400ms later");
+```
+
+```output
+working…
+…and back, 400ms later
 ```
 
 The static block under each runnable snippet is pre-recorded output — it is what you see if JavaScript is off or the playground is unreachable, and the live output replaces it when you hit Run.
@@ -181,6 +274,10 @@ Images become proper figures with lazy loading and a lightbox — click to zoom:
 YouTube embeds are click-to-load facades: nothing is fetched from Google until you press play.
 
 ::youtube{id=dQw4w9WgXcQ title="A historically significant video."}
+
+## Sharing and tags
+
+Every article carries a **Share** button beneath its title — it hands off to your device's share sheet where there is one, and copies the link everywhere else. Nothing is loaded from anyone else to make that work. The tags under the title are links as well: each opens a page collecting everything filed under it.
 
 ## Publishing mechanics
 
