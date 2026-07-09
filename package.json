@@ -16,18 +16,18 @@
     "image-size": "^2.0.2",
     "js-yaml": "^5.2.1",
     "katex": "^0.17.0",
-    "marked": "^18.0.5",
+    "marked": "^18.0.6",
     "marked-footnote": "^1.4.0",
     "shiki": "^4.3.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260630.1",
+    "@cloudflare/workers-types": "^5.20260708.1",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/newsreader": "^5.2.10",
     "mermaid": "^11.16.0",
     "sql.js": "^1.14.1",
-    "wrangler": "^4.106.0"
+    "wrangler": "^4.109.0"
   },
   "engines": {
     "bun": ">=1.0.0"
