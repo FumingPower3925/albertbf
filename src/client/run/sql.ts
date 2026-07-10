@@ -2,8 +2,14 @@ import type { Engine, OutputEvent } from "./index";
 
 /**
  * SQL engine: sql.js (SQLite compiled to WASM), fully client-side.
- * Each run gets a fresh in-memory database. Optional `db=seed.sql` fence
- * meta preloads a seed file colocated with the article.
+ *
+ * `db=` fence meta selects the database for a block:
+ *   (omitted)              fresh empty in-memory DB, discarded after the run.
+ *   db=seed.sql           fresh DB seeded from a colocated SQL text script.
+ *   db=data.sqlite        fresh DB opened from a colocated binary SQLite file.
+ *   db=@shared            one persistent DB reused across every block on the
+ *                         page — progressive tutorials build state block by block.
+ *   db=@shared:seed.sql   the shared DB, seeded once (text or binary) on first use.
  */
 
 declare global {
@@ -39,17 +45,66 @@ function textTable(columns: string[], values: unknown[][]): string {
   return [line(rows[0]), separator, ...rows.slice(1).map(line)].join("\n");
 }
 
+/** One persistent database per page, backing `db=@shared` tutorials. */
+let sharedDb: any = null;
+
+function parseDbMeta(db?: string): { shared: boolean; seed?: string } {
+  if (!db) return { shared: false };
+  const sharedMatch = db.match(/^@shared(?::(.+))?$/);
+  if (sharedMatch) return { shared: true, seed: sharedMatch[1] };
+  return { shared: false, seed: db };
+}
+
+/** A binary SQLite snapshot is opened directly; a .sql script is executed. */
+function isBinarySeed(file: string): boolean {
+  return /\.(sqlite3?|db)$/i.test(file);
+}
+
+/**
+ * Open a new database, optionally seeded. Text seeds run into a fresh DB;
+ * binary seeds ARE the database. Returns the DB plus a one-line system notice.
+ */
+async function openDb(
+  SQL: any,
+  seed: string | undefined,
+  baseUrl: string,
+): Promise<{ db: any; notice?: string }> {
+  if (!seed) return { db: new SQL.Database() };
+  const url = baseUrl.replace(/[^/]*$/, "") + seed.replace(/^\.\//, "");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Seed file not found: ${seed}`);
+  if (isBinarySeed(seed)) {
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    return { db: new SQL.Database(bytes), notice: `-- opened ${seed}\n\n` };
+  }
+  const db = new SQL.Database();
+  try {
+    db.run(await res.text());
+  } catch (err) {
+    db.close();
+    throw err;
+  }
+  return { db, notice: `-- loaded ${seed}\n\n` };
+}
+
 export const engine: Engine = {
   async *run(source: string, opts: { db?: string; baseUrl: string }): AsyncIterable<OutputEvent> {
     const SQL = await loadSqlJs();
-    const db = new SQL.Database();
+    const { shared, seed } = parseDbMeta(opts.db);
+    let db: any = null;
     try {
-      if (opts.db) {
-        const seedUrl = opts.baseUrl.replace(/[^/]*$/, "") + opts.db.replace(/^\.\//, "");
-        const res = await fetch(seedUrl);
-        if (!res.ok) throw new Error(`Seed file not found: ${opts.db}`);
-        db.run(await res.text());
-        yield { kind: "system", text: `-- loaded ${opts.db}\n\n` };
+      if (shared) {
+        if (!sharedDb) {
+          const opened = await openDb(SQL, seed, opts.baseUrl);
+          sharedDb = opened.db;
+          // Seeding notice only fires once, when the shared DB is first created.
+          if (opened.notice) yield { kind: "system", text: opened.notice };
+        }
+        db = sharedDb;
+      } else {
+        const opened = await openDb(SQL, seed, opts.baseUrl);
+        db = opened.db;
+        if (opened.notice) yield { kind: "system", text: opened.notice };
       }
 
       const results = db.exec(source);
@@ -68,7 +123,8 @@ export const engine: Engine = {
     } catch (err) {
       yield { kind: "stderr", text: err instanceof Error ? err.message : String(err) };
     } finally {
-      db.close();
+      // The shared DB persists for later blocks; per-run databases are closed.
+      if (!shared && db) db.close();
     }
   },
 };

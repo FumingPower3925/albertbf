@@ -3,6 +3,23 @@ import { site } from "../config";
 import type { Article } from "../content";
 import { formatDate, metaRow, tagChips } from "./components";
 
+const SHARE_ICON =
+  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>';
+
+/**
+ * Share control. Rendered hidden and revealed by main.js only where the browser
+ * supports Web Share or the async clipboard — a no-JS or unsupported browser
+ * never sees a dead button. Self-contained: no third-party share endpoints.
+ */
+function shareButton(article: Article): RawHtml {
+  const url = site.url + article.url;
+  return html`<div class="article-share">
+<button type="button" class="share-button" data-share-url="${url}" data-share-title="${article.fm.title}" hidden>
+${raw(SHARE_ICON)}<span>Share</span>
+</button>
+</div>`;
+}
+
 function colophon(article: Article): RawHtml {
   const src = `${site.repo}/blob/main/content/articles/${article.slug}/index.md`;
   const history = `${site.repo}/commits/main/content/articles/${article.slug}/index.md`;
@@ -82,6 +99,7 @@ ${article.isArchived ? html`<div class="archived-banner">This article has been a
 <p class="article-lead">${article.fm.description}</p>
 ${article.fm.links.length ? html`<p class="article-links">${article.fm.links.map((l) => html`<a href="${l.url}" rel="noopener" target="_blank">${l.label} ↗</a>`)}</p>` : null}
 ${article.fm.updated ? html`<p class="article-updated">Last updated <time datetime="${article.fm.updated.toISOString()}">${formatDate(article.fm.updated)}</time></p>` : null}
+${shareButton(article)}
 </header>
 <div class="prose">
 ${raw(article.html)}

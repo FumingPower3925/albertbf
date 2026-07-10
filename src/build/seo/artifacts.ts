@@ -18,13 +18,14 @@ interface Page {
   lastmod?: Date;
 }
 
-export async function writeSitemap(articles: Article[]): Promise<void> {
+export async function writeSitemap(articles: Article[], extraPaths: string[] = []): Promise<void> {
   const pages: Page[] = [
     { path: "/", lastmod: articles[0]?.fm.date },
     { path: "/articles/", lastmod: articles[0]?.fm.date },
     { path: "/projects/" },
     { path: "/about/" },
     ...articles.map((a) => ({ path: a.url, lastmod: a.fm.updated ?? a.fm.date })),
+    ...extraPaths.map((path) => ({ path })),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

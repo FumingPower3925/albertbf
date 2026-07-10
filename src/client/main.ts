@@ -55,6 +55,44 @@ document.addEventListener("click", async (event) => {
   }
 });
 
+// --- Share button (progressive: revealed only where the browser supports it) ---
+const canShare = typeof navigator.share === "function" || !!navigator.clipboard;
+if (canShare) {
+  for (const btn of document.querySelectorAll<HTMLButtonElement>(".share-button")) {
+    btn.hidden = false;
+  }
+}
+document.addEventListener("click", async (event) => {
+  const btn = (event.target as Element).closest?.(".share-button") as HTMLButtonElement | null;
+  if (!btn) return;
+  const url = btn.dataset.shareUrl || location.href;
+  const title = btn.dataset.shareTitle || document.title;
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share({ title, url });
+    } catch {
+      /* user dismissed the share sheet — nothing to do */
+    }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    announce("Link copied to clipboard");
+    const label = btn.querySelector("span");
+    if (label) {
+      const original = label.textContent;
+      label.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        label.textContent = original;
+        btn.classList.remove("copied");
+      }, 2000);
+    }
+  } catch {
+    announce("Copy failed");
+  }
+});
+
 // --- Scroll to top ---
 const scrollTop = document.getElementById("scroll-top");
 if (scrollTop) {
