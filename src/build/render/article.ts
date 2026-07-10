@@ -64,7 +64,7 @@ function articleListBlock(heading: string, articles: Article[]): RawHtml {
 <ul>
 ${articles.map(
     (other) =>
-      html`<li><a href="${other.url}">${other.fm.title}</a><span class="related-meta">${formatDate(other.fm.date)} · ${other.readTime} min read</span></li>`,
+      html`<li><span class="related-title"><a href="${other.url}">${other.fm.title}</a></span><span class="related-meta">${formatDate(other.fm.date)} · ${other.readTime} min read</span></li>`,
   )}
 </ul>
 </section>`;
