@@ -4,12 +4,13 @@ date: 2026-07-08
 description: "September 21, 2007: three engineers, one whiteboard, and a shared impatience with slow builds. How Go was designed — and why, two years later, it went public."
 tags: [go, go-history, language-design]
 series: go-version-by-version
+featured: true
 links:
   - { label: "Go at Google — Rob Pike (SPLASH 2012)", url: "https://go.dev/talks/2012/splash.article" }
   - { label: "The Go gopher, by Renée French", url: "https://go.dev/blog/gopher" }
 ---
 
-This series reviews every Go release in order. But a language doesn't begin at 1.0 — it begins on a whiteboard, and Go's whiteboard predates its first stable release by four and a half years. So before we account for a single version, two chapters on the Go that existed *before* Go 1: the design and the people (this one), and the wild, unstable years that followed (the next). The compatibility promise that the whole rest of this series is built on only makes sense once you've seen what it was a reaction to.
+A language doesn't begin at 1.0. It begins on a whiteboard — and Go's whiteboard predates its first stable release by four and a half years. Long before there was anything to version, there was a design, three people, and a specific set of frustrations they set out to engineer their way past. This is where Go actually starts.
 
 ## The whiteboard
 
@@ -125,9 +126,7 @@ The `=>` defines a function; the `:-` is a Prolog-style rule. You were never goi
 
 By the end of 2009 Go was public, fast, open source, and had a gopher. What it did *not* have was any promise that the program you wrote this week would still compile next week.
 
-Almost nothing was settled. The standard library was a sketch. Builtins would appear and vanish. Whole packages would be redesigned, renamed, and moved. The syntax itself was still moving. For the next two and a half years, using Go meant treating breakage as a routine cost of doing business — and that experience is precisely what made the Go 1 compatibility promise feel less like a feature and more like a rescue.
-
-That's the next chapter: **The Wild Years** — the r56-to-r60 era, the churn, `gofix`, and the people who bet production systems on a language that changed under them every week.
+Almost nothing was settled. The standard library was a sketch. Builtins would appear and vanish. Whole packages were redesigned, renamed, and moved. The syntax itself was still moving. For the next two and a half years, using Go meant treating breakage as a routine cost of doing business — and living through that is exactly what would make a promise of stability, once it finally arrived, feel less like a feature than a rescue.
 
 [^faq]: All conception and timeline facts here are quoted from the official [Go FAQ, "History"](https://go.dev/doc/faq#history): the September 21, 2007 whiteboard session, the January 2008 C-emitting compiler, the May 2008 `gccgo` front end, Russ Cox joining in late 2008, and the November 10, 2009 open-source release.
 [^splash]: Rob Pike, [*Go at Google: Language Design in the Service of Software Engineering*](https://go.dev/talks/2012/splash.article) (SPLASH 2012) — the source for the "origin myth," the build-time figures, and the software-engineering thesis.

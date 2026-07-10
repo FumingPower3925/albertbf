@@ -284,6 +284,6 @@ A few things you can't see on this page:
 - **Scheduled publishing** — an article dated in the future is skipped at build time; the daily rebuild publishes it when its day comes.
 - **Drafts** — `draft: true` keeps an article out of every build unless you pass `--drafts`.
 - **Archiving** — set `archived: 2027-01-01` and the article gains an archived banner on that date.
-- **Series** — add `series: <slug>` (declared in `series.yaml`) and an article joins that series with automatic prev/next navigation, as the *Go, Version by Version* posts do.
+- **Series** — add `series: <slug>` (declared in `series.yaml`) and an article joins that series, with automatic prev/next navigation between its entries.
 
 That's the tour. The [source](https://github.com/FumingPower3925/albertbf) is public — steal anything you like.
