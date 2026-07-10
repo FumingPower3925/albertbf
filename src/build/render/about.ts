@@ -47,9 +47,9 @@ ${photo}
 
 <h2>Projects</h2>
 <ul class="about-projects">
-<li><strong><a href="https://goceleris.dev/" rel="noopener" target="_blank">Celeris</a></strong> — a high-throughput, load-bearing Go HTTP engine on a dual <code>io_uring</code> / <code>epoll</code> architecture, with first-party event-loop database drivers. My Master's thesis, and the best thing I've built.</li>
+<li><strong><a href="https://goceleris.dev/" rel="noopener" target="_blank">Celeris</a></strong> — a high-throughput, load-bearing Go HTTP engine on a dual <code>io_uring</code> / <code>epoll</code> architecture, with first-party event-loop database drivers. My Master's thesis, and the best thing I've built yet.</li>
 <li><strong><a href="https://github.com/FumingPower3925/stdocs" rel="noopener" target="_blank">stdocs</a></strong> — a zero-dependency Go library that turns a standard-library <code>net/http.ServeMux</code> into a self-documenting API: the route patterns you already write become an OpenAPI 3.x spec and a <code>/docs</code> console, no code generation.</li>
-<li><strong><a href="https://github.com/FumingPower3925/htmx-dynamic-url" rel="noopener" target="_blank">htmx-dynamic-url</a></strong> — an HTMX extension that resolves <code>{placeholder}</code> variables in <code>hx-*</code> request URLs from your app's JavaScript state: declarative dynamic URLs, CSP-compliant, no per-request glue.</li>
+<li><strong><a href="https://github.com/FumingPower3925/htmx-dynamic-url" rel="noopener" target="_blank">htmx-dynamic-url</a></strong> — an official community HTMX extension that resolves <code>{placeholder}</code> variables in <code>hx-*</code> request URLs from your app's JavaScript state: declarative dynamic URLs, CSP-compliant, no per-request glue.</li>
 <li><strong><a href="${site.repo}" rel="noopener" target="_blank">This blog</a></strong> — a zero-cost, framework-free static site on Cloudflare Workers. Source is public.</li>
 </ul>
 
