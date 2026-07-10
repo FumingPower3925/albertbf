@@ -105,9 +105,21 @@ Then, on November 10, 2009, Go became a public open-source project.[^faq] The an
 
 ## The other Go
 
-Not everyone was delighted. The day after launch, a developer named Francis McCabe opened [issue #9](https://github.com/golang/go/issues/9) with a title that is hard to improve on: *"I have already used the name for MY programming language."* He had, in fact — a language also called Go, with published papers and a book, a decade in the making.[^issue9]
+Not everyone was delighted. The day after launch, a developer named Francis McCabe opened [issue #9](https://github.com/golang/go/issues/9) with a title that is hard to improve on: *"I have already used the name for MY programming language."* He had, in fact — an agent-oriented language called Go!, in the Prolog tradition, with academic papers to its name.[^issue9]
 
-The issue stayed open for eleven months and was closed in October 2010 with the status *"Unfortunate"* and a note that, in the time since launch, *"there has been minimal confusion of the two languages."* Which was true, and also exactly the answer you'd expect from the side that had Google behind it. On GitHub the thread survives, frozen due to age — a small monument to the one fight Go didn't design its way out of.
+It looked nothing like the language that took it. Algebraic types, functions, and logical relations shared a single object:[^goexcl]
+
+```go!
+Sex ::= male | female.
+
+person(Nm, Born, Sx, Hm)..{
+  age() => yearsBetween(now(), Born).
+  sex() => Sx.
+  lives(Pl) :- Pl = home().
+}.
+```
+
+The `=>` defines a function; the `:-` is a Prolog-style rule. You were never going to confuse *that* with a systems language — which is roughly what Google argued. The issue stayed open for eleven months and was closed in October 2010 with the status *"Unfortunate"* and a note that, since launch, *"there has been minimal confusion of the two languages."* True enough — and also exactly the answer you'd expect from the side that had Google behind it. On GitHub the thread survives, frozen due to age — a small monument to the one fight Go didn't design its way out of.
 
 ## What wasn't settled
 
@@ -121,3 +133,4 @@ That's the next chapter: **The Wild Years** — the r56-to-r60 era, the churn, `
 [^splash]: Rob Pike, [*Go at Google: Language Design in the Service of Software Engineering*](https://go.dev/talks/2012/splash.article) (SPLASH 2012) — the source for the "origin myth," the build-time figures, and the software-engineering thesis.
 [^gopher]: Renée French, [*The Go gopher*](https://go.dev/blog/gopher), on the mascot's origins and its lineage from the WFMU gopher and Plan 9's Glenda.
 [^issue9]: golang/go issue #9, *"I have already used the name for MY programming language"* — filed by Francis McCabe the day after launch and closed in October 2010.
+[^goexcl]: The Go! fragment is drawn from the [Go! programming language](https://en.wikipedia.org/wiki/Go!_%28programming_language%29) article; the language was introduced by Francis McCabe and Keith Clark around 2003.
