@@ -27,32 +27,23 @@
   transform: translateY(-2px);
 }
 
-/* Share control (article header) */
-.article-share {
-  margin-top: var(--space-md);
-}
-
+/* Share control — a peer of the colophon links (the article action row) */
 .share-button {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
-  font-size: var(--text-sm);
-  font-family: var(--font-mono);
-  padding: 0.3em 0.9em;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-subtle);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-strong);
+  gap: 0.4em;
+  font: inherit;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  transition:
-    color var(--dur-1) var(--ease),
-    border-color var(--dur-1) var(--ease);
+  transition: color var(--dur-1) var(--ease);
 }
 
 .share-button:hover,
 .share-button.copied {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--color-accent-strong);
 }
 
 .share-button svg {
