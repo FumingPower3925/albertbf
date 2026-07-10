@@ -4,6 +4,7 @@ date: 2026-07-10
 description: "March 28, 2012 — Go 1 froze the language and made a promise it has kept for fourteen years. The first release, reviewed with the benefit of hindsight."
 tags: [go, go-history, compatibility]
 series: go-version-by-version
+featured: true
 links:
   - { label: "Go 1 release notes", url: "https://go.dev/doc/go1" }
   - { label: "Go 1 and the Future of Go Programs", url: "https://go.dev/doc/go1compat" }

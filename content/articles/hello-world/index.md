@@ -3,7 +3,6 @@ title: "Hello, World — Everything This Blog Can Do"
 date: 2026-07-04
 description: "A grand tour of the rebuilt blog engine: typography, callouts, footnotes, math, diagrams, media, and code you can actually run — right here in the page."
 tags: [meta, go, sql, javascript]
-featured: true
 links:
   - { label: "Source on GitHub", url: "https://github.com/FumingPower3925/albertbf" }
 ---
