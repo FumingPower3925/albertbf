@@ -4,3 +4,5 @@ dist/
 .DS_Store
 # Lighthouse CI local output
 .lighthouseci/
+# Generated OG social-card cache — rebuilt deterministically at deploy time
+.cache/

@@ -57,21 +57,23 @@ function ogSvg(title: string, date: string, tags: string[]): string {
 }
 
 let resvgAvailable: boolean | undefined;
-let fontBuffer: Buffer | undefined;
 
 async function renderPng(svg: string): Promise<Uint8Array | null> {
   if (resvgAvailable === false) return null;
   try {
     const { Resvg } = await import("@resvg/resvg-js");
-    if (!fontBuffer) {
-      // Static-weight Inter for deterministic SVG text rendering (resvg does
-      // not handle variable fonts' weight axis).
-      const fontPath = join(paths.nodeModules, "@fontsource-variable", "inter", "files", "inter-latin-wght-normal.woff2");
-      fontBuffer = Buffer.from(await Bun.file(fontPath).arrayBuffer());
-    }
     const resvg = new Resvg(svg, {
       fitTo: { mode: "width", value: WIDTH },
-      font: { fontBuffers: [fontBuffer], defaultFontFamily: "Inter" },
+      // resvg-js 2.6.2 loads fonts from disk (fontFiles/fontDirs), NOT buffers —
+      // an earlier fontBuffers attempt was silently ignored and only rendered on
+      // hosts with a system "Inter". Load the bundled static weights and disable
+      // system fonts so text renders identically on any build host, including a
+      // headless Linux CI (Cloudflare Workers Builds / GitHub Actions).
+      font: {
+        fontDirs: [paths.fonts],
+        loadSystemFonts: false,
+        defaultFontFamily: "Inter",
+      },
     });
     resvgAvailable = true;
     return resvg.render().asPng();
@@ -91,7 +93,7 @@ export async function generateOgImage(article: Article): Promise<string> {
   }
 
   const date = article.fm.date.toISOString().slice(0, 10);
-  const key = Bun.hash(`${article.fm.title}|${date}|v1`).toString(16).slice(0, 8);
+  const key = Bun.hash(`${article.fm.title}|${date}|v2`).toString(16).slice(0, 8);
   const cachePath = join(paths.cache, "og", `${article.slug}-${key}.png`);
   // Content-hashed public name so editing a title busts the 1-year immutable
   // cache on /assets/og/ (the og:image meta is regenerated each build).

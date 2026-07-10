@@ -32,6 +32,9 @@ export const paths = {
   staticDir: join(ROOT, "src", "static"),
   nodeModules: join(ROOT, "node_modules"),
   cache: join(ROOT, ".cache"),
+  // Static Inter weights bundled for OG-image text rendering (resvg reads fonts
+  // from disk, not the browser's variable woff2).
+  fonts: join(ROOT, "src", "build", "fonts"),
 } as const;
 
 export const buildFlags = {
