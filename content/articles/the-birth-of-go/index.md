@@ -105,7 +105,7 @@ Then, on November 10, 2009, Go became a public open-source project.[^faq] The an
 
 ## The other Go
 
-Not everyone was delighted. The day after launch, a developer named Francis McCabe opened issue #9 with a title that is hard to improve on: *"I have already used the name for MY programming language."* He had, in fact — a language also called Go, with published papers and a book, a decade in the making.[^issue9]
+Not everyone was delighted. The day after launch, a developer named Francis McCabe opened [issue #9](https://github.com/golang/go/issues/9) with a title that is hard to improve on: *"I have already used the name for MY programming language."* He had, in fact — a language also called Go, with published papers and a book, a decade in the making.[^issue9]
 
 The issue stayed open for eleven months and was closed in October 2010 with the status *"Unfortunate"* and a note that, in the time since launch, *"there has been minimal confusion of the two languages."* Which was true, and also exactly the answer you'd expect from the side that had Google behind it. On GitHub the thread survives, frozen due to age — a small monument to the one fight Go didn't design its way out of.
 
