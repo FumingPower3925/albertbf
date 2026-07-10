@@ -1,12 +1,6 @@
 # Project / series metadata. Articles opt in with `series: <slug>` in frontmatter.
 # Each series needs a title and description; url is optional (external link).
 
-blog-engine:
-  title: Blog Engine
-  description: Building and evolving this zero-cost, framework-free blog on Cloudflare Workers.
-  url: https://albertbf.com
-  repo: https://github.com/FumingPower3925/albertbf
-
 go-version-by-version:
   title: Go, Version by Version
   description: Every Go release, reviewed in order with hindsight — what shipped, what mattered, and what it cost.

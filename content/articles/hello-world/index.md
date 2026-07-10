@@ -3,7 +3,6 @@ title: "Hello, World — Everything This Blog Can Do"
 date: 2026-07-04
 description: "A grand tour of the rebuilt blog engine: typography, callouts, footnotes, math, diagrams, media, and code you can actually run — right here in the page."
 tags: [meta, go, sql, javascript]
-series: blog-engine
 featured: true
 links:
   - { label: "Source on GitHub", url: "https://github.com/FumingPower3925/albertbf" }
@@ -286,6 +285,6 @@ A few things you can't see on this page:
 - **Scheduled publishing** — an article dated in the future is skipped at build time; the daily rebuild publishes it when its day comes.
 - **Drafts** — `draft: true` keeps an article out of every build unless you pass `--drafts`.
 - **Archiving** — set `archived: 2027-01-01` and the article gains an archived banner on that date.
-- **Series** — this article belongs to the *Blog Engine* series; the navigation below appears automatically.
+- **Series** — add `series: <slug>` (declared in `series.yaml`) and an article joins that series with automatic prev/next navigation, as the *Go, Version by Version* posts do.
 
 That's the tour. The [source](https://github.com/FumingPower3925/albertbf) is public — steal anything you like.
