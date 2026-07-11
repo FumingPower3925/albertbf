@@ -254,6 +254,13 @@
   gap: var(--space-xs);
 }
 
+/* Isolate the link in its own block so the muted meta below is never treated
+   as "surrounding text" — keeps the title link out of axe's link-in-text-block
+   rule (which flags links distinguished from adjacent text by colour alone). */
+.related-title {
+  display: block;
+}
+
 .related-meta {
   display: block;
   font-size: var(--text-xs);

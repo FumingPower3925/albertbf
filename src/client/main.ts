@@ -55,13 +55,7 @@ document.addEventListener("click", async (event) => {
   }
 });
 
-// --- Share button (progressive: revealed only where the browser supports it) ---
-const canShare = typeof navigator.share === "function" || !!navigator.clipboard;
-if (canShare) {
-  for (const btn of document.querySelectorAll<HTMLButtonElement>(".share-button")) {
-    btn.hidden = false;
-  }
-}
+// --- Share button (rendered up-front; Web Share with a clipboard fallback) ---
 document.addEventListener("click", async (event) => {
   const btn = (event.target as Element).closest?.(".share-button") as HTMLButtonElement | null;
   if (!btn) return;

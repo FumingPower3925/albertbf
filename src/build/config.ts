@@ -17,8 +17,10 @@ export const site = {
   x: "https://x.com/FumingPower",
   // Kept private by choice — no public email link.
   email: "",
-  // USER ACTION: Cloudflare Web Analytics token (Dashboard → Analytics → Web Analytics).
-  cfAnalyticsToken: "",
+  // Cloudflare Web Analytics token, injected from the CF_ANALYTICS_TOKEN build
+  // env var (set in Workers Builds → Settings → Variables). Kept out of the repo
+  // so public forks don't report to this site's analytics. Empty in local builds.
+  cfAnalyticsToken: process.env.CF_ANALYTICS_TOKEN ?? "",
 } as const;
 
 export const paths = {
@@ -32,6 +34,9 @@ export const paths = {
   staticDir: join(ROOT, "src", "static"),
   nodeModules: join(ROOT, "node_modules"),
   cache: join(ROOT, ".cache"),
+  // Static Inter weights bundled for OG-image text rendering (resvg reads fonts
+  // from disk, not the browser's variable woff2).
+  fonts: join(ROOT, "src", "build", "fonts"),
 } as const;
 
 export const buildFlags = {
