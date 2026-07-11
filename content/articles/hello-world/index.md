@@ -7,11 +7,11 @@ links:
   - { label: "Source on GitHub", url: "https://github.com/FumingPower3925/albertbf" }
 ---
 
-This site just went through a complete rebuild, and this article doubles as its living documentation: every feature the engine supports appears somewhere on this page. The [raw Markdown source](index.md) of this page is served alongside it, so it's also the reference for how each block is written.
+This site just went through a complete rebuild, and this article also documents it: every feature the engine supports appears somewhere on this page. The [raw Markdown source](index.md) of this page is served alongside it, so it's also the reference for how each block is written.
 
 ## Typography and prose
 
-Long-form text is set in Newsreader with a 70-character measure, the sweet spot for sustained reading. Inline styles work as expected: **bold**, *italic*, ~~strikethrough~~, `inline code`, and [links](https://developer.mozilla.org/). Keyboard keys render like <kbd>Ctrl</kbd>+<kbd>K</kbd>.
+Long-form text is set in Newsreader with a 70-character measure. Inline styles work as expected: **bold**, *italic*, ~~strikethrough~~, `inline code`, and [links](https://developer.mozilla.org/). Keyboard keys render like <kbd>Ctrl</kbd>+<kbd>K</kbd>.
 
 > Regular blockquotes still look like this. Good for quoting people who said smart things.
 
