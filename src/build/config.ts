@@ -39,8 +39,23 @@ export const paths = {
   fonts: join(ROOT, "src", "build", "fonts"),
 } as const;
 
+// A "preview" build is a Cloudflare Workers build on any branch other than the
+// production branch. Cloudflare sets WORKERS_CI=1 and WORKERS_CI_BRANCH on every
+// Workers build; the daily GitHub Actions cron and local builds set neither, so
+// they are never treated as preview and production output stays clean.
+const PRODUCTION_BRANCH = "main";
+const isPreviewDeploy =
+  process.env.WORKERS_CI === "1" &&
+  !!process.env.WORKERS_CI_BRANCH &&
+  process.env.WORKERS_CI_BRANCH !== PRODUCTION_BRANCH;
+
 export const buildFlags = {
   includeDrafts: process.argv.includes("--drafts"),
+  // Preview deploys build future-dated (scheduled) articles so they can be
+  // reviewed before their publish date. Production builds (main + the daily
+  // cron) keep them hidden until the date arrives. `--preview` forces it on for
+  // a local review build.
+  includeScheduled: isPreviewDeploy || process.argv.includes("--preview"),
 } as const;
 
 export const WORDS_PER_MINUTE = 200;
