@@ -6,6 +6,7 @@
   "scripts": {
     "build": "bun run src/build/index.ts",
     "build:drafts": "bun run src/build/index.ts --drafts",
+    "build:preview": "bun run src/build/index.ts --preview",
     "dev": "bun run build && wrangler dev",
     "deploy": "bun run build && wrangler deploy",
     "preview": "wrangler dev --local"
