@@ -29,7 +29,7 @@ The weekly track was tagged `weekly.YYYY-MM-DD`: near-weekly cuts of the tip of 
 
 The numbered track was tagged `release.rNN`. Each numbered release was a blessed pin of one specific weekly snapshot plus extra bug fixes. There were five in the entire run: r56 on 2011/03/16 (the first stable release, pinning `weekly.2011-03-07.1`), r57 on 2011/05/03, r58 on 2011/06/29, r59 on 2011/08/01, and r60 on 2011/09/07.[^pregoone] Five stable pins across roughly two and a half years.
 
-The numbering is the tell. The first stable release carried the number 56, not 1. The pre_go1 page explains it plainly: before this, what we now call weekly snapshots were themselves called releases, so r56 continued the running count.[^pregoone] That implies somewhere around 55 earlier releases going back to launch, though the page enumerates none of them, so treat the figure as an inference from the count rather than a list you can check.
+The numbering is the tell. The first stable release carried the number 56, not 1. The pre_go1 page explains it plainly: before this, what we now call weekly snapshots were themselves called releases, so r56 continued the running count.[^pregoone] That implies somewhere around 55 earlier releases going back to launch, though the page lists none of them.
 
 The last numbered release was r60.3. There was no r61. After r60 the project turned its full attention to Go 1, and about six more months of weekly-only churn separated that last pin from the freeze. Go 1 itself corresponds to `weekly.2012-03-27`, released 2012/03/28.[^pregoone] So the numbered track went quiet about six months before the churn actually stopped.
 
@@ -185,11 +185,11 @@ The parts that felt solid in 2011 are the parts spelled the same way now. The wi
 
 People shipped real Go while it was this liquid.
 
-On 21 April 2011, Heroku systems engineers Keith Rarick and Blake Mizerany wrote up Doozer, a consistent, highly-available data store they had built in Go, deep in the pre-1.0 window a month after r56.[^heroku] The post is worth reading for three concrete draws. They implemented Paxos processes as goroutines communicating over channels, and said they were amazed at how few lines it took. They stopped arguing about formatting because the buck stopped at the default output from gofmt. And Go's statically linked binaries meant Doozer was a single file with no external dependencies, copyable to any machine and launched to join a cluster.[^heroku] The post never claims Doozer ran inside Heroku's own production; it is an early pre-1.0 Go project by Heroku engineers, and that is all I will assert about it.
+On 21 April 2011, Heroku systems engineers Keith Rarick and Blake Mizerany wrote up Doozer, a consistent, highly-available data store they had built in Go, deep in the pre-1.0 window a month after r56.[^heroku] The post is worth reading for three concrete draws. They implemented Paxos processes as goroutines communicating over channels, and said they were amazed at how few lines it took. They stopped arguing about formatting because the buck stopped at the default output from gofmt. And Go's statically linked binaries meant Doozer was a single file with no external dependencies, copyable to any machine and launched to join a cluster.[^heroku]
 
 Google gave its own signal. On 10 May 2011, at Google I/O, Go became App Engine's first compiled runtime, marked experimental, while the language was still pre-1.0.[^appengine]
 
-SoundCloud adopted Go pre-1.0 in the r59 era, late 2011, and ran it in production; the Berlin Go users group formed around the same time. The sourced claim is that they picked it up early and ran it reliably, nothing stronger than that.
+SoundCloud adopted Go pre-1.0 in the r59 era, late 2011, and ran it in production; the Berlin Go users group formed around the same time.
 
 ## The freeze
 
