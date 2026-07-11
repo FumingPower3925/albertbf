@@ -10,11 +10,11 @@ links:
   - { label: "The Go gopher, by Renée French", url: "https://go.dev/blog/gopher" }
 ---
 
-A language doesn't begin at 1.0. It begins on a whiteboard. And Go's whiteboard predates its first stable release by four and a half years. Long before there was anything to version, there was a design, three people, and a specific set of frustrations they set out to engineer their way past. This is where Go actually starts.
+Go's whiteboard predates its first stable release by four and a half years. Long before there was anything to version, there was a design, three people, and a specific set of frustrations they set out to engineer their way past. This is where Go actually starts.
 
 ## The whiteboard
 
-On September 21, 2007, three engineers at Google started sketching the goals for a new language on a whiteboard.[^faq] That is not a colorful retelling. It's the first line of Go's official history, and the Go team has always dated the language to that afternoon rather than to any release.
+On September 21, 2007, three engineers at Google started sketching the goals for a new language on a whiteboard.[^faq] That's the first line of Go's official history. The Go team has always dated the language to that afternoon, not to any release.
 
 The three were Robert Griesemer, Rob Pike, and Ken Thompson. Whatever else you want to say about Go, it was not a language designed by people learning on the job.
 
@@ -31,11 +31,11 @@ Who sat at that whiteboard explains a great deal about the language that came of
 
 **Robert Griesemer** had worked on Google's V8 JavaScript engine, and before that on Java's HotSpot compiler and the Strongtalk system. He is the reason the language has a compiler team's sensibility about what is cheap and what is not.
 
-This is a story about three people who had already built the tools other people's languages were built on, sitting down to build one for themselves.
+All three had already built the tools other people's languages were built on. Now they were building one for themselves.
 
 ## What they were running from
 
-Go was, in Pike's framing, designed *"in the service of software engineering"*.[^splash] The point was never language theory for its own sake. It answered specific pain at Google's scale: codebases of tens of millions of lines, worked on by thousands of engineers, with build times that had *"stretched to many minutes, even hours."*[^splash]
+Go was, in Pike's framing, designed *"in the service of software engineering"*.[^splash] The goal was engineering, not language theory. It answered specific pain at Google's scale: codebases of tens of millions of lines, worked on by thousands of engineers, with build times that had *"stretched to many minutes, even hours."*[^splash]
 
 The stated goals were unglamorous and, in hindsight, exactly right:
 
@@ -48,7 +48,7 @@ There was a subtler motivation underneath all of that. The team had watched capa
 
 ## Where it came from
 
-Go did not spring from nowhere, and it's least original in exactly the places people assume it's most novel.
+Go's most novel-seeming parts are its least original ones.
 
 The syntax is C family. The declarations and package structure come from the Pascal / Modula / Oberon side of the family. And the concurrency (the goroutines and channels everyone associates with Go) descends from Tony Hoare's *Communicating Sequential Processes*, published in 1978, by way of the languages Pike spent two decades building.[^faq]
 
@@ -96,7 +96,7 @@ func main() {
 5
 ```
 
-That program is younger than the idea it demonstrates by about thirty years. This is a recurring theme in Go: the parts that feel modern are usually old, chosen deliberately, and the newness is in the restraint.
+That program is younger than the idea it demonstrates by about thirty years. Go does this repeatedly. The parts that feel modern are usually old, and chosen deliberately.
 
 ## Going public
 
@@ -108,7 +108,7 @@ Then, on November 10, 2009, Go became a public open-source project.[^faq] The an
 
 Not everyone was delighted. The day after launch, a developer named Francis McCabe opened [issue #9](https://github.com/golang/go/issues/9) with a title that is hard to improve on: *"I have already used the name for MY programming language."* He had, in fact. An agent-oriented language called Go!, in the Prolog tradition, with academic papers to its name.[^issue9]
 
-It looked nothing like the language that took it. Algebraic types, functions, and logical relations shared a single object:[^goexcl]
+The two had a name in common and almost nothing else. Algebraic types, functions, and logical relations shared a single object:[^goexcl]
 
 ```go!
 Sex ::= male | female.
@@ -120,13 +120,13 @@ person(Nm, Born, Sx, Hm)..{
 }.
 ```
 
-The `=>` defines a function; the `:-` is a Prolog-style rule. You were never going to confuse *that* with a systems language, which is roughly what Google argued. The issue stayed open for eleven months and was closed in October 2010 with the status *"Unfortunate"* and a note that, since launch, *"there has been minimal confusion of the two languages."* True enough, and also exactly the answer you'd expect from the side that had Google behind it. On GitHub the thread survives, frozen due to age, a small monument to the one fight Go didn't design its way out of.
+The `=>` defines a function; the `:-` is a Prolog-style rule. You were never going to confuse *that* with a systems language, which is roughly what Google argued. The issue stayed open for eleven months and was closed in October 2010 with the status *"Unfortunate"* and a note that, since launch, *"there has been minimal confusion of the two languages."* True enough, and also exactly the answer you'd expect from the side that had Google behind it. On GitHub the thread survives, frozen due to age.
 
 ## What wasn't settled
 
-By the end of 2009 Go was public, fast, open source, and had a gopher. What it did *not* have was any promise that the program you wrote this week would still compile next week.
+By the end of 2009 Go was public, fast, open source, and had a gopher. It had no promise that the program you wrote this week would still compile next week.
 
-Almost nothing was settled. The standard library was a sketch. Builtins would appear and vanish. Whole packages were redesigned, renamed, and moved. The syntax itself was still moving. For the next two and a half years, using Go meant treating breakage as a routine cost of doing business. Living through that is exactly what would make a promise of stability, once it finally arrived, feel less like a feature than a rescue.
+Almost nothing was settled. The standard library was a sketch. Builtins would appear and vanish. Whole packages were redesigned, renamed, and moved. The syntax itself was still moving. For the next two and a half years, using Go meant treating breakage as a routine cost of doing business. That is why the promise of stability, once it finally arrived, felt like a rescue.
 
 [^faq]: All conception and timeline facts here are quoted from the official [Go FAQ, "History"](https://go.dev/doc/faq#history): the September 21, 2007 whiteboard session, the January 2008 C-emitting compiler, the May 2008 `gccgo` front end, Russ Cox joining in late 2008, and the November 10, 2009 open-source release.
 [^splash]: Rob Pike, [*Go at Google: Language Design in the Service of Software Engineering*](https://go.dev/talks/2012/splash.article) (SPLASH 2012), the source for the "origin myth," the build-time figures, and the software-engineering thesis.

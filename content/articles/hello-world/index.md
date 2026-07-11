@@ -149,7 +149,7 @@ INSERT INTO elements (number, symbol, name) VALUES
   (5, 'B',  'Boron');
 ```
 
-So the query below opens onto a table that already exists:
+So the query below runs against a table that already exists:
 
 ```sql run title="periodic.sql" db=seed.sql
 SELECT number, symbol, name
@@ -169,7 +169,7 @@ number  symbol  name
 5       B       Boron
 ```
 
-A script suits a handful of rows; a real dataset is better shipped as an actual SQLite file. `status.sqlite`, also next to this page, is one such file. It holds a single `http_status(code, phrase)` table, and a fence pointed at it opens the database directly, no script step:
+A script works for a handful of rows. For anything bigger, ship a SQLite file instead. `status.sqlite`, also next to this page, is one such file. It holds a single `http_status(code, phrase)` table, and a fence pointed at it opens the database directly, no script step:
 
 ```sql run title="http.sql" db=status.sqlite
 SELECT code, phrase
