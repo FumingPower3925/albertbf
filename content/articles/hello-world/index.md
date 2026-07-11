@@ -1,7 +1,7 @@
 ---
-title: "Hello, World — Everything This Blog Can Do"
+title: "Hello, World: Everything This Blog Can Do"
 date: 2026-07-04
-description: "A grand tour of the rebuilt blog engine: typography, callouts, footnotes, math, diagrams, media, and code you can actually run — right here in the page."
+description: "A tour of the rebuilt blog engine: typography, callouts, footnotes, math, diagrams, media, and code you can run, right here in the page."
 tags: [meta, go, sql, javascript]
 links:
   - { label: "Source on GitHub", url: "https://github.com/FumingPower3925/albertbf" }
@@ -11,11 +11,11 @@ This site just went through a complete rebuild, and this article doubles as its 
 
 ## Typography and prose
 
-Long-form text is set in Newsreader with a 70-character measure — the sweet spot for sustained reading. Inline styles work as expected: **bold**, *italic*, ~~strikethrough~~, `inline code`, and [links](https://developer.mozilla.org/). Keyboard keys render like <kbd>Ctrl</kbd>+<kbd>K</kbd>.
+Long-form text is set in Newsreader with a 70-character measure, the sweet spot for sustained reading. Inline styles work as expected: **bold**, *italic*, ~~strikethrough~~, `inline code`, and [links](https://developer.mozilla.org/). Keyboard keys render like <kbd>Ctrl</kbd>+<kbd>K</kbd>.
 
 > Regular blockquotes still look like this. Good for quoting people who said smart things.
 
-Lists, of course:
+Lists work too:
 
 1. Ordered lists for sequences
 2. With proper spacing
@@ -26,19 +26,19 @@ Lists, of course:
 |---|---|---|
 | Syntax highlighting | Shiki | none |
 | Math | KaTeX | none |
-| Diagrams | — | Mermaid (lazy) |
-| Running code | — | on demand |
+| Diagrams | none | Mermaid (lazy) |
+| Running code | none | on demand |
 
 ## Callouts
 
 > [!NOTE]
-> Five callout types are supported, using GitHub's blockquote syntax — so they degrade gracefully anywhere else markdown is rendered.
+> Five callout types are supported, using GitHub's blockquote syntax. They degrade gracefully anywhere else markdown is rendered.
 
 > [!TIP]
 > Use `hl={3-5}` on a code fence to highlight lines three through five.
 
 > [!IMPORTANT]
-> Runnable blocks need complete programs — a Go snippet must be a full `package main`.
+> Runnable blocks need complete programs: a Go snippet must be a full `package main`.
 
 > [!WARNING]
 > The Go snippets on this page execute on the public Go Playground via a proxy. Don't paste secrets into things you run.
@@ -80,7 +80,7 @@ Diffs work with the `diff` language:
 
 ## Runnable code
 
-This is the fun part. Blocks marked `run` get a **Run** button. Go programs execute on the official Go Playground (proxied through this site's Worker), and the playground's event timing is preserved — watch the goroutines interleave:
+This is the fun part. Blocks marked `run` get a **Run** button. Go programs execute on the official Go Playground (proxied through this site's Worker), and the playground's event timing is preserved. Watch the goroutines interleave:
 
 ```go run title="goroutines.go"
 package main
@@ -112,7 +112,7 @@ worker 2 finished
 worker 3 finished
 ```
 
-SQL runs entirely in your browser — a fresh in-memory SQLite database, courtesy of WebAssembly. No server involved:
+SQL runs entirely in your browser, on a fresh in-memory SQLite database, courtesy of WebAssembly. No server involved:
 
 ```sql run title="languages.sql"
 CREATE TABLE langs (name TEXT, born INTEGER, systems BOOLEAN);
@@ -136,7 +136,7 @@ Rust  2010
 Zig   2016
 ```
 
-A block can also draw on data that ships beside the article. When a fence names a `.sql` file with `db=`, the engine runs that file before the block. This page carries one — `seed.sql`:
+A block can also draw on data that ships beside the article. When a fence names a `.sql` file with `db=`, the engine runs that file before the block. This page carries one, `seed.sql`:
 
 ```sql title="seed.sql"
 CREATE TABLE elements (number INTEGER, symbol TEXT, name TEXT);
@@ -169,7 +169,7 @@ number  symbol  name
 5       B       Boron
 ```
 
-A script suits a handful of rows; a real dataset is better shipped as an actual SQLite file. `status.sqlite`, also next to this page, is one such file — a single `http_status(code, phrase)` table — and a fence pointed at it opens the database directly, no script step:
+A script suits a handful of rows; a real dataset is better shipped as an actual SQLite file. `status.sqlite`, also next to this page, is one such file. It holds a single `http_status(code, phrase)` table, and a fence pointed at it opens the database directly, no script step:
 
 ```sql run title="http.sql" db=status.sqlite
 SELECT code, phrase
@@ -239,7 +239,7 @@ working…
 …and back, 400ms later
 ```
 
-The static block under each runnable snippet is pre-recorded output — it is what you see if JavaScript is off or the playground is unreachable, and the live output replaces it when you hit Run.
+The static block under each runnable snippet is pre-recorded output. It is what you see if JavaScript is off or the playground is unreachable, and the live output replaces it when you hit Run.
 
 ## Math
 
@@ -249,7 +249,7 @@ $$
 \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
 $$
 
-All rendered at build time — your browser downloads no math JavaScript.
+All rendered at build time. Your browser downloads no math JavaScript.
 
 ## Diagrams
 
@@ -265,9 +265,9 @@ flowchart LR
 
 ## Media
 
-Images become proper figures with lazy loading and a lightbox — click to zoom:
+Images become proper figures with lazy loading and a lightbox. Click to zoom:
 
-![The blog engine's mascot: a terminal cursor, at rest.](./cursor.png "A blinking terminal cursor on a dark background — the unofficial mascot of this blog.")
+![The blog engine's mascot: a terminal cursor, at rest.](./cursor.png "A blinking terminal cursor on a dark background, the unofficial mascot of this blog.")
 
 YouTube embeds are click-to-load facades: nothing is fetched from Google until you press play.
 
@@ -275,15 +275,10 @@ YouTube embeds are click-to-load facades: nothing is fetched from Google until y
 
 ## Sharing and tags
 
-Every article carries a **Share** button beneath its title — it hands off to your device's share sheet where there is one, and copies the link everywhere else. Nothing is loaded from anyone else to make that work. The tags under the title are links as well: each opens a page collecting everything filed under it.
+Every article carries a **Share** button beneath its title. It hands off to your device's share sheet where there is one, and copies the link everywhere else. Nothing is loaded from anyone else to make that work. The tags under the title are links as well: each opens a page collecting everything filed under it.
 
 ## Publishing mechanics
 
-A few things you can't see on this page:
+A few things you can't see on this page. An article dated in the future is skipped at build time, and the daily rebuild publishes it when its day comes. A file with `draft: true` stays out of every build unless you pass `--drafts`. Set `archived: 2027-01-01` and the article gains an archived banner on that date. Add `series: <slug>`, declared in `series.yaml`, and the article joins that series, with automatic prev/next navigation between its entries.
 
-- **Scheduled publishing** — an article dated in the future is skipped at build time; the daily rebuild publishes it when its day comes.
-- **Drafts** — `draft: true` keeps an article out of every build unless you pass `--drafts`.
-- **Archiving** — set `archived: 2027-01-01` and the article gains an archived banner on that date.
-- **Series** — add `series: <slug>` (declared in `series.yaml`) and an article joins that series, with automatic prev/next navigation between its entries.
-
-That's the tour. The [source](https://github.com/FumingPower3925/albertbf) is public — steal anything you like.
+That's the tour. The [source](https://github.com/FumingPower3925/albertbf) is public. Steal anything you like.
