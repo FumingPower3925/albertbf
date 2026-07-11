@@ -34,21 +34,9 @@ The numbering is the tell. The first stable release carried the number 56, not 1
 The last numbered release was r60.3. There was no r61. After r60 the project turned its full attention to Go 1, and about six more months of weekly-only churn separated that last pin from the freeze. Go 1 itself corresponds to `weekly.2012-03-27`, released 2012/03/28.[^pregoone] So the numbered track went quiet about six months before the churn actually stopped.
 
 ```mermaid
-flowchart TB
-    subgraph WEEKLY["weekly track: near-weekly tip-of-tree cuts, broke constantly"]
-        direction LR
-        L["2009-11-10<br/>launch"] --> A["weekly<br/>2011-03-07"] --> B["weekly<br/>2011-04-27"] --> C["weekly<br/>2011-06-09"] --> D["weekly<br/>2011-07-07"] --> E["weekly<br/>2011-08-17"] --> F["...6 more months,<br/>weekly only..."] --> G["weekly<br/>2012-03-27"]
-    end
-    subgraph NUMBERED["numbered track: five blessed pins in the whole run"]
-        direction LR
-        R56["r56<br/>2011-03-16"] --> R57["r57<br/>2011-05-03"] --> R58["r58<br/>2011-06-29"] --> R59["r59<br/>2011-08-01"] --> R60["r60<br/>2011-09-07"]
-    end
-    A -. pins .-> R56
-    B -. pins .-> R57
-    C -. pins .-> R58
-    D -. pins .-> R59
-    E -. pins .-> R60
-    G --> GO1["Go 1<br/>2012-03-28"]
+flowchart LR
+    r56["r56<br/>Mar 2011<br/>first stable"] --> r57["r57<br/>May 2011"] --> r58["r58<br/>Jun 2011"] --> r59["r59<br/>Aug 2011"] --> r60["r60<br/>Sep 2011"]
+    r60 -. "6 months, weekly only" .-> go1["Go 1<br/>Mar 2012<br/>the freeze"]
 ```
 
 A numbered release only changed the shape of the breakage: it arrived in batches instead of continuously. And third-party libraries lagged the snapshots, so one dependency built against last month's tip could block your upgrade entirely.
