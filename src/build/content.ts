@@ -233,9 +233,12 @@ export async function loadContent(): Promise<Content> {
       console.log(`Skipped (draft): ${fm.title}`);
       continue;
     }
-    if (isScheduled) {
+    if (isScheduled && !buildFlags.includeScheduled) {
       console.log(`Skipped (scheduled for ${fm.date.toISOString().slice(0, 10)}): ${fm.title}`);
       continue;
+    }
+    if (isScheduled) {
+      console.log(`Included (scheduled for ${fm.date.toISOString().slice(0, 10)}, preview build): ${fm.title}`);
     }
 
     const assets = (await readdir(dir)).filter((f) => f !== "index.md" && !f.startsWith("."));
