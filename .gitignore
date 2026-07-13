@@ -6,3 +6,5 @@ dist/
 .lighthouseci/
 # Generated OG social-card cache — rebuilt deterministically at deploy time
 .cache/
+# Claude Code local tooling config/state (dev-server launch, task locks)
+.claude/
