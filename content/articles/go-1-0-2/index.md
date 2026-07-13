@@ -174,7 +174,52 @@ For #3695, Jan Ziak replaced the cancelling XOR with a fold that cannot cancel. 
 +	*h = (*h ^ hash) * M1;
 ```
 
-The multiply is what breaks the symmetry. Fold a field, multiply. Fold the second, equal field, and it mixes against an accumulator the first field has already moved, so the two contributions are no longer equal and there is nothing left to cancel. The same one-line idea went into every combiner in the file, for interfaces and floats as much as for plain memory.
+The multiply is what breaks the symmetry. Fold a field, multiply. Fold the second, equal field, and it mixes against an accumulator the first field has already moved, so the two contributions are no longer equal and there is nothing left to cancel. Put both folds side by side, on two different keys that each hold two equal halves:
+
+```go run title="fold.go"
+package main
+
+import "fmt"
+
+// M1 is the odd constant Go 1.0.2 introduced for the mix.
+const (
+	seed = 0x9e3779b9
+	M1   = 23344194077549503
+)
+
+// xorFold is Go 1.0: combine each field into the accumulator with XOR.
+func xorFold(fields ...uint64) uint64 {
+	h := uint64(seed)
+	for _, f := range fields {
+		h ^= f
+	}
+	return h
+}
+
+// mixFold is Go 1.0.2: multiply the accumulator by an odd constant each fold.
+func mixFold(fields ...uint64) uint64 {
+	h := uint64(seed)
+	for _, f := range fields {
+		h = (h ^ f) * M1
+	}
+	return h
+}
+
+func main() {
+	// Two different keys, each holding two equal halves: {p, p} and {q, q}.
+	for _, k := range []uint64{0x1111, 0x2222} {
+		fmt.Printf("{%#06x, %#06x}  xor=%#018x  mix=%#018x\n",
+			k, k, xorFold(k, k), mixFold(k, k))
+	}
+}
+```
+
+```output
+{0x001111, 0x001111}  xor=0x00000000009e3779b9  mix=0x00d4e30c007a245577
+{0x002222, 0x002222}  xor=0x00000000009e3779b9  mix=0x00f6bb5859c73f6eb9
+```
+
+Under the XOR fold, both keys collapse onto the same seed, the collision that filled one bucket and killed the map. Under the multiply, they stay apart. The same one-line idea went into every combiner in the file, for interfaces and floats as much as for plain memory.
 
 For #3573, Russ Cox taught the map to hold big keys by reference. Change 6215078, "runtime: handle and test large map values," added an indirection flag so a key or value too large for the inline entry is stored as a pointer to a heap copy, and made the byte-wide size ceiling an explicit constant.[^cl3573] A four-hundred-byte key now costs one pointer in the table, and the offset arithmetic stays inside a byte where it belongs.
 
@@ -185,8 +230,6 @@ A third fix rode along in the same window, a compiler crash on any struct that h
 Go 1.0.2 was 118 commits on the release branch.[^release] Most were the usual point-release freight, documentation and small library fixes. A few were real: a superpolynomial blowup fixed in `math/big`'s Karatsuba multiplication, a panic in `crypto/x509` when a certificate named an unavailable hash function, a deadlock in `time.Sleep(0)`.[^minor] The two map bugs are why the release was cut.
 
 They are an odd pair to headline a release, because neither is exotic. Both are keys you would write without a second thought, and on the compiler that had shipped eleven weeks earlier both of them crashed. The map is the one container nearly every Go program leans on, and in Go 1.0 its hash could be zeroed out by a symmetric key or overrun by a big one.
-
-Neither failure survives on a toolchain you can install today. The only way to watch a struct of two equal fields throw `hashmap assert` is to rebuild the 2012 runtime, which is what threw the one above.
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 13 June 2012 date and the verbatim description of go1.0.2 as a fix for two bugs in maps using struct or array keys (issue 3695 and issue 3573), plus minor code and documentation fixes. There are 118 commits between the go1.0.1 and go1.0.2 tags.
 [^issue]: [golang/go issue #3695](https://github.com/golang/go/issues/3695), "runtime: computed hash value for struct map key ignores some fields," reported by Dan Kortschak (kortschak) on 2 June 2012; the source for the reproduction program and the note that single-field keys behave normally.
