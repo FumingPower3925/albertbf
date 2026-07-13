@@ -11,7 +11,7 @@ links:
 
 Go 1.0.2 shipped on 13 June 2012, seven weeks after 1.0.1. It was the second point release, and like the first it went out for one part of the language: the map. Two bugs, both in how the runtime handled maps whose keys are structs or arrays, both able to crash a running program.[^release]
 
-A map is the container a Go programmer reaches for without thinking, and both of these bugs sat under that reflex. One turned an ordinary struct key into a hash that ignored its own contents. The other let a large enough key corrupt memory during garbage collection. Neither needed unsafe code, cgo, or a data race. Both needed only a map and a key of the wrong shape.
+A map is the container a Go programmer reaches for without thinking, and both of these bugs sat under that reflex. One turned an ordinary struct key into a hash that ignored its own contents. The other let a large enough key corrupt memory during garbage collection. Neither needed unsafe code or a data race. Both needed only a map and a key of the wrong shape.
 
 ## A struct that hashed to nothing
 
@@ -57,7 +57,7 @@ main.main()
 	/pair.go:15 +0xde
 ```
 
-It does not finish. The map accepts keys for a while, then the runtime throws `hashmap assert` and dies on the line that inserts. Kortschak's version printed each index as it went; it climbed to 81 and threw on the next insert. Change the string inside the key and the failure changes with it. The report lists a nil pointer dereference, an "unexpected fault address," and an infinite loop pinning a core at 100%, each tied to a particular value.[^variations] One struct key, four ways to die.
+It does not finish. The map accepts keys for a while, then the runtime throws `hashmap assert` and dies on the line that inserts. Kortschak's version printed each index as it went; it climbed to 81 and threw on the next insert. Change the string inside the key and the failure changes with it. The report lists a nil pointer dereference, an "unexpected fault address," and an infinite loop pinning a core at 100%, each tied to a particular value.[^variations] The same struct key crashed four different ways.
 
 ## Why two equal fields cancelled
 
@@ -103,13 +103,13 @@ field hash 3735928559 -> pair{x,x} hash 0x9e3779b9
 field hash 999999     -> pair{x,x} hash 0x9e3779b9
 ```
 
-Whatever the fields hash to, `pair{x, x}` hashes to the seed. Every key in Kortschak's loop had two equal halves, so all five hundred distinct keys produced the same hash value. The hash did not skip a field by an off-by-one or a padding mistake. For this shape of key it dropped every field, by arithmetic.
+Whatever the fields hash to, `pair{x, x}` hashes to the seed. Every key in Kortschak's loop had two equal halves, so all five hundred distinct keys produced the same hash value. For a key with two equal halves, the arithmetic zeroed out every field's contribution and left the seed.
 
 That is why a single-field key was safe, and why a key with two different fields was safe too. Give the two halves different values and there is nothing to cancel. I ran that variant on Go 1.0 as well, `pair{a, b}` with `a` and `b` distinct, and it stores all five hundred keys and finishes clean. The bug needed symmetry.
 
 ## Why the map crashed instead of slowing down
 
-A pile of keys that all hash the same is normally just slow. The map puts them in one bucket and walks the bucket on every lookup. It should not throw an assertion. The reason it did is worth the detour, because it says something about the map Go shipped in 2012.
+A pile of keys that all hash the same is normally just slow. The map puts them in one bucket and walks the bucket on every lookup. It should not throw an assertion. Why it threw one comes down to how Go 1.0's map was built.
 
 The keys were genuinely distinct, so the equality check never matched, and the map kept all of them as separate entries. But they all carried the same hash, so they all wanted the same bucket. Go 1.0's map was an extendible hash table: when one bucket filled past its probe window, the table split it, looking at another bit of the hash and sending some entries each way. That split is the escape valve for a hot bucket, and it works only if the colliding keys differ somewhere in their bits. These did not. They were equal in every bit, so each split sent all of them to the same side, the bucket refilled at once, and the table split again with nothing gained. Once the entries stacked past the fixed window the bookkeeping walks, the probe arithmetic ran off the end of the subtable and the runtime threw its internal assertion. A different key string put the overrun on a live pointer, which is the fault, or left the never-progressing split running forever, which is the spin.
 
@@ -117,7 +117,7 @@ The hash and the equality check never disagreed. Equality was correct on every c
 
 ## The other bug: a key too big to fit
 
-Issue #3573, reported by Rémy Oudompheng on 28 April 2012, was the other map crash, and it came from the opposite direction. Not the key's shape, its size.
+Issue #3573, reported by Rémy Oudompheng on 28 April 2012, was the other map crash, and its trigger was size rather than shape.
 
 ```go run title="big.go"
 package main
@@ -161,7 +161,7 @@ main.main()
 
 The size is the bug. Go 1.0's map stored each key and value inline in its entries and tracked their sizes and offsets in single bytes. Ian Lance Taylor named it on the issue: "the hashmap code uses a uint8 to store the size of a data element," so it "fails if the total of the key size plus the data size, with appropriate rounding, is >= 256."[^ilt] Four hundred bytes is past 255. The byte-wide size wrapped, the offset that locates the value inside the entry came out wrong, and when the map grew and the garbage collector walked its entries it followed a bad pointer and faulted. There was no path in the code to hold a key that large by reference. It simply did not fit the bookkeeping.
 
-The two issues share a thread. Kortschak first hit the struct-key failure in a comment on #3573, and after the large-key fix landed Russ Cox split the struct case out into its own report, #3695.[^thread] Same subsystem, overlapping crash signatures, two unrelated causes.
+The two issues share a thread. Kortschak first hit the struct-key failure in a comment on #3573, and once the large-key fix landed the struct case became its own report, #3695.[^thread] They sat in the same subsystem and threw similar crashes, but their causes were unrelated.
 
 ## The fix
 
@@ -178,13 +178,13 @@ The multiply is what breaks the symmetry. Fold a field, multiply. Fold the secon
 
 For #3573, Russ Cox taught the map to hold big keys by reference. Change 6215078, "runtime: handle and test large map values," added an indirection flag so a key or value too large for the inline entry is stored as a pointer to a heap copy, and made the byte-wide size ceiling an explicit constant.[^cl3573] A four-hundred-byte key now costs one pointer in the table, and the offset arithmetic stays inside a byte where it belongs.
 
-A third fix rode along in the same window, a compiler crash on any struct that had a blank `_` field, from the same family of type-algorithm code.[^blank] The map machinery was getting a hard look that month.
+A third fix rode along in the same window, a compiler crash on any struct that had a blank `_` field, from the same family of type-algorithm code.[^blank]
 
 ## The second point release
 
 Go 1.0.2 was 118 commits on the release branch.[^release] Most were the usual point-release freight, documentation and small library fixes. A few were real: a superpolynomial blowup fixed in `math/big`'s Karatsuba multiplication, a panic in `crypto/x509` when a certificate named an unavailable hash function, a deadlock in `time.Sleep(0)`.[^minor] The two map bugs are why the release was cut.
 
-They are an odd pair to headline a release, because neither is exotic. One is a struct with two equal fields. The other is an array that happens to be large. Both are keys you would write without a second thought, and on the compiler that had shipped eleven weeks earlier both of them crashed. The map is the one container nearly every Go program leans on, and in Go 1.0 its hash could be zeroed out by a symmetric key or overrun by a big one.
+They are an odd pair to headline a release, because neither is exotic. Both are keys you would write without a second thought, and on the compiler that had shipped eleven weeks earlier both of them crashed. The map is the one container nearly every Go program leans on, and in Go 1.0 its hash could be zeroed out by a symmetric key or overrun by a big one.
 
 Neither failure survives on a toolchain you can install today. The only way to watch a struct of two equal fields throw `hashmap assert` is to rebuild the 2012 runtime, which is what threw the one above.
 
