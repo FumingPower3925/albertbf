@@ -4,6 +4,7 @@ import {
   transformerNotationHighlight,
 } from "@shikijs/transformers";
 import { escapeAttr, escapeHtml } from "../render/html";
+import { renderChartFence } from "./charts";
 import type { Feature } from "../content";
 
 /** Languages (and common aliases) preloaded into the highlighter. Others
@@ -103,6 +104,12 @@ export function renderCodeBlock(
       html: `<div class="mermaid-diagram"><pre class="mermaid">${escapeHtml(code)}</pre></div>\n`,
       features,
     };
+  }
+
+  // Chart/matrix fences become static SVG/HTML rendered at build time (no JS).
+  const chart = renderChartFence(meta.lang, code);
+  if (chart !== null) {
+    return { html: chart, features };
   }
 
   const lang = (LANGS as readonly string[]).includes(meta.lang) ? meta.lang : "text";

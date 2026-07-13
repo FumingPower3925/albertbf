@@ -23,6 +23,7 @@ const STYLE_ORDER = [
   "components/buttons.css",
   "components/media.css",
   "components/terminal.css",
+  "components/charts.css",
   "prose.css",
   "code.css",
   "pages/home.css",
