@@ -11,7 +11,7 @@ links:
 
 Go 1.0.3 shipped on 21 September 2012, the third point release and by far the largest: 223 commits against 1.0.2. The release note describes all of it in one line: "includes minor code and documentation fixes."[^release] Most of it is exactly that, typo corrections and CLA additions and doc tweaks. The note tells you nothing about which of those commits you actually needed.
 
-One of them closed a way to crash a Go program from the outside. If your code decompressed data it did not produce, a gzip request body, an uploaded archive, a zlib blob off a socket, then a few malformed bytes could take it down. Not corrupt a value, not leak memory, just crash, with a stack trace out of the standard library. That is issue #3815, and it hid in a release the note called minor.[^issue]
+One of them closed a way to crash a Go program from the outside. If your code decompressed data it did not produce, a gzip request body, an uploaded archive, a zlib blob off a socket, then a few malformed bytes could crash it outright, with a stack trace thrown from inside the standard library. Issue #3815 hid in a release the note called minor.[^issue]
 
 ## A few bytes that crash the decompressor
 
@@ -43,7 +43,7 @@ func main() {
 copied=0 err=flate: corrupt input before offset 3
 ```
 
-Current Go reads three bytes, decides the stream is corrupt, and returns an error. That is the whole point of returning an error: the caller handles it and moves on. Now the same program on Go 1.0, built from source and run unchanged:[^repro]
+Current Go reads three bytes, decides the stream is corrupt, and returns an error. Returning an error is the point: the caller handles it and moves on. Now the same program on Go 1.0, built from source and run unchanged:[^repro]
 
 ```
 $ go version
@@ -58,13 +58,13 @@ compress/flate.(*decompressor).nextBlock(0xf840059000, 0x405fc6)
 	/goroot/src/pkg/compress/flate/inflate.go:262 +0x1ab
 ```
 
-No error value. A panic, thrown from inside `compress/flate`, three stack frames deep in the standard library, on input the program was handed from outside. The bytes never decompressed to anything. They only had to be shaped wrong.
+No error value this time. The panic came up from inside `compress/flate`, three stack frames deep in the standard library, on input the program was handed from outside. The bytes never decompressed to anything. They only had to be shaped wrong.
 
 ## The length the decoder trusted
 
 DEFLATE, the algorithm behind gzip and zlib, encodes a block by first describing the Huffman codes it will use, then the data. A dynamic-Huffman block opens with three counts: how many literal and length codes follow, how many distance codes, and how many code-length codes. The decoder reads those counts and then reads exactly that many entries.
 
-The first count is the one that matters here. Decode the first byte of the malformed stream:
+Two of those counts drive the bug. Decode them out of the stream's first two bytes:
 
 ```go run title="header.go"
 package main
@@ -72,22 +72,28 @@ package main
 import "fmt"
 
 func main() {
-	b := byte(0xfc) // first byte of the malformed stream
-	fmt.Printf("byte %#02x, bits low to high: %08b\n", b, b)
-	fmt.Println("BFINAL =", b&1)
-	fmt.Println("BTYPE  =", (b>>1)&3, "(2 means a dynamic-Huffman block)")
-	hlit := (b >> 3) & 0x1f
-	fmt.Println("HLIT   =", hlit)
-	fmt.Println("nlit = HLIT + 257 =", int(hlit)+257)
+	// The block header lives in the first two bytes, read low bit first:
+	// BFINAL(1) BTYPE(2) HLIT(5) HDIST(5) HCLEN(4).
+	b0, b1 := byte(0xfc), byte(0xfe)
+	bits := uint16(b0) | uint16(b1)<<8
+
+	btype := (bits >> 1) & 3
+	hlit := (bits >> 3) & 0x1f
+	hdist := (bits >> 8) & 0x1f
+
+	fmt.Printf("BTYPE = %d (2 is a dynamic-Huffman block)\n", btype)
+	fmt.Printf("HLIT  = %d, so nlit  = %d\n", hlit, int(hlit)+257)
+	fmt.Printf("HDIST = %d, so ndist = %d\n", hdist, int(hdist)+1)
+	fmt.Printf("nlit + ndist = %d, and the table holds 286 + 32 = 318\n",
+		int(hlit)+257+int(hdist)+1)
 }
 ```
 
 ```output
-byte 0xfc, bits low to high: 11111100
-BFINAL = 0
-BTYPE  = 2 (2 means a dynamic-Huffman block)
-HLIT   = 31
-nlit = HLIT + 257 = 288
+BTYPE = 2 (2 is a dynamic-Huffman block)
+HLIT  = 31, so nlit  = 288
+HDIST = 30, so ndist = 31
+nlit + ndist = 319, and the table holds 286 + 32 = 318
 ```
 
 HLIT is a five-bit field, so it holds 0 through 31, and the decoder reads it as `nlit = HLIT + 257`, a number from 257 to 288. This stream sets it to its maximum: 288 code lengths to follow.
@@ -115,9 +121,9 @@ func (f *decompressor) readHuffman() error {
 }
 ```
 
-The array holds 318 entries, and 318 is `maxLit + maxDist`, exactly `286 + 32`. That is the size of the largest header the format permits: RFC 1951 caps HLIT at 29, so a well-formed `nlit` never exceeds 286.[^rfc] The array was sized for legal input, with no room to spare.
+The array holds 318 entries, and 318 is `maxLit + maxDist`, exactly `286 + 32`. Those 318 slots are the largest header the format permits. RFC 1951 caps HLIT at 29, so a well-formed `nlit` never exceeds 286.[^rfc] The array was sized for legal input, with no room to spare.
 
-But `nlit` was not read from a well-formed header. It was read from the stream, and the stream said 288. With `nlit` at 288 and `ndist` at 32, the loop runs `i` up to 319 and writes `f.bits[318]` and `f.bits[319]`, two past the end of a 318-entry array. Go's bounds check fires, and an out-of-bounds write becomes a panic instead of the silent memory corruption it would be in C. The safety net caught the write. Nothing had caught the length.
+But `nlit` came straight from the stream, and the stream said 288, two more than the 286 the array budgeted for literal codes. The decoder fills `nlit + ndist` entries, and for this header that is 319, one more than the array holds. The write to `f.bits[318]` lands one index past the end, where the last valid slot is 317, and Go's bounds check turns the out-of-bounds write into a panic instead of the silent memory corruption it would be in C. The bounds check caught the write. Nothing had checked the length.
 
 ## One bounds check
 
@@ -132,17 +138,17 @@ The fix is a single guard, added right after the count is read. Nigel Tao's chan
 
 Three lines. `ndist` and the code-length count could not exceed their arrays, so only `nlit` needed the check. With it in place, the 288 is rejected at the header, before a single code length is written, and the caller gets the `flate: corrupt input` error that the runnable at the top prints. The panic is gone because the length is now checked against the buffer instead of trusted into it.
 
-## Why the panic mattered
+## The panic as denial of service
 
-A panic is not a returned error, and the difference is the whole security story. An error travels up the call stack as a value the caller chose to ask for. A panic unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input is often exactly the code that does not expect to fail this way: it calls `io.Copy` from a flate reader and handles the error, never imagining the read itself could abort the goroutine.
+A panic is not a returned error, and that difference is why this is a security bug. An error travels up the call stack as a value the caller chose to ask for. A panic unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input is often exactly the code that does not expect to fail this way: it calls `io.Copy` from a flate reader and handles the error, never imagining the read itself could bring the program down.
 
-That turns a malformed header into a denial of service. The input needs no valid compressed data, no authentication, no size: a handful of bytes with the wrong count in the first one is enough, and it triggers every time. Anything that inflated bytes off the wire was exposed, and in 2012 that was a widening surface, gzip-encoded HTTP bodies, uploaded content, compressed data inside application protocols. The bug was not that the decoder rejected bad input. It was that it crashed on it.
+So a malformed header becomes a denial of service. The input needs no valid compressed data and no credentials, just a handful of bytes with the wrong count in the first one, and it triggers every time. Anything that inflated bytes off the wire was exposed, and in 2012 that was a widening surface, anywhere a server accepted compressed input it had not created. The decoder should have rejected the bad input. It crashed on it instead.
 
-## The biggest little release
+## The third point release
 
-Go 1.0.3 was 223 commits, and the flate fix is one of them. Most of the rest is the freight the release note names: documentation, typos, contributor additions. But the same release quietly fixed real bugs the note does not mention. The amd64 compiler had been rounding float-to-integer conversions when the language requires truncation, so `uint64` of a runtime `2.9` returned 3.[^float] The RSA code had been emitting PKCS#1 v1.5 signatures a byte short whenever the result had a leading zero, which made OpenSSL reject about one Go TLS handshake in 256.[^rsa] Each of those is a one-line entry in a 223-commit log, and each is the kind of bug you would want to know shipped a fix.
+Go 1.0.3 was 223 commits, and the flate fix is one of them. Most of the rest is the freight the release note names: documentation, typos, contributor additions. But the same release quietly fixed real bugs the note does not mention. The amd64 compiler had been rounding float-to-integer conversions when the language requires truncation, so `uint64` of a runtime `2.9` returned 3.[^float] The RSA code had been emitting PKCS#1 v1.5 signatures a byte short whenever the result had a leading zero, which made OpenSSL reject about one Go TLS handshake in 256.[^rsa] Each is a one-line entry in a 223-commit log, and each shipped a fix worth having.
 
-That is what a point release looks like once a language has real users: a long tail of small, specific corrections, most boring, a few that decide whether a program stays up. The note said minor code and documentation fixes. One of those minor fixes was the bounds check between a malformed length and a downed process, on every program that inflated bytes it had not written.
+The flate one was the bounds check standing between a malformed length and a downed process, on every program that inflated bytes it had not written.
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 21 September 2012 date and the verbatim description of go1.0.3 as "minor code and documentation fixes." There are 223 commits between the go1.0.2 and go1.0.3 tags.
 [^issue]: [golang/go issue #3815](https://github.com/golang/go/issues/3815), "compress/flate: panic on index out of range." A malformed dynamic-Huffman header made the flate decoder index past a fixed array and panic instead of returning an error.
