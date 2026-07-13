@@ -134,11 +134,11 @@ $ go run -race race.go
 WARNING: DATA RACE
 Write by goroutine 4:
   main.func·001()
-      /race.go:9 +0x40
+      /tmp/race.go:9 +0x40
 
 Previous write by goroutine 1:
   main.main()
-      /race.go:12 +0x115
+      /tmp/race.go:12 +0x115
 ==================
 Found 1 data race(s)
 exit status 66
@@ -219,5 +219,5 @@ Go 1.1 is the first release where the compatibility promise paid out. A year ear
 [^bench]: The performance figures come from msa2-client, one node of my benchmarking cluster: an AMD Ryzen 9 9955HX (16 cores, 32 threads, up to 5.06 GHz) running Ubuntu 26.04 on Linux 7.0, linux/amd64. I built both compilers from the `go1` and `go1.1` source tags and ran them natively on that machine, not under emulation, so the timing is real. Each figure is the median of five runs of one second each; the single-thread suite ran at `GOMAXPROCS=1` pinned to one core, and the scheduler workload at `GOMAXPROCS=8`. The identical benchmark file was compiled by each toolchain, and speedup is the Go 1.0 time divided by the Go 1.1 time. The suite is `bench_test.go`, alongside this article.
 [^sched]: Dmitry Vyukov, "Scalable Go Scheduler Design Doc," which lays out the Go 1.0 single-global-lock, single-run-queue scheduler as the problem and the G-M-P work-stealing model as the fix; Vyukov wrote both the document and the Go 1.1 implementation. `GOMAXPROCS` is the number of P's; it defaulted to 1 in both Go 1.0 and Go 1.1.
 [^race]: The race detector was introduced in Go 1.1, enabled with the `-race` build flag, and is built on ThreadSanitizer. See "Introducing the Go Race Detector," Dmitry Vyukov and Andrew Gerrand, 2013.
-[^repro]: The two transcripts are recorded from toolchains built from the `go1` and `go1.1` source tags with a period compiler (gcc on ubuntu 12.04, linux/amd64) and run under emulation. A `-race` build needs a C compiler for its runtime. The finding is stable across runs here, but the goroutine numbers, the stack addresses, and which of the two writes is reported as "previous" can vary between runs and machines; the full report also lists where each goroutine was created. The Go Playground does not support `-race`, so this cannot be a live cell.
+[^repro]: Both transcripts are recorded from toolchains built from the `go1` and `go1.1` source tags and run natively on msa2-client, the same machine as the benchmarks. Go 1.1's 2013 race runtime is written in C, and on a 2026 host it links only after its C toolchain is told to drop position-independent code and the newer relocation types the old linker cannot read. The report here is trimmed to the two conflicting writes; the full output also prints the runtime frames and where each goroutine was created, and the goroutine numbers, the addresses, and which write is called "previous" can vary between runs and machines. The Go Playground does not support `-race`, so this cannot be a live cell.
 [^points]: Two point releases followed, go1.1.1 (13 June 2013) and go1.1.2 (13 August 2013), each a bag of compiler and runtime fixes.
