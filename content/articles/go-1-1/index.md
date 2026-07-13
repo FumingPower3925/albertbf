@@ -1,7 +1,7 @@
 ---
 title: "Go 1.1: The Dividend"
 date: 2026-07-17
-description: "A year after freezing the language, Go 1.1 recompiled the same code about a third faster and added a tool that could find a data race. The engine moved while the language sat still."
+description: "A year after freezing the language, Go 1.1 recompiled the same code faster and shipped a tool that found data races. I built both compilers and timed the difference."
 tags: [go, go-history, runtime]
 series: go-version-by-version
 links:
@@ -13,7 +13,7 @@ Go 1.1 shipped on 13 May 2013, thirteen months after Go 1. Read its release note
 
 The change was all underneath. Recompile a Go 1.0 program with the 1.1 toolchain, no edits, and it ran about a third faster. The scheduler had been rebuilt, the garbage collector made precise, the compiler taught to emit better code. And the toolchain could now do something the 1.0 toolchain could not do at all: watch a running program and tell you where two goroutines were touching the same memory without synchronization.
 
-The headline is speed, and it is the one thing I can cite but not show. A benchmark is worth publishing only on real hardware, and the runnable code here runs in a playground with a faked clock. The speedup also lives in the compiler and the runtime, not in your source, which is why it needed no code change and why there is nothing to paste into a cell. So I cite the figure the Go team reported and spend the runnable part of this piece on what is visible: a new tool and some sharper edges on the language.
+That figure is the Go team's, reported in 2013, and I checked it myself. The runnable cells later in the piece cannot help there: the playground fakes its clock, and the speedup lives in the compiler and the runtime rather than in a line you could edit. The timing in this piece comes from real hardware instead, and the cells carry what is left, a new tool and some sharper edges on the language.
 
 ## The dividend
 
@@ -22,6 +22,34 @@ The release notes state the performance claim directly:[^relnotes]
 > The performance of code compiled with the Go 1.1 gc tool suite should be noticeably better for most Go programs. Typical improvements relative to Go 1.0 seem to be about 30%-40%, sometimes much more, but occasionally less or even non-existent.
 
 The gains came from several places at once. The compiler inlined more, including small operations like `append` and interface conversions that had been function calls. The map implementation was rewritten to use less memory and less CPU. The runtime and the network library were coupled more tightly, so network operations caused fewer trips through the scheduler. None of it touched the language. A program written to the Go 1 spec got faster by being handed to a newer compiler, with no source change.
+
+I did not want to take that on faith, so I put it on a clock. I built the 1.0 and 1.1 compilers from their `go1` and `go1.1` source tags and ran the same benchmark file through each, natively and back to back, on one idle machine.[^bench] Recompiling the Go 1 code with the newer toolchain, with no edit to the source, moved almost all of it:
+
+```
+host   msa2-client, AMD Ryzen 9 9955HX (16 cores / 32 threads), Ubuntu 26.04, linux/amd64
+build  go1 and go1.1 built from source, each compiling the same benchmark file
+setup  GOMAXPROCS=1, pinned to one core, median of 5 runs, ns/op
+
+benchmark               go 1.0      go 1.1   speedup
+BinaryTree             437,681     443,659     0.99x
+Fannkuch             1,766,521   1,486,956     1.19x
+Mandelbrot             284,911     188,919     1.51x
+FmtFprintfInt             94.1        66.6     1.41x
+FmtFprintfString           118        64.2     1.84x
+AppendBytes              2,970       3,431     0.87x
+MapAssignInt              39.1        25.7     1.52x
+MapAccessInt              36.1        15.5     2.33x
+GobEncode                1,658       1,057     1.57x
+JSONMarshal              7,180       3,849     1.87x
+RegexpMatch                673         658     1.02x
+SortInts               228,520     138,671     1.65x
+InterfaceCall              518         310     1.67x
+Gzip                   270,253     255,145     1.06x
+
+geometric mean                                 1.41x
+```
+
+No single number captures it. The map read came out more than twice as fast. Formatting, JSON, gob, and sort came in between 40 and 90 percent faster. The regexp match and the gzip pass moved by only a few percent. Two came out slower on 1.1: the binary-tree allocation walk by a hair, and appending to a byte slice by about fifteen percent. The geometric mean is 1.41, and the individual results run from more than double to a real loss, which is the release notes' own hedge measured out: "sometimes much more, but occasionally less or even non-existent."
 
 ## The engine that moved
 
@@ -46,6 +74,19 @@ flowchart LR
 ```
 
 One thing this did not change is the default. `GOMAXPROCS` still defaulted to 1 in Go 1.1, the same as in 1.0, so out of the box a program still ran its goroutines through a single P. The rewrite let the runtime scale across cores, but `GOMAXPROCS` still had to be raised by hand to use more than one P.
+
+You can measure the rewrite once you raise it. I ran a workload built to lean on the scheduler, sixty-four short-lived goroutines per iteration, each doing a little arithmetic and reporting back over a channel, on both toolchains with `GOMAXPROCS` set to 8:
+
+```
+host   msa2-client, AMD Ryzen 9 9955HX (16C/32T), Ubuntu 26.04, linux/amd64
+setup  64 goroutines per op, native build, median of 5 runs, ns/op
+
+            GOMAXPROCS=1    GOMAXPROCS=8
+go 1.0            20,319          33,924
+go 1.1            21,422          15,577
+```
+
+On one P the two are within a few percent. At eight they separate. Go 1.1 drops from 21.4 to 15.6 microseconds, because the goroutines spread across per-P queues that take no shared lock on the common path. Go 1.0 goes the other way, from 20.3 up to 33.9: every scheduling step still passes through the one global lock, so more threads buy more contention. On this workload at eight cores the 1.1 scheduler ran 2.18 times faster than 1.0.
 
 The garbage collector changed in a quieter way. Go 1.0's collector was conservative about pointers: shown a word that might be an address, it kept whatever that word pointed at alive, to be safe. Go 1.1 made the collector precise for values on the heap. It knew which words in a heap object were real pointers and which were plain integers, so a stray number that happened to look like an address could no longer keep dead memory from being reclaimed. The heap footprint fell, and it fell hard on 32-bit systems, where an integer and an address are the same width and the guessing was worst.[^relnotes]
 
@@ -175,6 +216,7 @@ The wider `int` raised the ceilings that came with it. A slice could now hold mo
 Go 1.1 is the first release where the compatibility promise paid out. A year earlier the team had frozen the language and accepted the cost that came with it, that no mistake in the Go 1 API could ever be removed. The freeze bought the freedom to change everything below the language: the scheduler and the collector rebuilt, the compiler's output improved, all of it handed back as a recompile that ran a third faster and could now find a program's races.[^points]
 
 [^relnotes]: [Go 1.1 Release Notes](https://go.dev/doc/go1.1), the source for the 13 May 2013 release, the performance claim (quoted verbatim), the inlining and map and network improvements, the precise garbage collector, the 64-bit `int` on 64-bit platforms and its effect on slice and heap sizes, and the language changes.
+[^bench]: The performance figures come from msa2-client, one node of my benchmarking cluster: an AMD Ryzen 9 9955HX (16 cores, 32 threads, up to 5.06 GHz) running Ubuntu 26.04 on Linux 7.0, linux/amd64. I built both compilers from the `go1` and `go1.1` source tags and ran them natively on that machine, not under emulation, so the timing is real. Each figure is the median of five runs of one second each; the single-thread suite ran at `GOMAXPROCS=1` pinned to one core, and the scheduler workload at `GOMAXPROCS=8`. The identical benchmark file was compiled by each toolchain, and speedup is the Go 1.0 time divided by the Go 1.1 time. The suite is `bench_test.go`, alongside this article.
 [^sched]: Dmitry Vyukov, "Scalable Go Scheduler Design Doc," which lays out the Go 1.0 single-global-lock, single-run-queue scheduler as the problem and the G-M-P work-stealing model as the fix; Vyukov wrote both the document and the Go 1.1 implementation. `GOMAXPROCS` is the number of P's; it defaulted to 1 in both Go 1.0 and Go 1.1.
 [^race]: The race detector was introduced in Go 1.1, enabled with the `-race` build flag, and is built on ThreadSanitizer. See "Introducing the Go Race Detector," Dmitry Vyukov and Andrew Gerrand, 2013.
 [^repro]: The two transcripts are recorded from toolchains built from the `go1` and `go1.1` source tags with a period compiler (gcc on ubuntu 12.04, linux/amd64) and run under emulation. A `-race` build needs a C compiler for its runtime. The finding is stable across runs here, but the goroutine numbers, the stack addresses, and which of the two writes is reported as "previous" can vary between runs and machines; the full report also lists where each goroutine was created. The Go Playground does not support `-race`, so this cannot be a live cell.
