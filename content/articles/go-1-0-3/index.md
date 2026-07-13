@@ -1,7 +1,7 @@
 ---
-title: "Go 1.0.3: The Unchecked Length"
+title: "Go 1.0.3: The Minor Release"
 date: 2026-07-16
-description: "Go's third point release was 223 commits the release note called minor. Two of them were a decompressor that crashed on malformed input and an RSA signature that came out a byte short."
+description: "Go 1.0.3 was 223 commits the release note called minor. Three of them: a decompressor crash, an RSA signature OpenSSL rejected, and a compiler that rounded."
 tags: [go, go-history, security]
 series: go-version-by-version
 links:
@@ -11,11 +11,11 @@ links:
 
 Go 1.0.3 shipped on 21 September 2012, the third point release and by far the largest: 223 commits against 1.0.2. The release note describes all of it in one line: "includes minor code and documentation fixes."[^release] Most of it is exactly that, typo corrections and CLA additions and doc tweaks.
 
-Two of those commits are the subject here, and neither is minor. One let a few malformed bytes crash any program that decompressed untrusted data. The other made a Go TLS server fail about one handshake in a few hundred against OpenSSL.
+Three of those commits are the subject here, and none is minor. One let a few malformed bytes crash any program that decompressed untrusted data. One made a Go TLS server fail against OpenSSL about one handshake in a few hundred. One made the compiler give the wrong answer for an ordinary number. They sit in three different corners of the language: the decompressor, the crypto library, and the compiler. Take them in that order.
 
-## A few bytes that crash the decompressor
+## A crash in the decompressor
 
-Start with the crash. You have some compressed bytes from a source you do not control, and you inflate them. Here is that, with a stream built to be malformed. On current Go, hit Run.
+The first bug you could trigger from outside the program. You have some compressed bytes from a source you do not control, and you inflate them. Here is that, with a stream built to be malformed. On current Go, hit Run.
 
 ```go run title="decompress.go"
 package main
@@ -60,7 +60,7 @@ compress/flate.(*decompressor).nextBlock(0xf840059000, 0x405fc6)
 
 There is no error value this time. The panic comes up from inside `compress/flate`, three stack frames into the standard library, on input the program was handed from outside.
 
-## The length the decoder trusted
+## The length the decoder never checked
 
 DEFLATE, the algorithm behind gzip and zlib, encodes a block by first describing the Huffman codes it will use, then the data. A dynamic-Huffman block opens with three counts: how many literal and length codes follow, how many distance codes, and how many code-length codes. The decoder reads those counts and then reads exactly that many entries.
 
@@ -125,8 +125,6 @@ The array holds 318 entries, and 318 is `maxLit + maxDist`, exactly `286 + 32`. 
 
 But `nlit` came straight from the stream, and the stream said 288, two more than the 286 the array budgeted for literal codes. The decoder fills `nlit + ndist` entries, and for this header that is 319, one more than the array holds. The write to `f.bits[318]` lands one index past the end, where the last valid slot is 317, so Go's bounds check fires and turns the out-of-bounds write into a panic instead of the silent memory corruption it would be in C.
 
-## One bounds check
-
 The fix is a single guard, added right after the count is read. Nigel Tao's change checks `nlit` against the size the array was built for, and returns a corrupt-input error when it does not fit:[^cl]
 
 ```diff
@@ -136,17 +134,11 @@ The fix is a single guard, added right after the count is read. Nigel Tao's chan
 +	}
 ```
 
-Three lines. `ndist` and the code-length count could not exceed their arrays, so only `nlit` needed the check. With the guard in place the 288 is rejected at the header, before a single code length is written, and the corrupt stream becomes the `flate: corrupt input` error the runnable at the top prints.
-
-## The panic as denial of service
-
-A panic is not a returned error, and that difference is why this is a security bug. An error travels up the call stack as a value the caller chose to ask for. A panic unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input is often exactly the code that does not expect to fail this way. It calls `io.Copy` from a flate reader and handles the error the copy returns, and a panic from inside the read is not that error.
-
-So a malformed header becomes a denial of service. The input needs no valid compressed data and no credentials, only a handful of bytes with the wrong count in the first one, and the trigger is deterministic. Anything that inflated bytes off the wire was exposed, and in 2012 that surface was widening, anywhere a server accepted compressed input it had not created.
+That guard is why this was worth a point release. A panic is not a returned error: it unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input often does not expect to fail that way, so a malformed header becomes a denial of service, needing no valid data and no credentials, only a few bytes with the wrong count in the first one. Anything that inflated bytes off the wire was exposed, and in 2012 that surface was widening, anywhere a server accepted compressed input it had not created.
 
 ## A signature a byte short
 
-The flate panic was one of the release's real fixes. Another was reported in July 2012: a Go TLS server that worked against Go clients and against browsers, and failed against OpenSSL, roughly one handshake in every few hundred, with nothing to distinguish the connections that broke.[^rsaissue]
+That crash was the loud bug. The second one was silent, and it took months to pin down. In July 2012 someone reported that a Go TLS server worked against Go clients and against browsers, and failed against OpenSSL, roughly one handshake in every few hundred, with nothing to distinguish the connections that broke.[^rsaissue]
 
 During a TLS handshake the server signs part of the exchange with its RSA private key and the client verifies it. The signature Go produced was mathematically valid and verified fine as a number. OpenSSL rejected it for its length. Here is one message signed with one RSA key, on Go 1.0 and on a current toolchain. The key was generated by the Go 1.0 toolchain so both accept it, and PKCS#1 v1.5 signing is deterministic, so the value is fixed:[^rsarepro]
 
@@ -206,9 +198,54 @@ The left-padding is the repair; the bare `Bytes` call is what Go 1.0 shipped. Wh
 
 Go's own verifier accepted the short encoding, so a Go client and a Go server never noticed the missing byte, while OpenSSL enforced the length and rejected it. Adam Langley put the requirement in the change description itself: *"OpenSSL requires that RSA signatures be exactly the same byte-length as the modulus."* His fix left-pads the output to that length, and it covered both functions that had the bug, PKCS#1 v1.5 signing and encryption.[^rsacl]
 
-## The third point release
+## The number the compiler rounded
 
-Go 1.0.3 was 223 commits, and the two bugs above are two of them. Most of the rest is what the release note names: documentation and contributor additions. A few more were real. The amd64 compiler had been rounding float-to-integer conversions when the language requires truncation, so a runtime `uint64(2.9)` returned 3.[^float]
+The decompressor and the signature were both in the standard library. The last bug was in the compiler, and it made a basic operation give the wrong answer.
+
+A conversion from a floating-point number to an integer is defined to truncate toward zero: `uint64(2.9)` is 2. On the amd64 compiler in Go 1.0, it was not. Run this on current Go:
+
+```go run title="conv.go"
+package main
+
+import "fmt"
+
+func main() {
+	// The Go spec says a float-to-integer conversion truncates toward zero.
+	for _, f := range []float64{2.9, 39.7, 258.6} {
+		fmt.Printf("uint64(%v) = %d\n", f, uint64(f))
+	}
+}
+```
+
+```output
+uint64(2.9) = 2
+uint64(39.7) = 39
+uint64(258.6) = 258
+```
+
+Truncation, as specified. The same program on Go 1.0:[^floatrepro]
+
+```
+$ go run conv.go
+uint64(2.9) = 3
+uint64(39.7) = 40
+uint64(258.6) = 259
+```
+
+Every value is rounded to the nearest integer instead of truncated. The amd64 processor has no instruction that converts a float straight to an unsigned 64-bit integer, so the compiler builds the conversion from the signed one plus a correction. The signed convert is where the bug lived. The instruction the compiler emitted, `CVTSD2SI`, rounds according to the processor's current rounding mode, which is round-to-nearest by default. The one the language needs, `CVTTSD2SI`, truncates. They differ by the extra `T`, and the neighbouring code that converted to a signed `int64` already used the truncating form.[^floatcl]
+
+Shenghou Ma's fix is that letter, in both the float64 and float32 paths:
+
+```diff
+-			a = ACVTSD2SQ;
++			a = ACVTTSD2SQ;
+```
+
+The `ACVTTSD2SQ` is Go's assembler name for `CVTTSD2SI` into a 64-bit register. With it, the conversion truncates, and `uint64(2.9)` is 2 on amd64 as it always was on the other architectures.
+
+## Three commits
+
+Go 1.0.3 was 223 commits, and the three above are three of them. The rest is what the note names, documentation and contributor additions, plus a long tail of small library fixes. But the three that mattered were a denial of service in a decompressor, a signature that OpenSSL would not accept, and a compiler that rounded when the language says to truncate. Each was one line in the log, under a note that promised only documentation and small fixes.
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 21 September 2012 date and the verbatim description of go1.0.3 as "minor code and documentation fixes." There are 223 commits between the go1.0.2 and go1.0.3 tags.
 [^issue]: [golang/go issue #3815](https://github.com/golang/go/issues/3815), "compress/flate: panic on index out of range." A malformed dynamic-Huffman header made the flate decoder index past a fixed array and panic instead of returning an error.
@@ -219,4 +256,5 @@ Go 1.0.3 was 223 commits, and the two bugs above are two of them. Most of the re
 [^rsarepro]: Reproduced with a 1024-bit RSA key generated by the go1 toolchain, so both toolchains accept it, reconstructed from its raw components (modulus, exponents, primes) to bypass version-specific key validation. Signing used `rsa.SignPKCS1v15` with a nil random source, which skips blinding and makes the signature value deterministic. For the message shown, Go 1.0 produces a 127-byte signature and a current toolchain produces the same value at 128 bytes, with the leading zero restored.
 [^i2osp]: [RFC 3447](https://www.rfc-editor.org/rfc/rfc3447) specifies the integer-to-octet-string primitive I2OSP with a fixed output length equal to the modulus size in bytes, k = (modulus bit length + 7) / 8.
 [^rsacl]: Change 6352093 (go1.0.3 backport commit 9dec2eb42a3a), "crypto/rsa: left-pad PKCS#1 v1.5 outputs," by Adam Langley, fixes issue #3796. It left-pads the output of `SignPKCS1v15` and `EncryptPKCS1v15` to the modulus length; the quoted line is from the change description.
-[^float]: Also in 1.0.3: `cmd/6g` fixed a float-to-`uint64` conversion that used the rounding convert instruction instead of the truncating one, so a runtime `uint64(2.9)` returned 3 rather than 2. Issue #3804, change 6352079, by Shenghou Ma.
+[^floatcl]: Change 6352079 (go1.0.3 backport commit 7feabb4b94c9), "cmd/6g: fix float32/64->uint64 conversion," by Shenghou Ma, "Fixes #3804." The change in `src/cmd/6g/gsubr.c` replaces the rounding convert `ACVTSS2SQ`/`ACVTSD2SQ` with the truncating `ACVTTSS2SQ`/`ACVTTSD2SQ`. The commit note: "CVTSS2SQ's rounding mode is controlled by the RC field of MXCSR; as we specifically need truncate semantic, we should use CVTTSS2SQ."
+[^floatrepro]: Reproduced on the `go1` toolchain built from source. The value has to be a non-constant float: a constant conversion like `uint64(2.9)` is folded in exact arithmetic at compile time and is unaffected, so the program converts values loaded from a slice at run time.
