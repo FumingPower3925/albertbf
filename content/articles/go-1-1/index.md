@@ -25,28 +25,24 @@ The gains came from several places at once. The compiler inlined more, including
 
 I did not want to take that on faith, so I put it on a clock. I built the 1.0 and 1.1 compilers from their `go1` and `go1.1` source tags and ran the same benchmark file through each, natively and back to back, on one idle machine.[^bench] Recompiling the Go 1 code with the newer toolchain, with no edit to the source, moved almost all of it:
 
-```
-host   msa2-client, AMD Ryzen 9 9955HX (16 cores / 32 threads), Ubuntu 26.04, linux/amd64
-build  go1 and go1.1 built from source, each compiling the same benchmark file
-setup  GOMAXPROCS=1, pinned to one core, median of 5 runs, ns/op
-
-benchmark               go 1.0      go 1.1   speedup
-BinaryTree             437,681     443,659     0.99x
-Fannkuch             1,766,521   1,486,956     1.19x
-Mandelbrot             284,911     188,919     1.51x
-FmtFprintfInt             94.1        66.6     1.41x
-FmtFprintfString           118        64.2     1.84x
-AppendBytes              2,970       3,431     0.87x
-MapAssignInt              39.1        25.7     1.52x
-MapAccessInt              36.1        15.5     2.33x
-GobEncode                1,658       1,057     1.57x
-JSONMarshal              7,180       3,849     1.87x
-RegexpMatch                673         658     1.02x
-SortInts               228,520     138,671     1.65x
-InterfaceCall              518         310     1.67x
-Gzip                   270,253     255,145     1.06x
-
-geometric mean                                 1.41x
+```table
+caption: msa2-client, AMD Ryzen 9 9955HX (16C/32T), Ubuntu 26.04, linux/amd64. go1 vs go1.1 built from source, GOMAXPROCS=1, median of 5 runs, ns/op.
+highlight: speedup
+cols: benchmark | go 1.0 | go 1.1 | speedup
+BinaryTree | 437,681 | 443,659 | 0.99×
+Fannkuch | 1,766,521 | 1,486,956 | 1.19×
+Mandelbrot | 284,911 | 188,919 | 1.51×
+FmtFprintfInt | 94.1 | 66.6 | 1.41×
+FmtFprintfString | 118 | 64.2 | 1.84×
+AppendBytes | 2,970 | 3,431 | 0.87×
+MapAssignInt | 39.1 | 25.7 | 1.52×
+MapAccessInt | 36.1 | 15.5 | 2.33×
+GobEncode | 1,658 | 1,057 | 1.57×
+JSONMarshal | 7,180 | 3,849 | 1.87×
+RegexpMatch | 673 | 658 | 1.02×
+SortInts | 228,520 | 138,671 | 1.65×
+InterfaceCall | 518 | 310 | 1.67×
+Gzip | 270,253 | 255,145 | 1.06×
 ```
 
 ```chart
@@ -79,33 +75,36 @@ The largest single change was the scheduler. In Go 1.0 every goroutine in a prog
 
 Go 1.1 replaced it with the G, M, P model. A goroutine is a G. An operating-system thread is an M. The new piece is P, a processor, meaning a scheduling context rather than a physical core, and there are exactly `GOMAXPROCS` of them. A thread must hold a P to run Go code. Each P carries its own local run queue, so creating and picking goroutines became a local operation with no global lock on the common path. When a P's queue empties, it pulls from the global queue, and if that is empty too, it steals about half the runnable goroutines from another P chosen at random. Dmitry Vyukov wrote both the design and the implementation, in a document called the "Scalable Go Scheduler Design Doc."[^sched]
 
-```mermaid
-flowchart LR
-  subgraph before["Go 1.0"]
-    direction TB
-    Q["one global run queue"] --> K(["one global lock"])
-    K --> Ta["thread"]
-    K --> Tb["thread"]
-  end
-  subgraph after["Go 1.1"]
-    direction TB
-    P1["P: local queue"] --> Ma["thread"]
-    P2["P: local queue"] --> Mb["thread"]
-    P1 -. "steals half" .-> P2
-  end
+```diagram
+dir: LR
+Q: one global run queue
+K (stadium): one global lock
+Ta: thread
+Tb: thread
+P1: P\nlocal queue
+P2: P\nlocal queue
+Ma: thread
+Mb: thread
+Q -> K
+K -> Ta
+K -> Tb
+P1 -> Ma
+P2 -> Mb
+P1 ~> P2: steals half
+group "Go 1.0": Q, K, Ta, Tb
+group "Go 1.1": P1, P2, Ma, Mb
 ```
 
 One thing this did not change is the default. `GOMAXPROCS` still defaulted to 1 in Go 1.1, the same as in 1.0, so out of the box a program still ran its goroutines through a single P. The rewrite let the runtime scale across cores, but `GOMAXPROCS` still had to be raised by hand to use more than one P.
 
 You can measure the rewrite once you raise it. I ran a workload built to lean on the scheduler, sixty-four short-lived goroutines per iteration, each doing a little arithmetic and reporting back over a channel, on both toolchains with `GOMAXPROCS` set to 8:
 
-```
-host   msa2-client, AMD Ryzen 9 9955HX (16C/32T), Ubuntu 26.04, linux/amd64
-setup  64 goroutines per op, native build, median of 5 runs, ns/op
-
-            GOMAXPROCS=1    GOMAXPROCS=8
-go 1.0            20,319          33,924
-go 1.1            21,422          15,577
+```matrix
+title: 64 goroutines per op, native on msa2-client, median of 5 runs, ns/op
+note: Lower is better; the heatmap runs light (fast) to dark (slow). At eight cores Go 1.0 is the slowest cell and Go 1.1 the fastest.
+cols: GOMAXPROCS=1, GOMAXPROCS=8
+go 1.0: 20319, 33924
+go 1.1: 21422, 15577
 ```
 
 On one P the two are within a few percent. At eight they separate. Go 1.1 drops from 21.4 to 15.6 microseconds, because the goroutines spread across per-P queues that take no shared lock on the common path. Go 1.0 goes the other way, from 20.3 up to 33.9: every scheduling step still passes through the one global lock, so more threads buy more contention. On this workload at eight cores the 1.1 scheduler ran 2.18 times faster than 1.0.

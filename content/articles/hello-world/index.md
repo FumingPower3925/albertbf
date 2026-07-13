@@ -255,12 +255,14 @@ All rendered at build time. Your browser downloads no math JavaScript.
 
 Mermaid diagrams are rendered client-side, lazily, and follow the site theme:
 
-```mermaid
-flowchart LR
-    md[index.md] --> build[bun build]
-    build --> dist[static HTML]
-    dist --> cf[Cloudflare Workers]
-    cf --> you((you))
+```diagram
+dir: LR
+md: index.md
+build: bun build
+dist: static HTML
+cf: Cloudflare Workers
+you (circle, accent): you
+md -> build -> dist -> cf -> you
 ```
 
 ## Media

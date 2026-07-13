@@ -52,11 +52,13 @@ Go's most novel-seeming parts are its least original ones.
 
 The syntax is C family. The declarations and package structure come from the Pascal / Modula / Oberon side of the family. And the concurrency (the goroutines and channels everyone associates with Go) descends from Tony Hoare's *Communicating Sequential Processes*, published in 1978, by way of the languages Pike spent two decades building.[^faq]
 
-```mermaid
-flowchart LR
-    csp["CSP<br/>Hoare, 1978"] --> nsq["Newsqueak<br/>Pike"]
-    nsq --> limbo["Limbo<br/>Inferno"]
-    limbo --> go["Go<br/>goroutines & channels"]
+```diagram
+dir: LR
+csp: CSP\nHoare, 1978
+nsq: Newsqueak\nPike
+limbo: Limbo\nInferno
+go (accent): Go\ngoroutines & channels
+csp -> nsq -> limbo -> go
 ```
 
 The one idea Go carried down this line, the thing that separates it from vanilla CSP, is that **a channel is a first-class value.** You can store one in a variable, pass it to a function, and return it from a function. It's the move that lets you write concurrency as ordinary code instead of as a special construct bolted onto the side of the language.

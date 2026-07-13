@@ -33,10 +33,16 @@ The numbering is the tell. The first stable release carried the number 56, not 1
 
 The last numbered release was r60.3. There was no r61. After r60 the project turned its full attention to Go 1, and about six more months of weekly-only churn separated that last pin from the freeze. Go 1 itself corresponds to `weekly.2012-03-27`, released 2012/03/28.[^pregoone] So the numbered track went quiet about six months before the churn actually stopped.
 
-```mermaid
-flowchart LR
-    r56["r56<br/>Mar 2011<br/>first stable"] --> r57["r57<br/>May 2011"] --> r58["r58<br/>Jun 2011"] --> r59["r59<br/>Aug 2011"] --> r60["r60<br/>Sep 2011"]
-    r60 -. "6 months, weekly only" .-> go1["Go 1<br/>Mar 2012<br/>the freeze"]
+```diagram
+dir: LR
+r56: r56\nMar 2011\nfirst stable
+r57: r57\nMay 2011
+r58: r58\nJun 2011
+r59: r59\nAug 2011
+r60: r60\nSep 2011
+go1 (accent): Go 1\nMar 2012\nthe freeze
+r56 -> r57 -> r58 -> r59 -> r60
+r60 ~> go1: 6 months, weekly only
 ```
 
 A numbered release only changed the shape of the breakage: it arrived in batches instead of continuously. And third-party libraries lagged the snapshots, so one dependency built against last month's tip could block your upgrade entirely.
