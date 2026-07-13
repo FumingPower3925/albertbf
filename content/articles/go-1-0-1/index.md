@@ -50,7 +50,19 @@ func main() {
 2
 ```
 
-It prints 1 and 2. That is the fixed compiler doing its job. On a 2012 Go 1.0 build the same program printed corrupted values or crashed, depending on what the reused stack slot happened to hold when the range loop read it. You cannot see the failure here because 1.0.1 is what removed it.
+It prints 1 and 2. That is the fixed compiler doing its job.
+
+Here is the same program compiled with Go 1.0 itself, the release that shipped the bug. I built that toolchain from its source tag in a period container and ran the program unchanged:[^repro]
+
+```
+$ go version
+go version go1
+$ go run corruption.go
+2
+0
+```
+
+Not 1 and 2. The first value the channel hands back is wrong and the second is zeroed garbage, the same on every run. Both pointers were left aimed at `send`'s stack frame, and the second call reused that frame before the range loop read through them. The exact wrong values depend on what the reused stack held; that they are wrong does not. That is issue #3545, running.
 
 Look at what has to escape. Inside `send`, the local `i` has its address taken into `b`. The deferred closure sends `&b` on a channel that is buffered and outlives the call. So both `i` and `b` genuinely outlive `send`'s frame. The compiler's one job is to notice that and put them somewhere that survives the return. In Go 1.0 it did not notice.
 
@@ -202,3 +214,4 @@ Under-approximating what escapes swaps a slowdown for a memory-safety hole, whic
 [^gcflags]: The `-m` escape diagnostics are part of the gc toolchain and are printed to stderr at build time; pass them with `go build -gcflags=-m`. The `moved to heap`, `escapes to heap`, and `does not escape` phrasings shown here were captured on a current toolchain; the three core messages have been stable for years.
 [^cl]: Change 6061043, "cmd/gc: fix addresses escaping through closures called in-place," written by Luuk van Dijk with Russ Cox as reviewer, description "Fixes issue 3545." It changed `src/cmd/gc/esc.c` and added the `foo124`–`foo137` regression tests to `test/escape2.go`.
 [^birth]: Escape analysis entered the compiler on 24 August 2011 (Luuk van Dijk, "gc: Escape analysis"), initially off by default and selectable with a flag, and was enabled by default four days later (Russ Cox, "gc: tweak and enable escape analysis"). The pass that shipped in Go 1 was the state of that single-file analysis at the go1 tag.
+[^repro]: Reproduced by building the `go1` source tag with a period compiler (gcc 4.6 on ubuntu 12.04, linux/amd64) and running the program unchanged on the resulting toolchain. Go 1.0's stack-versus-heap mistake is undefined behavior, so a different build or machine could print different wrong values or crash; the values being wrong is the invariant, not the specific `2` and `0`.
