@@ -11,7 +11,7 @@ links:
 
 Go 1.0.1 shipped on 25 April 2012, twenty-eight days after Go 1. It was the first point release, and it existed to fix one thing. The release note lists it in a single clause: an escape-analysis bug that can lead to memory corruption.[^release]
 
-Escape analysis is a compiler optimization. It decides whether a value lives in a function's stack frame or on the heap. Get that decision wrong in the cheap direction and you pay one needless allocation. Get it wrong in the other direction and you leave a pointer aimed at stack memory that has already been handed back and reused, so the program reads or writes through it and sees garbage. That is how a memory-corruption fix comes to ship as a change to an optimization pass: in Go, where a value lands is part of what keeps the language memory-safe, and for one shape of code 1.0 put it in the wrong place.
+Escape analysis is a compiler optimization. It decides whether a value lives in a function's stack frame or on the heap. Get that decision wrong in the cheap direction and you pay one needless allocation. Get it wrong in the other direction and you leave a pointer aimed at stack memory that has already been handed back and reused, so the program reads or writes through it and sees garbage. So a memory-corruption fix ships as a change to an optimization pass: in Go, where a value lands is part of what keeps the language memory-safe, and for one shape of code 1.0 put it in the wrong place.
 
 ## The report
 
@@ -50,7 +50,7 @@ func main() {
 2
 ```
 
-It prints 1 and 2. That is the fixed compiler doing its job.
+It prints 1 and 2, the correct result on a current toolchain.
 
 Here is the same program compiled with Go 1.0 itself, the release that shipped the bug. I built that toolchain from its source tag in a period container and ran the program unchanged:[^repro]
 
@@ -74,8 +74,8 @@ This is what makes `return &local` legal in Go. In C that is a dangling pointer 
 
 The two ways to be wrong are not symmetric:
 
-- **A false positive**: the compiler decides a value escapes when it does not. It lands on the heap when the stack would have done. You pay one allocation, and the program is still correct.
-- **A false negative**: the compiler decides a value does not escape when it does. It stays on the stack, a pointer to it outlives the return, the frame is reclaimed, the next call reuses that region, and every read or write through the stale pointer hits whatever now lives there. That is memory corruption, up to a pointer field sitting over bytes that were never a pointer.
+- **A false positive is the cheap mistake.** The compiler decides a value escapes when it does not, so it lands on the heap when the stack would have done. You pay one allocation, and the program is still correct.
+- **A false negative is the dangerous one.** The compiler decides a value does not escape when it does. It stays on the stack, a pointer to it outlives the return, the frame is reclaimed, the next call reuses that region, and every read or write through the stale pointer hits whatever now lives there. That is memory corruption, up to a pointer field sitting over bytes that were never a pointer.
 
 So the analysis has one hard constraint: it may over-approximate escaping as much as it wants, and it may never under-approximate. Heap-allocating something that was stack-safe is a slowdown. Stack-allocating something that escapes is a hole. Issue #3545 was an under-approximation, the only kind of escape mistake that can corrupt memory, and that is what made it worth a point release.
 
@@ -121,9 +121,9 @@ makeOnHeap (returns &local): 1 alloc(s)/call
 sumOnStack (stays in frame): 0 alloc(s)/call
 ```
 
-The 1 versus the 0 is the escape decision, counted. `makeOnHeap` returns a pointer to its local, so `n` is forced onto the heap and every call allocates. `sumOnStack` keeps everything in the frame and allocates nothing. The package-level sinks matter: without them the compiler proves the calls are dead and deletes them, and you measure nothing.
+The 1 versus the 0 is the escape decision. `makeOnHeap` returns a pointer to its local, so `n` is forced onto the heap and every call allocates. `sumOnStack` keeps everything in the frame and allocates nothing. The package-level sinks matter: without them the compiler proves the calls are dead and deletes them, and you measure nothing.
 
-To see the reasoning instead of the cost, ask the compiler directly. Pass `-m` through `-gcflags` and it prints its escape verdicts to stderr at build time.[^gcflags] This one is recorded from a local build, not the Playground, because the flag output never reaches the browser.
+To see the reasoning instead of the cost, ask the compiler directly. Pass `-m` through `-gcflags` and it prints its escape verdicts to stderr at build time.[^gcflags] The `-m` output prints to a build terminal, not the browser, so this block is a local build rather than the Playground.
 
 ```go
 package main
@@ -153,11 +153,11 @@ $ go build -gcflags=-m escape.go
 ./escape.go:11:12: p does not escape
 ```
 
-The two verdicts match the two functions. `escapes` stores its argument in a package-level `interface` that outlives the call, so the value goes to the heap. `stays` only reads through its pointer parameter, so nothing leaves the frame. `escapes to heap` and `does not escape` are the answers the analysis exists to produce, and #3545 was 1.0 producing the wrong one for a value that left through a closure.
+The verdicts follow the code. `escapes` stores its argument in a package-level `interface` that outlives the call, so the value goes to the heap. `stays` only reads through its pointer parameter, so nothing leaves the frame. `escapes to heap` and `does not escape` are the answers the analysis exists to produce, and #3545 was 1.0 producing the wrong one for a value that left through a closure.
 
 ## Why this pattern fooled the 2012 compiler
 
-The trigger in #3545 is narrow. The local's address escapes only through a closure that is invoked in place, here the deferred func literal. That is the corner the 1.0 analyzer got wrong.
+The trigger in #3545 is narrow. The local's address escapes only through a closure that is invoked in place, here the deferred func literal. The 1.0 analyzer got exactly that corner wrong.
 
 A closure captures the locals it uses by reference. Inside the compiler that captured local is represented as a `PPARAMREF`, a reference node standing in for the original variable. When code inside the closure took the address of a captured local and let that address escape, the 1.0 analyzer walked the escaping value back as far as the `PPARAMREF` and stopped. It never followed the last edge, from the reference back to the variable it referred to. So the original local was still classed as non-escaping and left on the stack, even though the closure had just leaked its address to a channel.
 
@@ -168,7 +168,7 @@ The corruption follows from stack reuse:
 3. Both `*box` pointers now sitting in the channel alias that reused memory. The value the first call queued no longer exists at the address the channel remembers.
 4. The range loop reads `*b.v` through those pointers and gets whatever the second call, or anything after it, left in the slot.
 
-The pass that exists to keep pointers valid is the one that left this pointer dangling. The fix is to heap-allocate `i` and `b`, so each call gets its own storage that stays valid for as long as the channel holds a pointer to it.
+The fix is to heap-allocate `i` and `b`, so each call gets its own storage that stays valid for as long as the channel holds a pointer to it.
 
 ## The fix
 
@@ -202,13 +202,13 @@ It was conservative on purpose, and it carried author TODOs marking the places i
 
 ## The first point release
 
-Go 1 had shipped a compatibility promise four weeks earlier: source you wrote to the Go 1 spec would keep compiling. Go 1.0.1 was the first live test of how that promise handles a bug. The answer was a template the project has followed ever since. The fix landed on tip, was cherry-picked onto the release branch, and a new release was cut by tagging that branch. No API changed. No source needed editing. A memory-corruption bug in the compiler was closed by recompiling with a fixed compiler, and nothing else.
+Go 1.0.1 also carried a handful of smaller standard-library fixes, among them a `text/template` typecheck on pipelined arguments and a panic in `encoding/base64` on input whose length was not a multiple of four. The escape-analysis bug is the one the release was issued for.
 
-The release carried a handful of smaller standard-library fixes alongside it, among them a `text/template` typecheck on pipelined arguments and a panic in `encoding/base64` on input whose length was not a multiple of four. None of them is why the release exists. Go 1.0.1 was cut for the escape-analysis fix.
+Go 1 had shipped its compatibility promise four weeks earlier: source written to the Go 1 spec would keep compiling. Go 1.0.1 was the first live test of how that promise absorbs a bug. The fix landed on tip, was cherry-picked onto the release branch, and the release was cut by tagging that branch. No API changed. No source needed editing. A memory-corruption bug in the compiler was closed by recompiling with a fixed compiler. You cannot see it on any toolchain you can install today; the only way to watch it happen is to rebuild the 2012 one, which is what printed the `2` and the `0`.
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 25 April 2012 date and the verbatim description of go1.0.1 as a fix for an escape-analysis bug that can lead to memory corruption.
 [^issue]: [golang/go issue #3545](https://github.com/golang/go/issues/3545), "cmd/gc: escape analysis bug," opened by Russ Cox on 18 April 2012 against the Go1.0.1 milestone; the source for the reporter's description and the reproduction program.
-[^gcflags]: The `-m` escape diagnostics are part of the gc toolchain and are printed to stderr at build time; pass them with `go build -gcflags=-m`. The `moved to heap`, `escapes to heap`, and `does not escape` phrasings shown here were captured on a current toolchain; the three core messages have been stable for years.
+[^gcflags]: The `-m` escape diagnostics are part of the gc toolchain and are printed to stderr at build time; pass them with `go build -gcflags=-m`. The `moved to heap`, `escapes to heap`, and `does not escape` phrasings shown here were captured on a current toolchain; the three core messages have been stable for years. Both `-m` transcripts show the lines that matter for the point; a real run also prints inlining notes and `does not escape` lines for the values that stay put.
 [^cl]: Change 6061043, "cmd/gc: fix addresses escaping through closures called in-place," written by Luuk van Dijk with Russ Cox as reviewer, description "Fixes issue 3545." It changed `src/cmd/gc/esc.c` and added the `foo124`–`foo137` regression tests to `test/escape2.go`.
 [^birth]: Escape analysis entered the compiler on 24 August 2011 (Luuk van Dijk, "gc: Escape analysis"), initially off by default and selectable with a flag, and was enabled by default four days later (Russ Cox, "gc: tweak and enable escape analysis"). The pass that shipped in Go 1 was the state of that single-file analysis at the go1 tag.
 [^repro]: Reproduced by building the `go1` source tag with a period compiler (gcc 4.6 on ubuntu 12.04, linux/amd64) and running the program unchanged on the resulting toolchain. Go 1.0's stack-versus-heap mistake is undefined behavior, so a different build or machine could print different wrong values or crash; the values being wrong is the invariant, not the specific `2` and `0`.
