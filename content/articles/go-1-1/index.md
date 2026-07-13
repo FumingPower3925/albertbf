@@ -49,6 +49,28 @@ Gzip                   270,253     255,145     1.06x
 geometric mean                                 1.41x
 ```
 
+```chart
+title: Recompile speedup, Go 1.0 to Go 1.1
+unit: x
+baseline: 1
+sort: desc
+note: Bars past the dashed 1x line ran faster on 1.1; the two below it ran slower.
+MapAccessInt: 2.33
+JSONMarshal: 1.87
+FmtFprintfString: 1.84
+InterfaceCall: 1.67
+SortInts: 1.65
+GobEncode: 1.57
+MapAssignInt: 1.52
+Mandelbrot: 1.51
+FmtFprintfInt: 1.41
+Fannkuch: 1.19
+Gzip: 1.06
+RegexpMatch: 1.02
+BinaryTree: 0.99
+AppendBytes: 0.87
+```
+
 No single number captures it. The map read came out more than twice as fast. Formatting, JSON, gob, and sort came in between 40 and 90 percent faster. The regexp match and the gzip pass moved by only a few percent. Two came out slower on 1.1: the binary-tree allocation walk by a hair, and appending to a byte slice by about fifteen percent. The geometric mean is 1.41, and the individual results run from more than double to a real loss, which is the release notes' own hedge measured out: "sometimes much more, but occasionally less or even non-existent."
 
 ## The engine that moved
