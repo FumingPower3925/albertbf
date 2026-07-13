@@ -11,7 +11,7 @@ links:
 
 Go 1.0.1 shipped on 25 April 2012, twenty-eight days after Go 1. It was the first point release, and it existed to fix one thing. The release note lists it in a single clause: an escape-analysis bug that can lead to memory corruption.[^release]
 
-Escape analysis is a compiler optimization. It decides whether a value lives in a function's stack frame or on the heap, and getting that wrong usually costs you an allocation and nothing else. This bug was the other kind of wrong. It left a pointer aimed at stack memory that had already been handed back and reused, so a program could read or write through it and see garbage. That is why a memory-corruption fix shipped as a change to an optimization pass. In Go the stack-versus-heap decision is load-bearing for memory safety, and the compiler shipped it wrong.
+Escape analysis is a compiler optimization. It decides whether a value lives in a function's stack frame or on the heap. Get that decision wrong in the cheap direction and you pay one needless allocation. Get it wrong in the other direction and you leave a pointer aimed at stack memory that has already been handed back and reused, so the program reads or writes through it and sees garbage. That is how a memory-corruption fix comes to ship as a change to an optimization pass: in Go, where a value lands is part of what keeps the language memory-safe, and for one shape of code 1.0 put it in the wrong place.
 
 ## The report
 
@@ -62,7 +62,7 @@ $ go run corruption.go
 0
 ```
 
-Not 1 and 2. The first value the channel hands back is wrong and the second is zeroed garbage, the same on every run. Both pointers were left aimed at `send`'s stack frame, and the second call reused that frame before the range loop read through them. The exact wrong values depend on what the reused stack held; that they are wrong does not. That is issue #3545, running.
+Not 1 and 2. The first value the channel hands back is wrong and the second is zeroed garbage, the same on every run. Both pointers were left aimed at `send`'s stack frame, and the second call reused that frame before the range loop read through them. The exact wrong values depend on what the reused stack held; that they are wrong does not. This is the bug Russ Cox reported, on the compiler that still had it.
 
 Look at what has to escape. Inside `send`, the local `i` has its address taken into `b`. The deferred closure sends `&b` on a channel that is buffered and outlives the call. So both `i` and `b` genuinely outlive `send`'s frame. The compiler's one job is to notice that and put them somewhere that survives the return. In Go 1.0 it did not notice.
 
@@ -72,13 +72,12 @@ Escape analysis runs at compile time. For every value a function creates, it ask
 
 This is what makes `return &local` legal in Go. In C that is a dangling pointer and undefined behavior. In Go the compiler sees the address leaving the frame and silently promotes the variable to the heap, so the pointer stays valid. The analysis is what lets you take the address of a local without thinking about its lifetime.
 
-The two ways to be wrong are not symmetric.
+The two ways to be wrong are not symmetric:
 
-A false positive means the compiler thinks a value escapes when it does not. The value lands on the heap when it could have stayed on the stack. You pay one allocation. The program is still correct.
+- **A false positive**: the compiler decides a value escapes when it does not. It lands on the heap when the stack would have done. You pay one allocation, and the program is still correct.
+- **A false negative**: the compiler decides a value does not escape when it does. It stays on the stack, a pointer to it outlives the return, the frame is reclaimed, the next call reuses that region, and every read or write through the stale pointer hits whatever now lives there. That is memory corruption, up to a pointer field sitting over bytes that were never a pointer.
 
-A false negative means the compiler thinks a value does not escape when it does. The value stays on the stack, a pointer to it is kept past the return, the frame is reclaimed, the next call reuses that stack region, and every read or write through the stale pointer hits whatever now lives there. That is memory corruption, up to and including a pointer field sitting over bytes that were never a pointer.
-
-So the analysis has one hard constraint: it may over-approximate escaping as much as it wants, and it may never under-approximate. Heap-allocating something that was stack-safe is a slowdown. Stack-allocating something that escapes is a hole. Issue #3545 was an under-approximation, which is the only kind that can corrupt memory, which is why it was worth a point release.
+So the analysis has one hard constraint: it may over-approximate escaping as much as it wants, and it may never under-approximate. Heap-allocating something that was stack-safe is a slowdown. Stack-allocating something that escapes is a hole. Issue #3545 was an under-approximation, the only kind of escape mistake that can corrupt memory, and that is what made it worth a point release.
 
 You can watch the decision happen at runtime. `testing.AllocsPerRun` is an ordinary exported function, so it runs anywhere, no build flags. It counts heap allocations per call.
 
@@ -154,7 +153,7 @@ $ go build -gcflags=-m escape.go
 ./escape.go:11:12: p does not escape
 ```
 
-Two functions, two verdicts. `escapes` stores its argument into a package-level `interface`, which outlives the call, so the value goes to the heap. `stays` only reads through its pointer parameter, so nothing leaves the frame. `does not escape` and `escapes to heap` are the two answers the analysis exists to give, and the bug was the compiler giving the first when the truth was the second.
+The two verdicts match the two functions. `escapes` stores its argument in a package-level `interface` that outlives the call, so the value goes to the heap. `stays` only reads through its pointer parameter, so nothing leaves the frame. `escapes to heap` and `does not escape` are the answers the analysis exists to produce, and #3545 was 1.0 producing the wrong one for a value that left through a closure.
 
 ## Why this pattern fooled the 2012 compiler
 
@@ -169,7 +168,7 @@ The corruption follows from stack reuse:
 3. Both `*box` pointers now sitting in the channel alias that reused memory. The value the first call queued no longer exists at the address the channel remembers.
 4. The range loop reads `*b.v` through those pointers and gets whatever the second call, or anything after it, left in the slot.
 
-A dangling pointer, produced by the pass whose job is to prevent exactly that. The fix is to heap-allocate `i` and `b` so each call gets its own storage that stays valid as long as the channel holds a pointer to it.
+The pass that exists to keep pointers valid is the one that left this pointer dangling. The fix is to heap-allocate `i` and `b`, so each call gets its own storage that stays valid for as long as the channel holds a pointer to it.
 
 ## The fix
 
@@ -205,9 +204,7 @@ It was conservative on purpose, and it carried author TODOs marking the places i
 
 Go 1 had shipped a compatibility promise four weeks earlier: source you wrote to the Go 1 spec would keep compiling. Go 1.0.1 was the first live test of how that promise handles a bug. The answer was a template the project has followed ever since. The fix landed on tip, was cherry-picked onto the release branch, and a new release was cut by tagging that branch. No API changed. No source needed editing. A memory-corruption bug in the compiler was closed by recompiling with a fixed compiler, and nothing else.
 
-The release carried a handful of smaller standard-library fixes alongside it, among them a `text/template` typecheck on pipelined arguments and a panic in `encoding/base64` on input whose length was not a multiple of four. The headline was the escape-analysis fix, and it is the one that mattered.
-
-Under-approximating what escapes swaps a slowdown for a memory-safety hole, which is why #3545 shipped as a point release instead of waiting for the next feature version.
+The release carried a handful of smaller standard-library fixes alongside it, among them a `text/template` typecheck on pipelined arguments and a panic in `encoding/base64` on input whose length was not a multiple of four. None of them is why the release exists. Go 1.0.1 was cut for the escape-analysis fix.
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 25 April 2012 date and the verbatim description of go1.0.1 as a fix for an escape-analysis bug that can lead to memory corruption.
 [^issue]: [golang/go issue #3545](https://github.com/golang/go/issues/3545), "cmd/gc: escape analysis bug," opened by Russ Cox on 18 April 2012 against the Go1.0.1 milestone; the source for the reporter's description and the reproduction program.
