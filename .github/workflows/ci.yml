@@ -95,6 +95,6 @@ jobs:
           #  - hosts that throttle or deny automated checkers and thus flake:
           #    linkedin.com (HTTP 999), x.com, and upc.edu (times out on CI).
           #    All are stable, human-verified links.
-          args: "--base http://localhost:8080 --verbose --no-progress --timeout 30 --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'github\\.com/FumingPower3925/albertbf/(blob|commits)' --exclude 'linkedin\\.com' --exclude '(^|\\.)x\\.com' --exclude 'upc\\.edu' './**/*.html'"
+          args: "--base http://localhost:8080 --verbose --no-progress --timeout 30 --max-retries 3 --retry-wait-time 5 --exclude '^https://albertbf\\.com' --exclude 'github\\.com/FumingPower3925/albertbf/(blob|commits)' --exclude 'linkedin\\.com' --exclude '(^|\\.|//)x\\.com' --exclude 'upc\\.edu' './**/*.html'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
