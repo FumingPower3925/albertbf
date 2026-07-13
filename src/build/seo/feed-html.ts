@@ -60,9 +60,9 @@ export function feedSafeHtml(html: string, articleUrl: string): string {
   const base = site.url + articleUrl; // e.g. https://albertbf.com/articles/slug/
   let out = html;
 
-  // Mermaid diagrams render client-side; link to the on-site version instead.
-  out = stripByClass(out, ["mermaid-diagram"], () =>
-    `<p><em>[Diagram — <a href="${base}">view on the site</a>]</em></p>`);
+  // Diagrams are inline SVG; some feed readers drop SVG, so link to the site.
+  out = stripByClass(out, ["diagram"], () =>
+    `<p><em>[Diagram: <a href="${base}">view on the site</a>]</em></p>`);
 
   // Strip UI chrome: code header (filename/copy/run buttons), heading anchors,
   // the empty live run-output panel, and KaTeX's visual span-soup (the

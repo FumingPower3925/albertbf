@@ -24,6 +24,7 @@ const STYLE_ORDER = [
   "components/media.css",
   "components/terminal.css",
   "components/charts.css",
+  "components/diagram.css",
   "prose.css",
   "code.css",
   "pages/home.css",
@@ -34,7 +35,7 @@ const STYLE_ORDER = [
 ];
 
 /** Client entrypoints bundled independently; run engines load via dynamic import. */
-const CLIENT_ENTRIES = ["main", "search", "toc", "lightbox", "mermaid-loader", "run"];
+const CLIENT_ENTRIES = ["main", "search", "toc", "lightbox", "run"];
 
 /**
  * The theme-init snippet inlined into <head> before CSS. Its sha256 goes in
@@ -128,16 +129,12 @@ async function copyFonts(): Promise<void> {
   }
 }
 
-async function copyVendor(features: { sql: boolean; mermaid: boolean; katex: boolean }): Promise<void> {
+async function copyVendor(features: { sql: boolean; katex: boolean }): Promise<void> {
   const vendor = join(paths.dist, "vendor");
   if (features.sql) {
     await mkdir(join(vendor, "sqljs"), { recursive: true });
     await cp(join(paths.nodeModules, "sql.js", "dist", "sql-wasm.js"), join(vendor, "sqljs", "sql-wasm.js"));
     await cp(join(paths.nodeModules, "sql.js", "dist", "sql-wasm.wasm"), join(vendor, "sqljs", "sql-wasm.wasm"));
-  }
-  if (features.mermaid) {
-    await mkdir(join(vendor, "mermaid"), { recursive: true });
-    await cp(join(paths.nodeModules, "mermaid", "dist", "mermaid.min.js"), join(vendor, "mermaid", "mermaid.min.js"));
   }
   if (features.katex) {
     await mkdir(join(vendor, "katex", "fonts"), { recursive: true });
@@ -168,7 +165,6 @@ export interface BuiltAssets {
 
 export async function buildAssets(features: {
   sql: boolean;
-  mermaid: boolean;
   katex: boolean;
 }): Promise<BuiltAssets> {
   const manifest: AssetManifest = new Map();

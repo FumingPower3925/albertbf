@@ -5,6 +5,7 @@ import {
 } from "@shikijs/transformers";
 import { escapeAttr, escapeHtml } from "../render/html";
 import { renderChartFence } from "./charts";
+import { renderDiagramFence } from "./diagram";
 import type { Feature } from "../content";
 
 /** Languages (and common aliases) preloaded into the highlighter. Others
@@ -14,7 +15,7 @@ const LANGS = [
   "go", "rust", "c", "cpp", "zig", "python", "py", "javascript", "js",
   "typescript", "ts", "jsx", "tsx", "sql", "bash", "shell", "sh", "yaml",
   "yml", "toml", "json", "jsonc", "html", "css", "diff", "dockerfile",
-  "makefile", "markdown", "md", "mermaid", "text",
+  "makefile", "markdown", "md", "text",
 ] as const;
 
 const RUNNABLE = new Set(["go", "sql", "js", "javascript"]);
@@ -97,13 +98,11 @@ export function renderCodeBlock(
   const meta = parseFenceMeta(info);
   const features: Feature[] = [];
 
-  // Mermaid fences become client-rendered diagram containers, not code blocks.
-  if (meta.lang === "mermaid") {
-    features.push("mermaid");
-    return {
-      html: `<div class="mermaid-diagram"><pre class="mermaid">${escapeHtml(code)}</pre></div>\n`,
-      features,
-    };
+  // Diagram fences are laid out (dagre) and rendered to themed SVG at build
+  // time — no client JS, unlike the old client-mermaid path.
+  const diagram = renderDiagramFence(meta.lang, code);
+  if (diagram !== null) {
+    return { html: diagram, features };
   }
 
   // Chart/matrix fences become static SVG/HTML rendered at build time (no JS).

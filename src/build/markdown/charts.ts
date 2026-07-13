@@ -31,7 +31,7 @@ import { escapeHtml, escapeAttr } from "../render/html";
 
 const RESERVED = new Set([
   "type", "title", "unit", "series", "baseline", "sort", "max", "note",
-  "cols", "scale", "caption",
+  "cols", "scale", "caption", "highlight",
 ]);
 
 interface Row {
@@ -249,7 +249,60 @@ function renderMatrix(spec: ChartSpec): string {
   return `<figure class="chart chart--matrix"><table class="matrix">${cap}<thead>${head}</thead><tbody>${body}</tbody></table>${noteHtml}</figure>\n`;
 }
 
-/** Returns rendered HTML for a `chart`/`matrix` fence, or null for other langs. */
+// ---- plain data table (pipe-separated so cells may contain commas) ----------
+
+const TABLE_OPTS = new Set(["title", "caption", "note", "highlight"]);
+
+function renderTable(source: string): string {
+  const opts: Record<string, string> = {};
+  let cols: string[] = [];
+  const rows: string[][] = [];
+  for (const raw of source.split("\n")) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const cm = line.match(/^cols\s*:\s*(.+)$/i);
+    if (cm) { cols = cm[1].split("|").map((s) => s.trim()); continue; }
+    const om = line.match(/^([a-z]+)\s*:\s*(.+)$/i);
+    if (om && TABLE_OPTS.has(om[1].toLowerCase()) && !line.includes("|")) {
+      opts[om[1].toLowerCase()] = om[2].trim();
+      continue;
+    }
+    if (line.includes("|")) rows.push(line.split("|").map((s) => s.trim()));
+  }
+  if (!rows.length) return "";
+  const ncol = Math.max(cols.length, ...rows.map((r) => r.length));
+
+  // A column is numeric when most of its body cells parse as numbers.
+  const numericCol: boolean[] = [];
+  for (let i = 0; i < ncol; i++) {
+    const cells = rows.map((r) => r[i]).filter((c) => c && c.trim());
+    const nums = cells.filter((c) => !Number.isNaN(parseNum(c)));
+    numericCol[i] = cells.length > 0 && nums.length >= cells.length * 0.6;
+  }
+  const hl = opts.highlight ? cols.findIndex((c) => c.toLowerCase() === opts.highlight.toLowerCase()) : -1;
+  const cls = (i: number, extra = "") =>
+    `${extra}${numericCol[i] ? " dt--num" : ""}${i === hl ? " dt--hl" : ""}`.trim();
+
+  const head = cols.length
+    ? `<thead><tr>${cols.map((c, i) =>
+        `<th scope="col" class="${cls(i)}">${escapeHtml(c)}</th>`).join("")}</tr></thead>`
+    : "";
+  const body = rows.map((r) => {
+    const cells = Array.from({ length: ncol }, (_, i) => {
+      const cell = r[i] ?? "";
+      if (i === 0) return `<th scope="row" class="${cls(0)}">${escapeHtml(cell)}</th>`;
+      return `<td class="${cls(i)}">${escapeHtml(cell)}</td>`;
+    }).join("");
+    return `<tr>${cells}</tr>`;
+  }).join("");
+
+  const cap = opts.caption || opts.title;
+  const capHtml = cap ? `<caption>${escapeHtml(cap)}</caption>` : "";
+  const noteHtml = opts.note ? `<p class="chart__note">${escapeHtml(opts.note)}</p>` : "";
+  return `<figure class="chart chart--table"><table class="dtable">${capHtml}${head}<tbody>${body}</tbody></table>${noteHtml}</figure>\n`;
+}
+
+/** Returns rendered HTML for a chart/matrix/table fence, or null for other langs. */
 export function renderChartFence(lang: string, source: string): string | null {
   if (lang === "chart") {
     const spec = parseSpec(source);
@@ -257,8 +310,7 @@ export function renderChartFence(lang: string, source: string): string | null {
     if (type === "matrix" || type === "heatmap") return renderMatrix(spec);
     return renderBar(spec);
   }
-  if (lang === "matrix" || lang === "heatmap") {
-    return renderMatrix(parseSpec(source));
-  }
+  if (lang === "matrix" || lang === "heatmap") return renderMatrix(parseSpec(source));
+  if (lang === "table") return renderTable(source);
   return null;
 }
