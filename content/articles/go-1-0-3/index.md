@@ -9,9 +9,9 @@ links:
   - { label: "Go release history", url: "https://go.dev/doc/devel/release" }
 ---
 
-Go 1.0.3 shipped on 21 September 2012, the third point release and by far the largest: 223 commits against 1.0.2. The release note describes all of it in one line: "includes minor code and documentation fixes."[^release] Most of it is exactly that, typo corrections and CLA additions and doc tweaks. The note tells you nothing about which of those commits you actually needed.
+Go 1.0.3 shipped on 21 September 2012, the third point release and by far the largest: 223 commits against 1.0.2. The release note describes all of it in one line: "includes minor code and documentation fixes."[^release] Most of it is exactly that, typo corrections and CLA additions and doc tweaks.
 
-Two of them are the subject here, and neither is minor. One let a few malformed bytes crash any program that decompressed untrusted data. The other made a Go TLS server fail about one handshake in a few hundred against OpenSSL, at random, for a year. Both shipped as one-line entries in the log.
+Two of those commits are the subject here, and neither is minor. One let a few malformed bytes crash any program that decompressed untrusted data. The other made a Go TLS server fail about one handshake in a few hundred against OpenSSL.
 
 ## A few bytes that crash the decompressor
 
@@ -58,7 +58,7 @@ compress/flate.(*decompressor).nextBlock(0xf840059000, 0x405fc6)
 	/goroot/src/pkg/compress/flate/inflate.go:262 +0x1ab
 ```
 
-No error value this time. The panic comes up from inside `compress/flate`, three stack frames deep in the standard library, on input the program was handed from outside, and none of it ever decompressed to anything.
+There is no error value this time. The panic comes up from inside `compress/flate`, three stack frames into the standard library, on input the program was handed from outside.
 
 ## The length the decoder trusted
 
@@ -121,7 +121,7 @@ func (f *decompressor) readHuffman() error {
 }
 ```
 
-The array holds 318 entries, and 318 is `maxLit + maxDist`, exactly `286 + 32`. Those 318 slots are the largest header the format permits. RFC 1951 caps HLIT at 29, so a well-formed `nlit` never exceeds 286.[^rfc] The array was sized for legal input, with no room to spare.
+The array holds 318 entries, and 318 is `maxLit + maxDist`, exactly `286 + 32`. Those 318 slots match the largest header the format permits: RFC 1951 caps HLIT at 29, so a well-formed `nlit` never exceeds 286.[^rfc]
 
 But `nlit` came straight from the stream, and the stream said 288, two more than the 286 the array budgeted for literal codes. The decoder fills `nlit + ndist` entries, and for this header that is 319, one more than the array holds. The write to `f.bits[318]` lands one index past the end, where the last valid slot is 317, so Go's bounds check fires and turns the out-of-bounds write into a panic instead of the silent memory corruption it would be in C.
 
@@ -140,15 +140,15 @@ Three lines. `ndist` and the code-length count could not exceed their arrays, so
 
 ## The panic as denial of service
 
-A panic is not a returned error, and that difference is why this is a security bug. An error travels up the call stack as a value the caller chose to ask for. A panic unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input is often exactly the code that does not expect to fail this way: it calls `io.Copy` from a flate reader and handles the error, never imagining the read itself could bring the program down.
+A panic is not a returned error, and that difference is why this is a security bug. An error travels up the call stack as a value the caller chose to ask for. A panic unwinds the stack on its own, and if nothing recovers it, it ends the program. Code that decompresses untrusted input is often exactly the code that does not expect to fail this way. It calls `io.Copy` from a flate reader and handles the error the copy returns, and a panic from inside the read is not that error.
 
-So a malformed header becomes a denial of service. The input needs no valid compressed data and no credentials, just a handful of bytes with the wrong count in the first one, and it triggers every time. Anything that inflated bytes off the wire was exposed, and in 2012 that surface was widening, anywhere a server accepted compressed input it had not created.
+So a malformed header becomes a denial of service. The input needs no valid compressed data and no credentials, only a handful of bytes with the wrong count in the first one, and the trigger is deterministic. Anything that inflated bytes off the wire was exposed, and in 2012 that surface was widening, anywhere a server accepted compressed input it had not created.
 
 ## A signature a byte short
 
-The flate panic was one bug the note buried. The other is quieter and stranger. In July 2012 someone reported that a Go TLS server worked against Go clients and against browsers, and failed against OpenSSL, roughly one handshake in every few hundred, with nothing to distinguish the connections that broke.[^rsaissue]
+The flate panic was one of the release's real fixes. Another was reported in July 2012: a Go TLS server that worked against Go clients and against browsers, and failed against OpenSSL, roughly one handshake in every few hundred, with nothing to distinguish the connections that broke.[^rsaissue]
 
-During a TLS handshake the server signs part of the exchange with its RSA private key and the client verifies it. The signature Go produced was mathematically valid, and verifying it as a number succeeded. What OpenSSL rejected was its length. Here is one message signed with one RSA key, on Go 1.0 and on a current toolchain. The key was generated by the Go 1.0 toolchain so both accept it, and PKCS#1 v1.5 signing is deterministic, so the value is fixed:[^rsarepro]
+During a TLS handshake the server signs part of the exchange with its RSA private key and the client verifies it. The signature Go produced was mathematically valid and verified fine as a number. OpenSSL rejected it for its length. Here is one message signed with one RSA key, on Go 1.0 and on a current toolchain. The key was generated by the Go 1.0 toolchain so both accept it, and PKCS#1 v1.5 signing is deterministic, so the value is fixed:[^rsarepro]
 
 ```
 # Go 1.0, the toolchain that shipped the bug:
@@ -162,11 +162,11 @@ modulus is 128 bytes; signature is 128 bytes
 first 6 bytes: 00c8fe05bee5
 ```
 
-The modulus is 128 bytes, so a signature under this key is 128 bytes. On Go 1.0 this one is 127. The two outputs are the same value: the current signature is the Go 1.0 signature with a `00` byte in front. Go 1.0 left off a leading zero.
+The modulus is 128 bytes, so a signature under this key is 128 bytes. On Go 1.0 this one is 127. The two outputs are the same value: the current signature is the Go 1.0 signature with a leading `00` byte that Go 1.0 dropped.
 
 ## The missing zero
 
-A PKCS#1 v1.5 signature is a large integer, and putting it on the wire means encoding it as bytes. The standard fixes the width. The octet string is exactly as many bytes as the modulus, big-endian, padded on the left with zeros when the number is small.[^i2osp] A 128-byte modulus takes a 128-byte signature, always.
+A PKCS#1 v1.5 signature is a large integer, and putting it on the wire means encoding it as bytes. The standard fixes the width: the octet string is exactly as many bytes as the modulus, big-endian, left-padded with zeros when the number is small, so a 128-byte modulus always takes a 128-byte signature.[^i2osp]
 
 Go 1.0 computed the integer correctly, then encoded it with `big.Int.Bytes`, which returns the shortest big-endian form and drops leading zeros:
 
@@ -178,7 +178,7 @@ import (
 	"math/big"
 )
 
-// leftPad is what the fix added: pad the big-endian bytes back out to k.
+// left-padding is what the fix applies to the signature: pad back out to k.
 func leftPad(b []byte, k int) []byte {
 	out := make([]byte, k)
 	copy(out[k-len(b):], b)
@@ -202,15 +202,13 @@ Go 1.0   c.Bytes():   c8 fe 05 be  (4 bytes)
 Go 1.0.3 left-padded: 00 c8 fe 05 be  (5 bytes)
 ```
 
-The `leftPad` is the repair; the `Bytes` call above it is what Go 1.0 shipped. Whenever the signature integer was small enough to begin with a zero byte, `Bytes` returned one byte fewer than the modulus. For a value that looks random, a leading zero byte turns up about once in 256, which is the rate at which the handshakes failed.
+The left-padding is the repair; the bare `Bytes` call is what Go 1.0 shipped. Whenever the signature integer was small enough to begin with a zero byte, `Bytes` returned one byte fewer than the modulus. For a value that looks random, a leading zero byte turns up about once in 256, which is the rate at which the handshakes failed.
 
-Go's own verifier accepted the short encoding, so Go talking to Go never noticed. OpenSSL did not. Adam Langley put the requirement in the change description itself: *"OpenSSL requires that RSA signatures be exactly the same byte-length as the modulus."* His fix left-pads the output to that length, and it covered both functions that had the bug, PKCS#1 v1.5 signing and encryption.[^rsacl]
+Go's own verifier accepted the short encoding, so a Go client and a Go server never noticed the missing byte, while OpenSSL enforced the length and rejected it. Adam Langley put the requirement in the change description itself: *"OpenSSL requires that RSA signatures be exactly the same byte-length as the modulus."* His fix left-pads the output to that length, and it covered both functions that had the bug, PKCS#1 v1.5 signing and encryption.[^rsacl]
 
 ## The third point release
 
-Go 1.0.3 was 223 commits, and the two bugs above are two of them. Most of the rest is the freight the release note names: documentation, typos, contributor additions. A few more were real. The amd64 compiler had been rounding float-to-integer conversions when the language requires truncation, so `uint64` of a runtime `2.9` returned 3.[^float] Each of these is a single line in the log.
-
-That is the shape of a point release once people depend on the language: a long tail of small corrections, and buried in it, a denial of service and a signature that OpenSSL would not accept, filed under minor code and documentation fixes.
+Go 1.0.3 was 223 commits, and the two bugs above are two of them. Most of the rest is what the release note names: documentation and contributor additions. A few more were real. The amd64 compiler had been rounding float-to-integer conversions when the language requires truncation, so a runtime `uint64(2.9)` returned 3.[^float]
 
 [^release]: [Release History](https://go.dev/doc/devel/release), the source for the 21 September 2012 date and the verbatim description of go1.0.3 as "minor code and documentation fixes." There are 223 commits between the go1.0.2 and go1.0.3 tags.
 [^issue]: [golang/go issue #3815](https://github.com/golang/go/issues/3815), "compress/flate: panic on index out of range." A malformed dynamic-Huffman header made the flate decoder index past a fixed array and panic instead of returning an error.
