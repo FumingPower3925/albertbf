@@ -116,31 +116,45 @@ The garbage collector changed in a quieter way. Go 1.0's collector was conservat
 
 The visible addition was a tool. With the `-race` flag, the Go 1.1 toolchain instruments every memory access a program makes and reports, at run time, when two goroutines reach the same variable with no synchronization between them and at least one is writing. It is built on ThreadSanitizer, the same detector used for C and C++.[^race]
 
-Here is about the smallest program that has a race. Two goroutines write one variable with nothing ordering them:
+Here is a race you can run. A thousand goroutines each add one to a shared counter with no lock, and the program does that eight times over:
 
 ```go run title="race.go"
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 func main() {
-	done := make(chan bool)
-	count := 0
-	go func() {
-		count++ // write in a second goroutine
-		done <- true
-	}()
-	count++ // write in the main goroutine, with nothing ordering the two
-	<-done
-	fmt.Println(count)
+	for trial := 0; trial < 8; trial++ {
+		count := 0
+		var wg sync.WaitGroup
+		for i := 0; i < 1000; i++ {
+			wg.Add(1)
+			go func() {
+				count++ // no lock: a racing read-modify-write
+				wg.Done()
+			}()
+		}
+		wg.Wait()
+		fmt.Println(count)
+	}
 }
 ```
 
 ```output
-2
+960
+974
+956
+1000
+972
+936
+969
+983
 ```
 
-Run it and it prints 2. Seeing the race takes a tool. On Go 1.0 you cannot even ask, because the flag does not exist:
+Every line should read 1000. Most fall short, and they rarely repeat. An unlocked `count++` is a read, an add, and a write, and when two goroutines interleave those steps one overwrites the other and an update is lost. On Go 1.0 you cannot even ask whether that is a race, because the flag does not exist:
 
 ```
 $ go version
@@ -158,21 +172,21 @@ go version go1.1
 $ go run -race race.go
 ==================
 WARNING: DATA RACE
-Write by goroutine 4:
+Write by goroutine 5:
   main.func·001()
-      /tmp/race.go:9 +0x40
+      /tmp/race.go:15 +0x40
 
-Previous write by goroutine 1:
-  main.main()
-      /tmp/race.go:12 +0x115
+Previous write by goroutine 4:
+  main.func·001()
+      /tmp/race.go:15 +0x40
 ==================
 Found 1 data race(s)
 exit status 66
 ```
 
-Two writes to `count`, one from the goroutine at line 9 and one from `main` at line 12, with no channel or lock ordering them, and the detector names both. It checks correctness, and says nothing about speed. The bug it catches is the kind that survives every reading of the code, because whether it corrupts anything depends on timing that changes from run to run, and a tool that watches every access does not depend on catching the bad interleaving live. It reasons about which accesses could overlap at all. Shipping it in 1.1 put a correctness tool for concurrency in the standard toolchain.
+Both writes are the same statement, `count++` at line 15, reached by two of the goroutines with nothing ordering them, and the detector names both. It checks correctness and says nothing about speed. The bug is the kind that survives every reading of the code, because whether it loses an update depends on timing that changes from run to run, which is the wobble in the eight numbers above. A tool that watches every access does not need to catch the bad interleaving live; it reasons about which accesses could overlap at all. Shipping it in 1.1 put a correctness tool for concurrency in the standard toolchain.
 
-The playground cannot run `-race`, so those two transcripts are recorded rather than live cells.[^repro]
+The program above runs live; the playground cannot run `-race`, so the two detector transcripts are recorded.[^repro]
 
 ## Sharper edges
 
