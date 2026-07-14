@@ -20,8 +20,6 @@ themeToggle?.addEventListener("click", () => {
   document.documentElement.dataset.theme = next;
   localStorage.setItem("theme", next);
   themeToggle.setAttribute("aria-label", labelFor(next));
-  // Re-render mermaid diagrams for the new effective theme, if present.
-  document.dispatchEvent(new CustomEvent("themechange"));
 });
 
 /** Announce a message to assistive tech via the shared live region. */

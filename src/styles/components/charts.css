@@ -1,0 +1,206 @@
+/* Build-time benchmark charts: static SVG bars + heatmap tables, no client JS.
+   All color comes from theme tokens, so light/dark just work. */
+
+.chart {
+  --chart-1: var(--color-accent);
+  --chart-2: var(--color-info);
+  --chart-3: var(--color-success);
+  --chart-4: var(--color-warning);
+  --chart-under: var(--color-text-muted);
+
+  margin: var(--space-lg) 0;
+  overflow-x: auto;
+}
+
+.chart__title {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+  line-height: 1.3;
+}
+
+.chart__svg {
+  display: block;
+  width: 100%;
+  min-width: 34rem; /* below this, scroll rather than shrink text to mush */
+  height: auto;
+}
+
+/* SVG text + marks (fill/stroke are theme tokens; sizes are viewBox units). */
+.chart__cat {
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  fill: var(--color-text-secondary);
+}
+.chart__val {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  fill: var(--color-text);
+}
+.chart__bar { fill: var(--chart-1); }
+.chart__bar--s1 { fill: var(--chart-1); }
+.chart__bar--s2 { fill: var(--chart-2); }
+.chart__bar--s3 { fill: var(--chart-3); }
+.chart__bar--s4 { fill: var(--chart-4); }
+.chart__bar--under { fill: var(--chart-under); }
+
+.chart__baseline {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.chart__baseline-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--color-text-muted);
+}
+
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.chart__legend-item { display: inline-flex; align-items: center; gap: 0.35em; }
+.chart__swatch {
+  width: 0.75em;
+  height: 0.75em;
+  border-radius: 2px;
+  display: inline-block;
+}
+.chart__swatch--s1 { background: var(--chart-1); }
+.chart__swatch--s2 { background: var(--chart-2); }
+.chart__swatch--s3 { background: var(--chart-3); }
+.chart__swatch--s4 { background: var(--chart-4); }
+
+.chart__note {
+  margin: var(--space-xs) 0 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* --- matrix / heatmap --- */
+.chart--matrix { overflow-x: auto; }
+
+.matrix {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.matrix caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: var(--space-xs);
+}
+.matrix th,
+.matrix td {
+  padding: 0.4em 0.7em;
+  border: 1px solid var(--color-border);
+  text-align: center;
+  white-space: nowrap;
+}
+.matrix thead th {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-subtle);
+}
+.matrix tbody th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-surface-subtle);
+}
+.matrix__cell--num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.matrix__cell--pos { color: var(--color-success); font-weight: 600; }
+.matrix__cell--neg { color: var(--color-accent); font-weight: 600; }
+
+/* --- plain data table (benchmark results) --- */
+.chart--table { overflow-x: auto; }
+
+.dtable {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.dtable caption {
+  caption-side: bottom;
+  text-align: left;
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.dtable th,
+.dtable td {
+  padding: 0.4em 0.85em;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+.dtable thead th {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border-bottom: 1.5px solid var(--color-border-strong);
+}
+.dtable tbody th {
+  font-weight: 500;
+  color: var(--color-text);
+}
+.dtable tbody tr:last-child td,
+.dtable tbody tr:last-child th { border-bottom: none; }
+.dt--num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.dtable .dt--hl {
+  color: var(--color-accent-strong);
+  font-weight: 600;
+  background: color-mix(in oklab, var(--color-accent) 6%, transparent);
+}
+
+/* collapsible table */
+.dtable-details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.5em 0.7em;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  user-select: none;
+  transition: color var(--dur-1) var(--ease);
+}
+.dtable-details > summary::-webkit-details-marker { display: none; }
+.dtable-details > summary::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-1) var(--ease);
+}
+.dtable-details[open] > summary::before { transform: rotate(45deg); }
+.dtable-details > summary:hover { color: var(--color-accent); }
+.dtable-details[open] > summary { margin-bottom: var(--space-sm); }
+.dtable-scroll { overflow-x: auto; }

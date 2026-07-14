@@ -1,0 +1,108 @@
+/* Build-time diagrams: dagre layout, themed SVG, no client JS.
+   Depth from soft shadows; structure from tinted cluster cards; life from a
+   coral accent on emphasis nodes and secondary (dashed) edges. */
+
+.diagram {
+  --diagram-edge: light-dark(#8a857c, #6f6a62);
+  margin: var(--space-lg) 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.diagram__title {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+  text-align: left;
+}
+
+.diagram__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 22rem; /* scroll rather than shrink text to mush on narrow screens */
+  margin-inline: auto;
+}
+
+/* --- nodes --- */
+.diagram__node {
+  filter: drop-shadow(0 1.5px 2px light-dark(rgb(28 27 26 / 0.13), rgb(0 0 0 / 0.55)));
+}
+.diagram__node > rect,
+.diagram__node > circle,
+.diagram__node > polygon,
+.diagram__node > path {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.4;
+}
+.diagram__node > text {
+  fill: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+}
+.diagram__node--accent > rect,
+.diagram__node--accent > circle,
+.diagram__node--accent > polygon,
+.diagram__node--accent > path {
+  fill: color-mix(in oklab, var(--color-accent) 13%, var(--color-surface));
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+}
+.diagram__node--accent > text { fill: var(--color-accent-strong); font-weight: 600; }
+.diagram__node--muted > rect,
+.diagram__node--muted > circle,
+.diagram__node--muted > polygon,
+.diagram__node--muted > path {
+  fill: var(--color-surface-subtle);
+  stroke: var(--color-border);
+}
+.diagram__node--muted > text { fill: var(--color-text-muted); }
+
+/* --- edges --- */
+.diagram__edge {
+  fill: none;
+  stroke: var(--diagram-edge);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.diagram__edge--dashed {
+  stroke: var(--color-accent);
+  stroke-dasharray: 5 4;
+}
+.diagram__arrowhead { fill: var(--diagram-edge); }
+.diagram__arrowhead--accent { fill: var(--color-accent); }
+
+.diagram__edge-label rect { fill: var(--color-bg); }
+.diagram__edge-label text {
+  fill: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* --- clusters --- */
+.diagram__cluster > rect {
+  fill: color-mix(in oklab, var(--color-accent) 3.5%, var(--color-surface-subtle));
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+.diagram__cluster-label {
+  fill: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.diagram__note {
+  margin: var(--space-xs) 0 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: left;
+}

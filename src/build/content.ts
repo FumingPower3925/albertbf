@@ -32,7 +32,6 @@ export interface TocEntry {
 /** Features detected during rendering; drive per-page conditional assets. */
 export type Feature =
   | "math"
-  | "mermaid"
   | "lightbox"
   | "run"
   | "run:go"

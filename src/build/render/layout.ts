@@ -107,6 +107,9 @@ ${X_HANDLE ? html`<meta name="twitter:site" content="${X_HANDLE}">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="${site.fullTitle}" href="/feed.xml">
 <link rel="alternate" type="application/feed+json" title="${site.fullTitle}" href="/feed.json">
+<link rel="preload" href="/fonts/newsreader-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/newsreader-latin-wght-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <script>${raw(THEME_SNIPPET)}</script>
 <style>${raw(inlineCss)}</style>
 ${meta.math ? html`<link id="katex-css" rel="preload" href="/vendor/katex/katex.min.css" as="style"><noscript><link rel="stylesheet" href="/vendor/katex/katex.min.css"></noscript>` : null}

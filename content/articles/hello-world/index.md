@@ -26,7 +26,8 @@ Lists work too:
 |---|---|---|
 | Syntax highlighting | Shiki | none |
 | Math | KaTeX | none |
-| Diagrams | none | Mermaid (lazy) |
+| Diagrams | dagre + SVG | none |
+| Charts and tables | SVG + HTML | none |
 | Running code | none | on demand |
 
 ## Callouts
@@ -253,14 +254,60 @@ All rendered at build time. Your browser downloads no math JavaScript.
 
 ## Diagrams
 
-Mermaid diagrams are rendered client-side, lazily, and follow the site theme:
+Diagrams are laid out with dagre and rendered to SVG at build time, so they ship no JavaScript and still follow the site theme:
 
-```mermaid
-flowchart LR
-    md[index.md] --> build[bun build]
-    build --> dist[static HTML]
-    dist --> cf[Cloudflare Workers]
-    cf --> you((you))
+```diagram
+dir: LR
+md: index.md
+build: bun build
+dist: static HTML
+cf: Cloudflare Workers
+you (circle, accent): you
+md -> build -> dist -> cf -> you
+```
+
+## Charts and tables
+
+Benchmark data gets structures of its own, all rendered at build time to SVG or plain HTML. There is no charting library and no client JavaScript, and they follow the theme like everything else.
+
+A bar chart takes a list of labels and values. A `baseline` draws a reference line and greys out the bars that fall short of it:
+
+```chart
+title: Speedup after an optimization pass
+unit: x
+baseline: 1
+sort: desc
+note: Bars past the dashed line got faster; the one below got slower.
+Parser: 2.1
+Router: 1.6
+Template: 1.35
+Logger: 1.05
+Serializer: 0.9
+```
+
+A data table right-aligns its numeric columns with tabular figures and can single out one of them. Add a `collapse` line and it folds away behind a summary, so a long breakdown stays out of the way until someone wants it:
+
+```table
+collapse: Full latency breakdown, 6 endpoints
+caption: Numeric columns are monospace with tabular figures; the p99 column is highlighted.
+highlight: p99
+cols: endpoint | p50 (ms) | p99 (ms) | req/s
+GET /articles | 1.2 | 4.8 | 9,400
+GET /feed.xml | 0.9 | 3.1 | 2,100
+GET /tags/go | 1.1 | 4.2 | 3,800
+POST /api/run | 12.4 | 48.0 | 320
+GET /sitemap.xml | 0.7 | 2.4 | 640
+GET / | 1.0 | 3.6 | 7,200
+```
+
+A matrix is a grid whose numeric cells shade by value, for reading a comparison across two axes at a glance:
+
+```matrix
+title: Cache hit rate by tier and region (percent)
+cols: Edge, Regional, Origin
+US: 98, 82, 40
+EU: 96, 79, 38
+APAC: 91, 71, 44
 ```
 
 ## Media

@@ -1,4 +1,4 @@
-/* Figures, video, YouTube facade, lightbox, mermaid. */
+/* Figures, video, YouTube facade, lightbox. */
 
 .media {
   margin-block: var(--space-lg);
@@ -153,32 +153,4 @@
   }
 }
 
-.mermaid-diagram {
-  margin-block: var(--space-lg);
-  padding: var(--space-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-}
-
-.mermaid-diagram pre.mermaid {
-  background: none;
-  border: none;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-/* Let diagrams render at their natural size, filling the container when
-   they're wide (crisp — it's vector). !important overrides Mermaid's inline
-   max-width; width:auto avoids the flex-collapse that made them tiny. */
-.mermaid-diagram svg {
-  width: auto;
-  max-width: 100% !important;
-  height: auto;
-  margin-inline: auto;
-}
+/* Diagrams are now built server-side to themed SVG; see components/diagram.css. */

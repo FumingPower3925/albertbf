@@ -55,7 +55,6 @@ async function main() {
   // 3. Assets (styles, client bundles, fonts, vendor, _headers, static files)
   const { manifest, inlineCss } = await buildAssets({
     sql: usedFeatures.has("run:sql"),
-    mermaid: usedFeatures.has("mermaid"),
     katex: usedFeatures.has("math"),
   });
 
@@ -65,7 +64,6 @@ async function main() {
     const scripts: string[] = [];
     if (article.toc.length >= 2) scripts.push("toc.js");
     if (article.features.has("lightbox")) scripts.push("lightbox.js");
-    if (article.features.has("mermaid")) scripts.push("mermaid-loader.js");
     if (article.features.has("run")) scripts.push("run.js");
 
     const doc = page(
