@@ -68,7 +68,7 @@ goroutine 2 [runnable]:
 exit status 2
 ```
 
-Read the second line. `pc=0xdeadbeef` is the program counter, the address of the instruction the processor tried to run, and `0xdeadbeef` is the number the program put in the slice a moment earlier. A value it stored as data came back as an address to jump to. The function returned, and the return sent it to `0xdeadbeef`. There is no stack trace under the two goroutines because there is no usable stack left to walk: the word that named the caller is the word that got overwritten.
+Read the second line. `pc=0xdeadbeef` is the program counter, the address of the instruction the processor tried to run, and `0xdeadbeef` is the number the program put in the slice a moment earlier. A value it stored as data came back as an address to jump to. The function returned, and the return sent it to `0xdeadbeef`. There is no stack trace under the two goroutines because the overwritten word is the return address itself, so a stack walk has nothing to follow back to the caller.
 
 ## How a swap reaches the return address
 
@@ -83,16 +83,16 @@ dir: LR
 compile: compile Swap,\ndrop the unused tmp
 wrapper: build the wrapper,\ninline Swap (tmp returns)
 reuse: 8g reuses\ntmp's missing slot
-addr: the return address (accent)
+addr (accent): the return address
 compile -> wrapper -> reuse
 reuse ~> addr: lands on
 ```
 
-amd64 and ARM were spared. Their back ends laid the frame out differently, so the reused slot did not fall on the return address. Same source, same compiler, one architecture that turned a slice write into a jump.
+amd64 and ARM were spared. Their back ends laid the frame out differently, so the reused slot did not fall on the return address.
 
 ## A value you control, on the return address
 
-That is why the release notes call it a security fix and not a codegen fix. The word written over the return address was not garbage. It was slice data, and a program builds its slices from its input. Get a chosen 32-bit value into the wrong entry and you choose where the corrupted function returns to. `0xdeadbeef` is a sentinel that segfaults loudly, but a real value would be an address, and returning to an address you picked is the whole aim of a control-flow attack. No exploit was ever written for this, and 386 was the minority target by 2013, but an externally controlled word landing on the return address is memory corruption with control-flow-hijack potential, and that is reason enough to fix it quietly and fast.
+The release notes give it the security label because the word written over the return address was slice data, and a program builds its slices from its input. Get a chosen 32-bit value into the wrong entry and you choose where the corrupted function returns to. `0xdeadbeef` is a sentinel that segfaults loudly, but a real value would be an address, and returning to an address you picked is the whole aim of a control-flow attack. No exploit was ever written for this, and 386 was the minority target by 2013, but an externally controlled word landing on the return address is memory corruption with control-flow-hijack potential, and that is reason enough to fix it quietly and fast.
 
 ## The fix
 
@@ -113,7 +113,7 @@ Go 1.1.1 | 386 | returned normally
 
 ## The rest of the release
 
-The other fifteen commits are the usual point-release mix.[^rest] Four are in the runtime, two of those memory-safety bugs in their own right: the garbage collector could rescan an object with the wrong size when a channel operation ran during collection, and it could scan past the end of a slice that pointed into an array embedded in a struct. Three more are in the compiler, all in the export data that lets one package inline a function from another, where a `make` of an unexported type, or slice and array types, could go missing and break the importer. None of those got the security line. The one that did was the one that handed you the return address.
+The other fifteen commits are the usual point-release mix.[^rest] Four are in the runtime, two of those memory-safety bugs in their own right: the garbage collector could rescan an object with the wrong size when its own scan reached a channel, and it could scan past the end of a slice that pointed into an array embedded in a struct. Two more fix the compiler's export data, the records that let one package inline a function from another, where a `make` of an unexported type, or slice and array types, could go missing and break the importer. Of the sixteen commits, the security line went to just the wrapper bug, the one that could write a value you chose over its own return address.
 
 [^rel]: [Go 1.1.1 release history](https://go.dev/doc/devel/release#go1.1.minor), the source for the 13 June 2013 date and the "security fix to the compiler" wording.
 [^repro]: The runnable cell runs on the current Go Playground, which is amd64. The 386 transcripts are from Go 1.1 and Go 1.1.1 toolchains built from their `go1.1` and `go1.1.1` source tags with a period compiler (gcc on ubuntu 12.04), cross-compiled to linux/386; the resulting static binaries run natively on msa2-client, an amd64 Linux machine that executes 386 binaries. Go 1.1 runs the same program cleanly on amd64, so the miscompile is specific to the 386 back end. The crash is deterministic across runs, though the goroutine numbers can vary.
