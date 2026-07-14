@@ -1,7 +1,7 @@
 ---
 title: "Go 1.1: The Dividend"
 date: 2026-07-17
-description: "A year after freezing the language, Go 1.1 recompiled the same code faster and shipped a tool that found data races. I built both compilers and timed the difference."
+description: "A year after freezing the language, Go 1.1 recompiled the same code faster and shipped a tool that found data races."
 tags: [go, go-history, runtime]
 series: go-version-by-version
 links:
@@ -13,7 +13,7 @@ Go 1.1 shipped on 13 May 2013, thirteen months after Go 1. Read its release note
 
 The change was all underneath. Recompile a Go 1.0 program with the 1.1 toolchain, no edits, and it ran about a third faster. The scheduler had been rebuilt, the garbage collector made precise, the compiler taught to emit better code. And the toolchain could now do something the 1.0 toolchain could not do at all: watch a running program and tell you where two goroutines were touching the same memory without synchronization.
 
-That figure is the Go team's, reported in 2013, and I checked it myself. The runnable cells later in the piece cannot help there: the playground fakes its clock, and the speedup lives in the compiler and the runtime rather than in a line you could edit. The timing in this piece comes from real hardware instead, and the cells carry what is left, a new tool and some sharper edges on the language.
+That figure is the Go team's. I measured it too, on real hardware, because the playground the runnable cells run on has a fake clock and cannot time anything.
 
 ## The dividend
 
@@ -116,9 +116,9 @@ The garbage collector changed in a quieter way. Go 1.0's collector was conservat
 
 The visible addition was a tool. With the `-race` flag, the Go 1.1 toolchain instruments every memory access a program makes and reports, at run time, when two goroutines reach the same variable with no synchronization between them and at least one is writing. It is built on ThreadSanitizer, the same detector used for C and C++.[^race]
 
-Here is the smallest program that has a race. Two goroutines write one variable with nothing ordering them:
+Here is about the smallest program that has a race. Two goroutines write one variable with nothing ordering them:
 
-```go
+```go run title="race.go"
 package main
 
 import "fmt"
@@ -136,7 +136,11 @@ func main() {
 }
 ```
 
-On Go 1.0 you cannot even ask the question, because the flag does not exist:
+```output
+2
+```
+
+Run it and it prints 2. Seeing the race takes a tool. On Go 1.0 you cannot even ask, because the flag does not exist:
 
 ```
 $ go version
