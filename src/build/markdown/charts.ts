@@ -251,7 +251,7 @@ function renderMatrix(spec: ChartSpec): string {
 
 // ---- plain data table (pipe-separated so cells may contain commas) ----------
 
-const TABLE_OPTS = new Set(["title", "caption", "note", "highlight"]);
+const TABLE_OPTS = new Set(["title", "caption", "note", "highlight", "collapse"]);
 
 function renderTable(source: string): string {
   const opts: Record<string, string> = {};
@@ -299,7 +299,11 @@ function renderTable(source: string): string {
   const cap = opts.caption || opts.title;
   const capHtml = cap ? `<caption>${escapeHtml(cap)}</caption>` : "";
   const noteHtml = opts.note ? `<p class="chart__note">${escapeHtml(opts.note)}</p>` : "";
-  return `<figure class="chart chart--table"><table class="dtable">${capHtml}${head}<tbody>${body}</tbody></table>${noteHtml}</figure>\n`;
+  const table = `<table class="dtable">${capHtml}${head}<tbody>${body}</tbody></table>`;
+  const inner = opts.collapse
+    ? `<details class="dtable-details"><summary>${escapeHtml(opts.collapse)}</summary><div class="dtable-scroll">${table}</div></details>`
+    : table;
+  return `<figure class="chart chart--table">${inner}${noteHtml}</figure>\n`;
 }
 
 /** Returns rendered HTML for a chart/matrix/table fence, or null for other langs. */
