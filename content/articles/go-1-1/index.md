@@ -25,26 +25,6 @@ The gains came from several places at once. The compiler inlined more, including
 
 I did not want to take that on faith, so I put it on a clock. I built the 1.0 and 1.1 compilers from their `go1` and `go1.1` source tags and ran the same benchmark file through each, natively and back to back, on one idle machine.[^bench] Recompiling the Go 1 code with the newer toolchain, with no edit to the source, moved almost all of it:
 
-```table
-caption: msa2-client, AMD Ryzen 9 9955HX (16C/32T), Ubuntu 26.04, linux/amd64. go1 vs go1.1 built from source, GOMAXPROCS=1, median of 5 runs, ns/op.
-highlight: speedup
-cols: benchmark | go 1.0 | go 1.1 | speedup
-BinaryTree | 437,681 | 443,659 | 0.99×
-Fannkuch | 1,766,521 | 1,486,956 | 1.19×
-Mandelbrot | 284,911 | 188,919 | 1.51×
-FmtFprintfInt | 94.1 | 66.6 | 1.41×
-FmtFprintfString | 118 | 64.2 | 1.84×
-AppendBytes | 2,970 | 3,431 | 0.87×
-MapAssignInt | 39.1 | 25.7 | 1.52×
-MapAccessInt | 36.1 | 15.5 | 2.33×
-GobEncode | 1,658 | 1,057 | 1.57×
-JSONMarshal | 7,180 | 3,849 | 1.87×
-RegexpMatch | 673 | 658 | 1.02×
-SortInts | 228,520 | 138,671 | 1.65×
-InterfaceCall | 518 | 310 | 1.67×
-Gzip | 270,253 | 255,145 | 1.06×
-```
-
 ```chart
 title: Recompile speedup, Go 1.0 to Go 1.1
 unit: x
@@ -65,6 +45,27 @@ Gzip: 1.06
 RegexpMatch: 1.02
 BinaryTree: 0.99
 AppendBytes: 0.87
+```
+
+```table
+collapse: Full results, 14 benchmarks in ns/op
+caption: msa2-client, AMD Ryzen 9 9955HX (16C/32T), Ubuntu 26.04, linux/amd64. go1 vs go1.1 built from source, GOMAXPROCS=1, median of 5 runs, ns/op.
+highlight: speedup
+cols: benchmark | go 1.0 | go 1.1 | speedup
+BinaryTree | 437,681 | 443,659 | 0.99×
+Fannkuch | 1,766,521 | 1,486,956 | 1.19×
+Mandelbrot | 284,911 | 188,919 | 1.51×
+FmtFprintfInt | 94.1 | 66.6 | 1.41×
+FmtFprintfString | 118 | 64.2 | 1.84×
+AppendBytes | 2,970 | 3,431 | 0.87×
+MapAssignInt | 39.1 | 25.7 | 1.52×
+MapAccessInt | 36.1 | 15.5 | 2.33×
+GobEncode | 1,658 | 1,057 | 1.57×
+JSONMarshal | 7,180 | 3,849 | 1.87×
+RegexpMatch | 673 | 658 | 1.02×
+SortInts | 228,520 | 138,671 | 1.65×
+InterfaceCall | 518 | 310 | 1.67×
+Gzip | 270,253 | 255,145 | 1.06×
 ```
 
 No single number captures it. The map read came out more than twice as fast. Formatting, JSON, gob, and sort came in between 40 and 90 percent faster. The regexp match and the gzip pass moved by only a few percent. Two came out slower on 1.1: the binary-tree allocation walk by a hair, and appending to a byte slice by about fifteen percent. The geometric mean is 1.41, and the individual results run from more than double to a real loss, which is the release notes' own hedge measured out: "sometimes much more, but occasionally less or even non-existent."

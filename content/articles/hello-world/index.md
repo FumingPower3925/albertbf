@@ -26,7 +26,7 @@ Lists work too:
 |---|---|---|
 | Syntax highlighting | Shiki | none |
 | Math | KaTeX | none |
-| Diagrams | none | Mermaid (lazy) |
+| Diagrams | dagre + SVG | none |
 | Running code | none | on demand |
 
 ## Callouts
@@ -253,7 +253,7 @@ All rendered at build time. Your browser downloads no math JavaScript.
 
 ## Diagrams
 
-Mermaid diagrams are rendered client-side, lazily, and follow the site theme:
+Diagrams are laid out with dagre and rendered to SVG at build time, so they ship no JavaScript and still follow the site theme:
 
 ```diagram
 dir: LR
