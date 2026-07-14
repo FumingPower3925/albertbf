@@ -10,9 +10,13 @@ links:
   - { label: "Issue #5443", url: "https://github.com/golang/go/issues/5443" }
 ---
 
-Go 1.1.1 shipped on 13 June 2013, a month after Go 1.1, and went out described as a handful of compiler and runtime fixes.[^rel] Go's promise is memory safety, and two pieces of machinery keep it: the compiler, which controls what the generated code may touch, and the collector, which judges what memory is still in use. This release corrected both. Between them they held three ways to corrupt memory the language calls safe, one on the stack and two on the heap, and the sharpest is a compiler bug that, on 386, made a function write a value of your choosing over its own return address.
+Go 1.1.1 shipped on 13 June 2013, a month after Go 1.1, and went out described as a handful of compiler and runtime fixes.[^rel] Go's promise is memory safety, and two pieces of machinery keep it: the compiler, which controls what the generated code may touch, and the collector, which judges what memory is still in use. This release corrected both. Between them they held three ways to corrupt memory the language calls safe, one on the stack and two on the heap.
 
-## A program that does nothing
+## The compiler
+
+The sharpest of them, on 386, made a function write a value of your choosing over its own return address.
+
+### A program that does nothing
 
 Here is the whole thing, a program that swaps two entries of a slice:
 
@@ -54,7 +58,7 @@ returned normally
 
 It makes a slice of eight 32-bit values, writes `0xdeadbeef` into the first, and calls `Swap` through an interface to exchange entries 0 and 4. Run it here, on a 64-bit build, and it does exactly that and says so.[^repro] Go 1.1 compiled it correctly for amd64. The 386 build is where it goes wrong.
 
-## On 386, it does not return
+### On 386, it does not return
 
 Compile the same source with the same Go 1.1, targeting 386, and run it:
 
@@ -71,7 +75,7 @@ exit status 2
 
 Read the second line. `pc=0xdeadbeef` is the program counter, the address of the instruction the processor tried to run, and `0xdeadbeef` is the number the program put in the slice a moment earlier. A value it stored as data came back as an address to jump to. The function returned, and the return sent it to `0xdeadbeef`. There is no stack trace under the two goroutines because the overwritten word is the return address itself, so a stack walk has nothing to follow back to the caller.
 
-## How a swap reaches the return address
+### How a swap reaches the return address
 
 `Swap` uses one temporary, `tmp`, to hold a value while it exchanges the two entries. The bug is about where that temporary lived.
 
@@ -91,11 +95,11 @@ reuse ~> addr: lands on
 
 amd64 ran the same generated wrapper, but its optimizer removed the leftover `tmp` from it, so no write to a missing slot was emitted. The 386 back end kept `tmp`, and its write landed on the return address.
 
-## A value you control, on the return address
+### A value you control, on the return address
 
 The word written over the return address was slice data, and a program builds its slices from its input. Put a chosen 32-bit value into the wrong entry and you choose where the corrupted function returns to. That is the shape of a control-flow attack: the overwritten word is externally controllable, and with the right value the return jumps into code the attacker picked.[^sec] `0xdeadbeef` segfaults loudly, but a real value would be an address. No exploit was written for it, and the release went out described as ordinary compiler and runtime fixes.
 
-## The fix
+### The fix
 
 The inlining that broke this was itself recent. A month earlier an optimization had turned inlining on inside these generated wrappers, to spare interface method calls the cost of a real call; on some sort benchmarks it cut the time by a fifth to over a third.[^fix] The crash that turned the bug up was in a program that sorted. The fix keeps the optimization and pays a pointer per declaration for it: the compiler now snapshots a function's variable list before the pass that drops unused locals runs, and the wrapper inlines from the snapshot, so `tmp` keeps a slot of its own. Built by Go 1.1.1, the same 386 program returns:
 
@@ -112,9 +116,11 @@ Go 1.1 | 386 | panic, pc=0xdeadbeef
 Go 1.1.1 | 386 | returned normally
 ```
 
-## A slice that hides a struct
+## The collector
 
-The compiler is one enforcer. The other is the collector, and in Go 1.1 it had just changed. Go 1.1 made the garbage collector more precise: rather than treat every word that looked like a pointer as one, it read a program's types to know which words actually held pointers.[^precise] Give the collector the wrong type for a block of memory and it scans the wrong thing.
+The collector is the other enforcer, and in Go 1.1 it had just changed. Go 1.1 made the garbage collector more precise: rather than treat every word that looked like a pointer as one, it read a program's types to know which words actually held pointers.[^precise] Give the collector the wrong type for a block of memory and it scans the wrong thing.
+
+### A slice that hides a struct
 
 Here is a program that gives it the wrong type without meaning to:
 
@@ -173,7 +179,7 @@ slice ~> node: backing array at offset 0
 node -> scan -> lost
 ```
 
-## The heap comes back reused
+### The heap comes back reused
 
 Built with Go 1.1 and run, the program reports what survived:
 
