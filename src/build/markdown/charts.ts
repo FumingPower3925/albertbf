@@ -279,7 +279,14 @@ function renderTable(source: string): string {
     const nums = cells.filter((c) => !Number.isNaN(parseNum(c)));
     numericCol[i] = cells.length > 0 && nums.length >= cells.length * 0.6;
   }
-  const hl = opts.highlight ? cols.findIndex((c) => c.toLowerCase() === opts.highlight.toLowerCase()) : -1;
+  // Match the highlight column tolerantly: exact, or ignoring a trailing unit
+  // annotation like "p99 (ms)", or as a substring.
+  const hl = opts.highlight
+    ? cols.findIndex((c) => {
+        const cl = c.toLowerCase(), h = opts.highlight.toLowerCase();
+        return cl === h || cl.replace(/\s*\([^)]*\)\s*$/, "").trim() === h || cl.includes(h);
+      })
+    : -1;
   const cls = (i: number, extra = "") =>
     `${extra}${numericCol[i] ? " dt--num" : ""}${i === hl ? " dt--hl" : ""}`.trim();
 
