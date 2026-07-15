@@ -92,8 +92,9 @@
   color: var(--color-text);
 }
 
-/* Tables scroll horizontally instead of breaking layout. */
-.prose table {
+/* Tables scroll horizontally instead of breaking layout. Chart components
+   (figure.chart) bring their own table styling and scroll container. */
+.prose table:not(.chart *) {
   display: block;
   overflow-x: auto;
   border-collapse: collapse;
@@ -102,14 +103,14 @@
   line-height: 1.5;
 }
 
-.prose th,
-.prose td {
+.prose th:not(.chart *),
+.prose td:not(.chart *) {
   border: 1px solid var(--color-border);
   padding: var(--space-xs) var(--space-md);
   text-align: left;
 }
 
-.prose th {
+.prose th:not(.chart *) {
   background: var(--color-surface-subtle);
   font-weight: 600;
   color: var(--color-text);
