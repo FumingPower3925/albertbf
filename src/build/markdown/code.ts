@@ -1,8 +1,4 @@
 import { createHighlighter, type Highlighter } from "shiki";
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-} from "@shikijs/transformers";
 import { escapeAttr, escapeHtml } from "../render/html";
 import { renderChartFence } from "./charts";
 import { renderDiagramFence } from "./diagram";
@@ -117,8 +113,6 @@ export function renderCodeBlock(
     themes: { light: LIGHT_THEME, dark: DARK_THEME },
     defaultColor: false,
     transformers: [
-      transformerNotationDiff(),
-      transformerNotationHighlight(),
       {
         line(node, line) {
           if (meta.highlights.includes(line)) {
