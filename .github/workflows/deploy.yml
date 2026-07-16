@@ -24,6 +24,9 @@ jobs:
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
       - name: Fetch current search index
         run: |
           curl -sf https://albertbf.com/search-index.json -o /tmp/old-search-index.json || echo "[]" > /tmp/old-search-index.json

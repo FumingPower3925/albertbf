@@ -4,21 +4,31 @@ updates:
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 5
     reviewers:
       - "FumingPower3925"
     assignees:
       - "FumingPower3925"
+    # Only propose releases that have survived a week in the wild. This covers
+    # version updates only; security updates are event-driven and ignore it.
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
     groups:
-      all-bun-dependencies:
+      # Majors stay out of the group so they arrive as their own reviewable PR
+      # instead of riding along behind a "3 updates" title.
+      bun-minor-patch:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     reviewers:
       - "FumingPower3925"
     assignees:

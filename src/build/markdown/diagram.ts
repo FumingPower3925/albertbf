@@ -1,9 +1,9 @@
 import { escapeHtml, escapeAttr } from "../render/html";
-// dagre-d3-es bundles dagre's layout + graphlib (pure JS, no DOM), already a
-// transitive dependency. We use it only for layout math and render our own SVG.
-// eslint-disable-next-line
-import * as dagre from "dagre-d3-es/src/dagre/index.js";
-import { Graph } from "dagre-d3-es/src/graphlib/index.js";
+// dagre's layout + graphlib (pure JS, no DOM). We use it only for the layout
+// math and render our own SVG, so nothing here needs the d3 renderer.
+import dagre from "@dagrejs/dagre";
+
+const { Graph } = dagre.graphlib;
 
 /**
  * Build-time diagrams: a small node/edge DSL laid out by dagre and rendered to
