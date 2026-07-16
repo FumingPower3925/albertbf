@@ -12,7 +12,7 @@ links:
 
 Go 1.1.2 shipped on 13 August 2013, two months after Go 1.1.1. Fifteen commits, described as fixes to the gc compiler and cgo, and to the bufio, runtime, syscall, and time packages.[^rel] Then the notes do something they do nowhere else on the page: they address you in the second person and tell you to go and read a change.[^note]
 
-They picked the right one. It is also the clearest case of the habit this release has. The bugs here report that they worked. One returns nil while ruining the process that called it, one prints the wrong answer with no diagnostic at all, and one throws your data away and tells you it wrote nothing, which is true.
+That change is the place to start, and it is the kind of bug the release keeps making: the call returns a nil error, and the value behind it is wrong or missing.
 
 ## The syscall
 
@@ -20,52 +20,28 @@ The warned-about bug is issue #5949: on 32-bit Linux, `syscall.Getrlimit` and `s
 
 ### A program that asks its own limit
 
-This program asks the kernel for its own open-file limit twice. Once through `/proc/self/limits`, which is the kernel's own account and does not go through package `syscall` at all, and once through `Getrlimit`. Then it tries to open a file.
+`Getrlimit` is meant to fill the `Rlimit` struct you pass it with the process's current limit. This program seeds that struct with a value of its own, then opens a file. A seed that comes back untouched means the call never read anything.
 
 ```go title="rlimit.go"
 package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"strings"
 	"syscall"
 )
 
-// kernelNofile reads the process's real open-file limit from the kernel,
-// bypassing package syscall entirely.
-func kernelNofile() string {
-	b, err := ioutil.ReadFile("/proc/self/limits")
-	if err != nil {
-		return "cannot read: " + err.Error()
-	}
-	for _, line := range strings.Split(string(b), "\n") {
-		if strings.Contains(line, "open files") {
-			return strings.Join(strings.Fields(line), " ")
-		}
-	}
-	return "not found"
-}
-
 func main() {
-	fmt.Println("kernel says, before:", kernelNofile())
+	// Getrlimit is meant to overwrite lim with the current limit. Seed it with
+	// a value of our own; if that value survives the call, the call read nothing.
+	lim := syscall.Rlimit{Cur: 1, Max: 1}
+	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &lim)
+	fmt.Printf("Getrlimit -> err=%v lim=%+v\n", err, lim)
 
-	var rlim syscall.Rlimit
-	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rlim)
-	fmt.Printf("Getrlimit(RLIMIT_NOFILE) -> err=%v rlim=%+v\n", err, rlim)
-
-	fmt.Println("kernel says, after: ", kernelNofile())
-
-	if _, err := os.Open("/etc/hostname"); err != nil {
-		fmt.Println("open /etc/hostname:", err)
-	} else {
-		fmt.Println("open /etc/hostname: ok")
-	}
+	_, openErr := os.Open("/etc/hostname")
+	fmt.Println("open a file ->", openErr)
 }
 ```
-
-Nothing in it writes. It is four questions and no answers.
 
 ### It returns nil
 
@@ -73,27 +49,23 @@ Built with Go 1.1.1 for linux/386 and run on a machine whose soft limit is 1024:
 
 ```
 $ ./rlimit     # Go 1.1.1, linux/386
-kernel says, before: Max open files 1024 524288 files
-Getrlimit(RLIMIT_NOFILE) -> err=<nil> rlim={Cur:0 Max:0}
-kernel says, after:  cannot read: open /proc/self/limits: too many open files
-open /etc/hostname: open /etc/hostname: too many open files
-exit=0
+Getrlimit -> err=<nil> lim={Cur:1 Max:1}
+open a file -> open /etc/hostname: too many open files
 ```
 
-Read the four lines in order. The kernel starts out willing to give the process 1024 file descriptors. `Getrlimit` returns `err=<nil>`, which by the contract of the function means the `rlim` beside it holds the answer. That struct is what the process's limit has just been changed to. The third line asks the same question as the first, and it can no longer be asked, because asking it needs a file descriptor and the process is allowed zero. From here the program cannot open anything for as long as it lives, and an unprivileged process that has lowered its own hard limit cannot raise it back.
+`Getrlimit` returns `err=<nil>`. By the contract of the function, that means `lim` now holds the current limit. It holds `{Cur:1 Max:1}`, the value the program seeded it with. The call never read the limit into `lim`; it took that struct and made it the process's new limit. The open on the next line fails, because the process is now allowed one file.
 
-Then it exits 0. There was no error to check.
+Seed the struct with zero instead of one and the limit becomes zero, and the process cannot open a file at all for as long as it runs. An unprivileged process that has lowered its own hard limit cannot raise it back.
 
 Go 1.1.2, same program, same machine:
 
 ```
 $ ./rlimit     # Go 1.1.2, linux/386
-kernel says, before: Max open files 1024 524288 files
-Getrlimit(RLIMIT_NOFILE) -> err=<nil> rlim={Cur:1024 Max:524288}
-kernel says, after:  Max open files 1024 524288 files
-open /etc/hostname: ok
-exit=0
+Getrlimit -> err=<nil> lim={Cur:1024 Max:524288}
+open a file -> <nil>
 ```
+
+Here `lim` comes back holding the real limit, the seed gone, and the file opens.
 
 ### The names were the bug
 
@@ -116,11 +88,11 @@ The names are inverted against the kernel. The parameter in position 3 is called
 ```table
 caption: The prlimit64 arguments, what Go called them, and what Go 1.1.1's Getrlimit put there.
 cols: position | the kernel does | Go's parameter name | Getrlimit passed
-3 | sets the limit | old | rlim, your zero struct
+3 | sets the limit | old | rlim, the struct you passed
 4 | reports the limit | newlimit | nil
 ```
 
-Both callers read the names and trusted them. `Getrlimit` wanted the old value, saw a parameter called `old`, and passed its `rlim` there. That is argument 3. So `Getrlimit(RLIMIT_NOFILE, &rlim)` handed the kernel a zeroed `Rlimit` as the new limit and asked for the previous value to be written to `nil`. `Setrlimit` made the mirror mistake and read the limit instead of writing it. Both callers passed the arguments the parameter names asked for.
+Both callers read the names and trusted them. `Getrlimit` wanted the old value, saw a parameter called `old`, and passed its `rlim` there. That is argument 3. So `Getrlimit` handed the kernel the struct it was given as the new limit and asked for the previous value to be written to `nil`. `Setrlimit` made the mirror mistake and read the limit instead of writing it. Both callers passed the arguments the parameter names asked for.
 
 amd64 never went near any of this. It has a `getrlimit` that takes 64-bit values, so it never called `prlimit64`, and nobody working on amd64 could trip over it. The change that introduced the inversion went into the tree in July 2012, making 32-bit rlimits handle 64-bit values. It shipped in Go 1.1, survived Go 1.1.1, and went a year and three weeks before anyone reported it.[^fix] 386 and ARM were both affected.
 
