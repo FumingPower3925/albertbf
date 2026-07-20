@@ -51,9 +51,9 @@ func main() {
 }
 ```
 
-`GOMAXPROCS(1)` gives the program one processor to run goroutines on. `main` starts a goroutine that loops forever, calling `burn` on every pass, then sleeps for a tenth of a second and tries to print a last line. The question is whether that last line ever runs.
+`GOMAXPROCS(1)` gives the program one processor to run goroutines on. `main` starts a goroutine that loops forever, calling `burn` on every pass, then sleeps for a tenth of a second and tries to print a last line.
 
-### It hangs, then it does not
+### The same program, built twice
 
 Built with Go 1.1.2 and run, it prints the first line and stops:[^repro]
 
@@ -79,14 +79,14 @@ It takes about a tenth of a second, the length of the sleep. The goroutine was m
 
 Go 1.2 gave the runtime a way to take the processor back from a goroutine that will not give it up, and the mechanism is one value written into the wrong place.
 
-A separate runtime thread, the system monitor, wakes up periodically and looks for a goroutine that has held its processor for more than ten milliseconds. When it finds one, it writes a sentinel into that goroutine's `stackguard0` field: `0xfffffade`, chosen to be larger than any real stack pointer.[^preempt]
+A separate runtime thread, the system monitor, wakes up periodically and looks for a goroutine that has held its processor for more than ten milliseconds. When it finds one, it writes a sentinel into that goroutine's `stackguard0` field. On a 64-bit build the sentinel is `0xfffffffffffffade`, near the top of the address space and above any real stack pointer.[^preempt]
 
-`stackguard0` is a value every Go function reads on entry. Compiled functions begin with a few instructions that compare the stack pointer against it, and when the stack has grown too close to the guard, the function calls into the runtime for more room. That check is how goroutine stacks grow. The sentinel turns it to a second purpose. Because `0xfffffade` is larger than any real stack pointer, the comparison always reports the stack exhausted, so the next function the goroutine enters calls into the runtime, and the runtime, finding the sentinel where a real limit should be, parks the goroutine rather than growing its stack. It is set aside as if it had called `Gosched` on its own.
+Most compiled Go functions begin with a few instructions that compare the stack pointer against `stackguard0`, and when the stack has grown too close to the guard, the function calls into the runtime for more room. That check is how goroutine stacks grow. The sentinel turns it to a second purpose. Because the planted value is higher than any real stack pointer, the comparison always reports the stack exhausted, so the next function the goroutine enters calls into the runtime, and the runtime, finding the sentinel where a real limit should be, parks the goroutine rather than growing its stack. It is set aside as if it had called `Gosched` on its own.
 
 ```diagram
 dir: LR
 sysmon: the monitor sees a goroutine\nhold the processor past 10ms
-plant: it writes 0xfffffade\ninto stackguard0
+plant: it plants the sentinel\nin stackguard0
 check: the goroutine's next\nfunction entry reads stackguard0
 yield (accent): the check fails,\nso the goroutine is parked
 sysmon -> plant -> check -> yield
@@ -113,7 +113,7 @@ start
 [still running after 6s, killed]
 ```
 
-An empty loop enters no function, so the check never runs, so the sentinel is never read. The goroutine Go 1.2 can preempt is the one that calls a function often enough to keep passing the check; a goroutine spinning in a tight loop with no calls holds the processor for as long as it runs. Preemption in Go 1.2 is a check at a doorway, and a goroutine that never walks through one is never caught.
+An empty loop enters no function, so the check never runs and the sentinel is never read. Go 1.2 can preempt a goroutine only while it keeps entering functions; one spinning in a tight loop with no calls holds the processor for as long as it runs.
 
 ## The language
 
@@ -177,7 +177,7 @@ two-index:   src[2] = 999
 three-index: safe[2] = 30
 ```
 
-`src[0:2]` has length 2 but capacity 3, because it still reaches the end of `src`. Appending to it writes `999` into the spare slot, which is `src[2]`, and the original changes underfoot. `safe[0:2:2]` sets the capacity to 2, so `append` finds no room, allocates a new array, and writes there. The original is untouched. A function that returns part of a slice it does not want its caller to grow into hands back `s[i:j:j]`, and that idiom is what the third index exists to allow.
+`src[0:2]` has length 2 but capacity 3, because it still reaches the end of `src`. Appending to it writes `999` into the spare slot, which is `src[2]`, and the original changes underfoot. `safe[0:2:2]` sets the capacity to 2, so `append` finds no room, allocates a new array, and writes there. The original is untouched. A function that returns part of a slice it does not want its caller to grow into hands back `s[i:j:j]`. The third index was added for that case.
 
 ### A nil pointer that used to lie
 
@@ -214,8 +214,8 @@ panic: runtime error: invalid memory address or nil pointer dereference
 
 ## The clock
 
-The scheduler and the slice syntax are what the release notes lead with. The announcement leads with the calendar instead: seven months since Go 1.1, against the fourteen between 1.1 and 1.0, and a stated intent to make a major release about every six months from then on.[^rel]
+The announcement puts the release cadence up front: seven months since Go 1.1, against the fourteen between Go 1.1 and Go 1.0, and a stated intent to make a major release about every six months from then on.[^rel]
 
 [^rel]: [Go 1.2 release notes](https://go.dev/doc/go1.2). Go 1.2 was released on 1 December 2013 (the tag is dated three days earlier). The announcement opens by contrasting the seven months since Go 1.1 with the fourteen months between Go 1.1 and Go 1.0, and states the intent to make a major release roughly every six months.
 [^repro]: The runnable cells run on the current Go Playground, which is amd64. The recorded transcripts come from Go 1.1.2 and Go 1.2 toolchains built from their source tags with a period compiler (gcc 4.6 on ubuntu 12.04, `make.bash`, `CGO_ENABLED=0`), as linux/amd64 binaries run natively on msa2-client, an amd64 Linux machine. `preempt.go` is run under `GOMAXPROCS(1)`; the Go 1.1.2 runs and the empty-loop Go 1.2 run never terminate, and were stopped with a six-second timeout, shown as `[still running after 6s, killed]`. The Go 1.2 completion is deterministic at about 0.14 seconds across runs.
-[^preempt]: The sentinel is `runtime.StackPreempt`, defined in the Go 1.2 source as `((uint64)-1314)`, which is `0xfffffade` in its low bits (a value larger than any valid stack pointer, so the prologue's compare always fails). The system monitor (`sysmon`) calls `retake`, which calls `preemptone`, which sets `gp->stackguard0 = StackPreempt`. Go 1.2 split the goroutine's guard into two fields for this: `stackguard0`, the one the function prologue reads and the one the sentinel overwrites, and `stackguard`, the real limit that `newstack` uses to tell a genuine stack overflow from a preemption request. A function whose frame is small enough to need no stack check is compiled without the prologue, so a call to such a function is not a preemption point either.
+[^preempt]: The sentinel is `runtime.StackPreempt`, defined in the Go 1.2 source as `((uint64)-1314)`. On a 64-bit build that is `0xfffffffffffffade`, whose low bits spell `fade`; it sits near the top of the address space, above any valid stack pointer, so the prologue's compare always fails. On 386 the same constant is `0xfffffade`, above any 32-bit stack pointer. The system monitor (`sysmon`) calls `retake`, which calls `preemptone`, which sets `gp->stackguard0 = StackPreempt`. Go 1.2 split the goroutine's guard into two fields for this: `stackguard0`, the one the function prologue reads and the one the sentinel overwrites, and `stackguard`, the real limit that `newstack` uses to tell a genuine stack overflow from a preemption request. A function whose frame is small enough to need no stack check is compiled without the prologue, so a call to such a function is not a preemption point either.
