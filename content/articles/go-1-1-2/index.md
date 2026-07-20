@@ -1,6 +1,6 @@
 ---
 title: "Go 1.1.2: It Returned Nil"
-date: 2026-07-19
+date: 2026-07-20
 description: "Every headline bug in Go 1.1.2 reported that it had worked. The sharpest of them zeroed your process's file limit and returned nil."
 tags: [go, go-history]
 series: go-version-by-version
