@@ -43,11 +43,6 @@ tiers:
             org: "Imperial College London"
             tags: [coursera, paid]
             status: todo
-          - slug: 3b1b-essence-of-linear-algebra
-            title: "Essence of Linear Algebra"
-            org: "3Blue1Brown"
-            tags: [free, series]
-            status: todo
       - name: "Calculus & matrix calculus"
         courses:
           - slug: imperial-mathematics-for-machine-learning-m
@@ -346,12 +341,6 @@ tiers:
             code: "CS336"
             tags: [free, univ]
             status: todo
-          - slug: stanford-cs25
-            title: "Transformers United (CS25)"
-            org: "Stanford"
-            code: "CS25"
-            tags: [free, series]
-            status: todo
           - slug: karpathy-neural-networks-zero-to-hero
             title: "Neural Networks: Zero to Hero"
             org: "Karpathy"
@@ -435,11 +424,6 @@ tiers:
           - slug: dlai-automated-testing-for-llmops
             title: "Automated Testing for LLMOps"
             org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: arena-arena-alignment-research-engineer-
-            title: "ARENA - Alignment Research Engineer Accelerator curriculum"
-            org: "ARENA"
             tags: [free, series]
             status: todo
   - id: reinforcement-learning
@@ -568,11 +552,6 @@ tiers:
             org: "NVIDIA DLI"
             tags: [paid, cert]
             status: todo
-          - slug: gpu-mode-gpu-mode-lecture-series
-            title: "GPU MODE lecture series"
-            org: "GPU MODE"
-            tags: [free, series]
-            status: todo
       - name: "Deep learning systems & compilers"
         courses:
           - slug: cmu-10-414
@@ -607,11 +586,6 @@ tiers:
             org: "Harvard (Reddi)"
             code: "CS249r"
             tags: [free, univ]
-            status: todo
-          - slug: stanford-stanford-mlsys-seminar-series
-            title: "Stanford MLSys Seminar Series"
-            org: "Stanford"
-            tags: [free, series]
             status: todo
       - name: "Distributed systems substrate"
         courses:
