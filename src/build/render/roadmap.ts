@@ -94,8 +94,14 @@ function courseItem(c: Course, showProgress: boolean, allCourses: Course[]): Raw
     : null;
 
   const prereq = c.builds_on_course ? allCourses.find((x) => x.slug === c.builds_on_course) : undefined;
+  // If the prerequisite is itself part of a "pick one" alt_of cluster, any
+  // member of that cluster satisfies it — name all of them, not just the one.
+  const prereqOptions = prereq ? altCluster(prereq, allCourses) : [];
   const buildsOn = prereq
-    ? html`<span class="rm-course__builds-on"><span aria-hidden="true">→</span> builds on <a href="#c-${prereq.slug}">${prereq.title}</a></span>`
+    ? html`<span class="rm-course__builds-on"><span aria-hidden="true">→</span> builds on ${prereqOptions.map(
+        (o, i) =>
+          html`${i === 0 ? "" : i === prereqOptions.length - 1 ? " or " : ", "}<a href="#c-${o.slug}">${o.title}</a>`,
+      )}</span>`
     : null;
 
   return html`<li class="rm-course${prereq ? " rm-course--sequel" : ""}" id="c-${c.slug}" data-status="${status}" data-tags="${c.tags.join(",")}" data-find="${haystack}">
@@ -113,31 +119,41 @@ ${verdict}
 </li>`;
 }
 
+/**
+ * `alt_of` may point through more than one hop, so a course's cluster is
+ * everyone who resolves to the same root, following the chain to its end
+ * rather than assuming a single direct pointer.
+ */
+function altRoot(slug: string, bySlug: Map<string, Course>): string {
+  const seen = new Set<string>();
+  let cur = slug;
+  while (!seen.has(cur)) {
+    seen.add(cur);
+    const parent = bySlug.get(cur)?.alt_of;
+    if (!parent || !bySlug.has(parent)) return cur;
+    cur = parent;
+  }
+  return cur; // cyclic alt_of data — stop rather than loop forever
+}
+
+/** Every course (in `courses`, any domain) that is a "pick one" alternative to `course`, including itself. */
+function altCluster(course: Course, courses: Course[]): Course[] {
+  const bySlug = new Map(courses.map((c) => [c.slug, c]));
+  const root = altRoot(course.slug, bySlug);
+  return courses.filter((c) => altRoot(c.slug, bySlug) === root);
+}
+
 type DomainItem = { kind: "course"; course: Course } | { kind: "alt-group"; members: Course[] };
 
 /**
  * Courses linked by `alt_of` render as one clustered "pick one" group instead
- * of separate list items. `alt_of` may point through more than one hop, so
- * each course resolves to the root of its chain and courses sharing a root
- * are grouped together, in the order the root first appears.
+ * of separate list items, in the order the group's root first appears.
  */
 function domainItems(domain: Domain): DomainItem[] {
   const bySlug = new Map(domain.courses.map((c) => [c.slug, c]));
-  const rootOf = (slug: string): string => {
-    const seen = new Set<string>();
-    let cur = slug;
-    while (!seen.has(cur)) {
-      seen.add(cur);
-      const parent = bySlug.get(cur)?.alt_of;
-      if (!parent || !bySlug.has(parent)) return cur;
-      cur = parent;
-    }
-    return cur; // cyclic alt_of data — stop rather than loop forever
-  };
-
   const groups = new Map<string, Course[]>();
   for (const c of domain.courses) {
-    const root = rootOf(c.slug);
+    const root = altRoot(c.slug, bySlug);
     if (!groups.has(root)) groups.set(root, []);
     groups.get(root)!.push(c);
   }
@@ -145,7 +161,7 @@ function domainItems(domain: Domain): DomainItem[] {
   const items: DomainItem[] = [];
   const emitted = new Set<string>();
   for (const c of domain.courses) {
-    const root = rootOf(c.slug);
+    const root = altRoot(c.slug, bySlug);
     if (emitted.has(root)) continue;
     emitted.add(root);
     const members = groups.get(root)!;
