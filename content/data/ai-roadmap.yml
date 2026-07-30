@@ -341,6 +341,12 @@ tiers:
             code: "CS336"
             tags: [free, univ]
             status: todo
+          - slug: stanford-cs25
+            title: "Transformers United (CS25)"
+            org: "Stanford"
+            code: "CS25"
+            tags: [free, series]
+            status: todo
           - slug: karpathy-neural-networks-zero-to-hero
             title: "Neural Networks: Zero to Hero"
             org: "Karpathy"
@@ -586,6 +592,11 @@ tiers:
             org: "Harvard (Reddi)"
             code: "CS249r"
             tags: [free, univ]
+            status: todo
+          - slug: stanford-stanford-mlsys-seminar-series
+            title: "Stanford MLSys Seminar Series"
+            org: "Stanford"
+            tags: [free, series]
             status: todo
       - name: "Distributed systems substrate"
         courses:
