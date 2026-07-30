@@ -21,6 +21,10 @@ export interface Course {
   status?: Status;
   rating?: number;
   verdict?: string;
+  /** Another course in the same domain this one is a genuine substitute for. */
+  alt_of?: string;
+  /** A course (any domain) this one continues from as a sequel or real prerequisite. */
+  builds_on_course?: string;
 }
 
 export interface Domain {
@@ -66,7 +70,7 @@ function tally(done: number, total: number): RawHtml {
   return html`<span class="rm-tally">${String(done)} of ${String(total)} done</span>`;
 }
 
-function courseItem(c: Course, showProgress: boolean): RawHtml {
+function courseItem(c: Course, showProgress: boolean, allCourses: Course[]): RawHtml {
   const status: Status = c.status ?? "todo";
   // data-* attributes are what the (optional) client filter reads
   const haystack = [c.title, c.org, c.code ?? ""].join(" ").toLowerCase();
@@ -89,7 +93,12 @@ function courseItem(c: Course, showProgress: boolean): RawHtml {
     ? html`<span class="rm-status rm-status--${status}">${STATUS_LABEL[status]}</span>${rating}`
     : null;
 
-  return html`<li class="rm-course" data-status="${status}" data-tags="${c.tags.join(",")}" data-find="${haystack}">
+  const prereq = c.builds_on_course ? allCourses.find((x) => x.slug === c.builds_on_course) : undefined;
+  const buildsOn = prereq
+    ? html`<span class="rm-course__builds-on"><span aria-hidden="true">→</span> builds on <a href="#c-${prereq.slug}">${prereq.title}</a></span>`
+    : null;
+
+  return html`<li class="rm-course${prereq ? " rm-course--sequel" : ""}" id="c-${c.slug}" data-status="${status}" data-tags="${c.tags.join(",")}" data-find="${haystack}">
 <span class="rm-course__marker rm-course__marker--${status}" aria-hidden="true"></span>
 <div class="rm-course__body">
 <span class="rm-course__title">${c.title}</span>
@@ -97,13 +106,65 @@ function courseItem(c: Course, showProgress: boolean): RawHtml {
 <span class="rm-org">${c.org}</span>${c.code ? html`<span class="rm-code">${c.code}</span>` : null}
 ${c.tags.map((t) => html`<span class="rm-tag rm-tag--${t}">${t}</span>`)}
 ${statusLabel}
+${buildsOn}
 </span>
 ${verdict}
 </div>
 </li>`;
 }
 
-function tierSection(t: Tier, all: Tier[], showProgress: boolean): RawHtml {
+type DomainItem = { kind: "course"; course: Course } | { kind: "alt-group"; members: Course[] };
+
+/**
+ * Courses linked by `alt_of` render as one clustered "pick one" group instead
+ * of separate list items. `alt_of` may point through more than one hop, so
+ * each course resolves to the root of its chain and courses sharing a root
+ * are grouped together, in the order the root first appears.
+ */
+function domainItems(domain: Domain): DomainItem[] {
+  const bySlug = new Map(domain.courses.map((c) => [c.slug, c]));
+  const rootOf = (slug: string): string => {
+    const seen = new Set<string>();
+    let cur = slug;
+    while (!seen.has(cur)) {
+      seen.add(cur);
+      const parent = bySlug.get(cur)?.alt_of;
+      if (!parent || !bySlug.has(parent)) return cur;
+      cur = parent;
+    }
+    return cur; // cyclic alt_of data — stop rather than loop forever
+  };
+
+  const groups = new Map<string, Course[]>();
+  for (const c of domain.courses) {
+    const root = rootOf(c.slug);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root)!.push(c);
+  }
+
+  const items: DomainItem[] = [];
+  const emitted = new Set<string>();
+  for (const c of domain.courses) {
+    const root = rootOf(c.slug);
+    if (emitted.has(root)) continue;
+    emitted.add(root);
+    const members = groups.get(root)!;
+    items.push(members.length > 1 ? { kind: "alt-group", members } : { kind: "course", course: members[0]! });
+  }
+  return items;
+}
+
+function domainItem(item: DomainItem, showProgress: boolean, allCourses: Course[]): RawHtml {
+  if (item.kind === "course") return courseItem(item.course, showProgress, allCourses);
+  return html`<li class="rm-alt-group">
+<p class="rm-alt-group__label">Pick one</p>
+<ul class="rm-courses rm-courses--nested">
+${item.members.map((c) => courseItem(c, showProgress, allCourses))}
+</ul>
+</li>`;
+}
+
+function tierSection(t: Tier, all: Tier[], allCourses: Course[], showProgress: boolean): RawHtml {
   const list = courses(t);
   const done = doneCount(list);
   const deps = (t.builds_on ?? [])
@@ -125,7 +186,7 @@ ${t.domains.map(
     (d) => html`<section class="rm-domain">
 <h3 class="rm-domain__title">${d.name}</h3>
 <ul class="rm-courses">
-${d.courses.map((c) => courseItem(c, showProgress))}
+${domainItems(d).map((item) => domainItem(item, showProgress, allCourses))}
 </ul>
 </section>`,
   )}
@@ -174,6 +235,6 @@ ${TAGS.map(
 <p class="rm-controls__count" id="rm-count" role="status"></p>
 </div>
 
-${data.tiers.map((t) => tierSection(t, data.tiers, showProgress))}
+${data.tiers.map((t) => tierSection(t, data.tiers, all, showProgress))}
 </article>`;
 }

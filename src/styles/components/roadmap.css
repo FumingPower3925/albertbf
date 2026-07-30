@@ -448,6 +448,39 @@
   max-width: 62ch;
 }
 
+/* --- alt_of: courses that are genuine substitutes cluster into one
+   "pick one" group instead of reading as separate, unrelated entries --- */
+
+.rm-alt-group {
+  border: 1px dashed color-mix(in oklab, var(--tier) 35%, transparent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2xs) var(--space-xs);
+}
+
+.rm-alt-group__label {
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.rm-courses--nested {
+  gap: var(--space-2xs);
+}
+
+/* --- builds_on_course: a sequel is nudged in and names what it follows --- */
+
+.rm-course--sequel {
+  padding-left: var(--space-sm);
+}
+
+.rm-course__builds-on {
+  font-style: italic;
+}
+
 /* --- scroll reveal ---
    Layered so the default state is fully visible: unsupported browsers, print,
    reduced-motion users and the Lighthouse crawler all see complete content.
