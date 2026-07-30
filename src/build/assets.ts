@@ -36,7 +36,7 @@ const STYLE_ORDER = [
 ];
 
 /** Client entrypoints bundled independently; run engines load via dynamic import. */
-const CLIENT_ENTRIES = ["main", "search", "toc", "lightbox", "run"];
+const CLIENT_ENTRIES = ["main", "search", "toc", "lightbox", "run", "roadmap"];
 
 /**
  * The theme-init snippet inlined into <head> before CSS. Its sha256 goes in

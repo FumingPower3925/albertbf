@@ -17,7 +17,6 @@ export interface Course {
   title: string;
   org: string;
   code?: string;
-  url?: string;
   tags: string[];
   status?: Status;
   rating?: number;
@@ -67,13 +66,10 @@ function tally(done: number, total: number): RawHtml {
   return html`<span class="rm-tally">${String(done)} of ${String(total)} done</span>`;
 }
 
-function courseItem(c: Course): RawHtml {
+function courseItem(c: Course, showProgress: boolean): RawHtml {
   const status: Status = c.status ?? "todo";
   // data-* attributes are what the (optional) client filter reads
   const haystack = [c.title, c.org, c.code ?? ""].join(" ").toLowerCase();
-  const title = c.url
-    ? html`<a href="${c.url}" target="_blank" rel="noopener">${c.title}</a>`
-    : html`${c.title}`;
 
   const verdict = c.verdict
     ? html`<details class="rm-verdict">
@@ -87,22 +83,27 @@ function courseItem(c: Course): RawHtml {
       ? html`<span class="rm-rating"><span class="sr-only">Rated </span>${String(c.rating)}<span aria-hidden="true">/5</span></span>`
       : null;
 
+  // With nothing completed yet, "not started" on all 118 entries is noise, not
+  // information; it earns its place once there is real variation to show.
+  const statusLabel = showProgress
+    ? html`<span class="rm-status rm-status--${status}">${STATUS_LABEL[status]}</span>${rating}`
+    : null;
+
   return html`<li class="rm-course" data-status="${status}" data-tags="${c.tags.join(",")}" data-find="${haystack}">
 <span class="rm-course__marker rm-course__marker--${status}" aria-hidden="true"></span>
 <div class="rm-course__body">
-<span class="rm-course__title">${title}</span>
+<span class="rm-course__title">${c.title}</span>
 <span class="rm-course__meta">
 <span class="rm-org">${c.org}</span>${c.code ? html`<span class="rm-code">${c.code}</span>` : null}
 ${c.tags.map((t) => html`<span class="rm-tag rm-tag--${t}">${t}</span>`)}
-<span class="rm-status rm-status--${status}">${STATUS_LABEL[status]}</span>
-${rating}
+${statusLabel}
 </span>
 ${verdict}
 </div>
 </li>`;
 }
 
-function tierSection(t: Tier, all: Tier[]): RawHtml {
+function tierSection(t: Tier, all: Tier[], showProgress: boolean): RawHtml {
   const list = courses(t);
   const done = doneCount(list);
   const deps = (t.builds_on ?? [])
@@ -117,14 +118,14 @@ function tierSection(t: Tier, all: Tier[]): RawHtml {
 ${deps.length
     ? html`<span class="rm-builds">Builds on ${deps.join(" and ")}</span>`
     : html`<span class="rm-builds rm-builds--none">No prerequisites</span>`}
-${tally(done, list.length)}${bar(done, list.length)}
+${showProgress ? html`${tally(done, list.length)}${bar(done, list.length)}` : null}
 </p>
 </header>
 ${t.domains.map(
     (d) => html`<section class="rm-domain">
 <h3 class="rm-domain__title">${d.name}</h3>
 <ul class="rm-courses">
-${d.courses.map(courseItem)}
+${d.courses.map((c) => courseItem(c, showProgress))}
 </ul>
 </section>`,
   )}
@@ -134,12 +135,16 @@ ${d.courses.map(courseItem)}
 export function renderRoadmap(data: Roadmap): RawHtml {
   const all = data.tiers.flatMap(courses);
   const done = doneCount(all);
+  // The progress chrome (bars, tallies, per-course status) earns its place once
+  // there is real status to show; at all-todo it would just repeat "0%"/"not
+  // started" 118 times. It reappears on its own the day a course changes status.
+  const showProgress = all.some((c) => (c.status ?? "todo") !== "todo");
 
   return html`<article class="rm">
 <header class="rm-head">
 <h1>${data.title}</h1>
 <p class="rm-lede">${data.lede}</p>
-<p class="rm-overall">${tally(done, all.length)}${bar(done, all.length)}</p>
+${showProgress ? html`<p class="rm-overall">${tally(done, all.length)}${bar(done, all.length)}</p>` : null}
 </header>
 
 ${raw(renderSpine(data.tiers))}
@@ -169,6 +174,6 @@ ${TAGS.map(
 <p class="rm-controls__count" id="rm-count" role="status"></p>
 </div>
 
-${data.tiers.map((t) => tierSection(t, data.tiers))}
+${data.tiers.map((t) => tierSection(t, data.tiers, showProgress))}
 </article>`;
 }

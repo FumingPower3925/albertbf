@@ -369,17 +369,6 @@
   color: var(--color-text);
 }
 
-.rm-course__title a {
-  color: var(--color-text);
-  text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, var(--tier) 55%, transparent);
-  text-underline-offset: 2.5px;
-}
-
-.rm-course__title a:hover {
-  color: var(--color-accent-strong);
-}
-
 .rm-course__meta {
   display: flex;
   flex-wrap: wrap;
@@ -424,16 +413,11 @@
   font-weight: 700;
 }
 
-.rm-status--todo {
-  /* the default state is the quiet one: keep it out of the way */
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
+/* The status label only renders once at least one course has moved off
+   "todo" (see showProgress in roadmap.ts), so by the time "not started"
+   appears here it is meaningful contrast against a tier's other courses,
+   not noise, and stays visible like the other two states. */
+.rm-status--todo { color: var(--color-text-muted); }
 .rm-status--done { color: var(--color-success); }
 .rm-status--doing { color: var(--color-info); }
 

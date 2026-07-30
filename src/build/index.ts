@@ -191,6 +191,7 @@ async function main() {
         ogImage: DEFAULT_OG,
         jsonLd: [breadcrumbJsonLd([{ name: roadmap.title, path: "/ai/" }])],
         bodyClass: "page-roadmap",
+        scripts: ["roadmap.js"],
       },
       renderRoadmap(roadmap),
       manifest,
