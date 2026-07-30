@@ -4,6 +4,11 @@
 # status: todo | doing | done   (public, shown on the page)
 # rating: 1-5                   (optional, only meaningful once status is done)
 # verdict: markdown            (optional, a couple of sentences)
+# alt_of: <slug>                (optional, points to another course in the same
+#                                domain that this one is a genuine substitute for
+#                                — pick one, not both)
+# builds_on_course: <slug>      (optional, points to a course this one continues
+#                                from as a sequel or real prerequisite)
 ---
 title: The AI knowledge tree
 lede: >-
@@ -38,15 +43,11 @@ tiers:
             code: "18.065"
             tags: [free, univ]
             status: todo
+            builds_on_course: mit-18-06
           - slug: imperial-mathematics-for-machine-learning-l
             title: "Mathematics for Machine Learning: Linear Algebra"
             org: "Imperial College London"
             tags: [coursera, paid]
-            status: todo
-          - slug: 3b1b-essence-of-linear-algebra
-            title: "Essence of Linear Algebra"
-            org: "3Blue1Brown"
-            tags: [free, series]
             status: todo
       - name: "Calculus & matrix calculus"
         courses:
@@ -67,6 +68,7 @@ tiers:
             code: "18.S096"
             tags: [free, univ]
             status: todo
+            builds_on_course: mit-18-02
       - name: "Probability & statistics"
         courses:
           - slug: mitx-6-431x
@@ -75,6 +77,7 @@ tiers:
             code: "6.431x"
             tags: [free, paid, univ]
             status: todo
+            alt_of: harvard-stat-110
           - slug: harvard-stat-110
             title: "Statistics 110: Probability"
             org: "Harvard"
@@ -86,6 +89,7 @@ tiers:
             org: "MITx / edX"
             tags: [paid, cert]
             status: todo
+            builds_on_course: mitx-6-431x
           - slug: ucsc-bayesian-statistics-from-concept-t
             title: "Bayesian Statistics: From Concept to Data Analysis"
             org: "UC Santa Cruz"
@@ -118,6 +122,7 @@ tiers:
             code: "EE364B"
             tags: [free, univ]
             status: todo
+            builds_on_course: stanford-ee364a
           - slug: mit-18-335
             title: "Introduction to Numerical Methods (18.335)"
             org: "MIT OCW"
@@ -203,6 +208,7 @@ tiers:
             org: "Stanford (Koller)"
             tags: [coursera, paid]
             status: todo
+            alt_of: stanford-cs228
           - slug: stanford-cs228
             title: "Probabilistic Graphical Models (CS228)"
             org: "Stanford"
@@ -253,6 +259,7 @@ tiers:
             code: "CS230"
             tags: [free, univ]
             status: todo
+            builds_on_course: dlai-deep-learning-specialization-5-cou
           - slug: cmu-11-785
             title: "Introduction to Deep Learning (11-785)"
             org: "CMU"
@@ -385,6 +392,7 @@ tiers:
             code: "CS336"
             tags: [free, univ]
             status: todo
+            builds_on_course: stanford-cs336
       - name: "Prompting, RAG & context"
         courses:
           - slug: dlai-chatgpt-prompt-engineering-for-dev
@@ -437,11 +445,6 @@ tiers:
             org: "DeepLearning.AI"
             tags: [free, series]
             status: todo
-          - slug: arena-arena-alignment-research-engineer-
-            title: "ARENA - Alignment Research Engineer Accelerator curriculum"
-            org: "ARENA"
-            tags: [free, series]
-            status: todo
   - id: reinforcement-learning
     n: 4
     name: "Reinforcement learning"
@@ -461,6 +464,7 @@ tiers:
             org: "DeepMind × UCL (Silver)"
             tags: [free, series]
             status: todo
+            alt_of: university-of--reinforcement-learning-specializat
       - name: "Deep RL"
         courses:
           - slug: berkeley-cs285
@@ -563,15 +567,11 @@ tiers:
             code: "CS149"
             tags: [free, univ]
             status: todo
+            alt_of: cmu-15-418
           - slug: nvidia-dli-fundamentals-of-accelerated-comput
             title: "Fundamentals of Accelerated Computing with CUDA C/C++"
             org: "NVIDIA DLI"
             tags: [paid, cert]
-            status: todo
-          - slug: gpu-mode-gpu-mode-lecture-series
-            title: "GPU MODE lecture series"
-            org: "GPU MODE"
-            tags: [free, series]
             status: todo
       - name: "Deep learning systems & compilers"
         courses:
