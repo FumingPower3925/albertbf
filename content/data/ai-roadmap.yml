@@ -37,6 +37,11 @@ tiers:
             code: "18.06"
             tags: [free, univ]
             status: todo
+          - slug: imperial-mathematics-for-machine-learning-l
+            title: "Mathematics for Machine Learning: Linear Algebra"
+            org: "Imperial College London"
+            tags: [coursera, paid]
+            status: todo
           - slug: mit-18-065
             title: "Matrix Methods in Data Analysis, Signal Processing & ML (18.065)"
             org: "MIT OCW"
@@ -44,23 +49,18 @@ tiers:
             tags: [free, univ]
             status: todo
             builds_on_course: mit-18-06
-          - slug: imperial-mathematics-for-machine-learning-l
-            title: "Mathematics for Machine Learning: Linear Algebra"
-            org: "Imperial College London"
-            tags: [coursera, paid]
-            status: todo
       - name: "Calculus & matrix calculus"
         courses:
-          - slug: imperial-mathematics-for-machine-learning-m
-            title: "Mathematics for Machine Learning: Multivariate Calculus"
-            org: "Imperial College London"
-            tags: [coursera, paid]
-            status: todo
           - slug: mit-18-02
             title: "Multivariable Calculus (18.02)"
             org: "MIT OCW"
             code: "18.02"
             tags: [free, univ]
+            status: todo
+          - slug: imperial-mathematics-for-machine-learning-m
+            title: "Mathematics for Machine Learning: Multivariate Calculus"
+            org: "Imperial College London"
+            tags: [coursera, paid]
             status: todo
           - slug: mit-18-s096
             title: "Matrix Calculus for Machine Learning and Beyond (18.S096)"
@@ -71,6 +71,12 @@ tiers:
             builds_on_course: mit-18-02
       - name: "Probability & statistics"
         courses:
+          - slug: harvard-stat-110
+            title: "Statistics 110: Probability"
+            org: "Harvard"
+            code: "Stat 110"
+            tags: [free, univ]
+            status: todo
           - slug: mitx-6-431x
             title: "Probability - The Science of Uncertainty and Data (6.431x)"
             org: "MITx (MIT Open Learning, via MITx Online)"
@@ -78,12 +84,6 @@ tiers:
             tags: [free, paid, univ]
             status: todo
             alt_of: harvard-stat-110
-          - slug: harvard-stat-110
-            title: "Statistics 110: Probability"
-            org: "Harvard"
-            code: "Stat 110"
-            tags: [free, univ]
-            status: todo
           - slug: mitx-micromasters-in-statistics-and-dat
             title: "MicroMasters in Statistics and Data Science"
             org: "MITx / edX"
@@ -143,15 +143,15 @@ tiers:
             org: "DeepLearning.AI + Stanford (Ng)"
             tags: [coursera, paid]
             status: todo
+          - slug: caltech-learning-from-data
+            title: "Learning From Data"
+            org: "Caltech (Abu-Mostafa)"
+            tags: [free, univ]
+            status: todo
           - slug: stanford-cs229
             title: "Machine Learning (CS229)"
             org: "Stanford"
             code: "CS229"
-            tags: [free, univ]
-            status: todo
-          - slug: caltech-learning-from-data
-            title: "Learning From Data"
-            org: "Caltech (Abu-Mostafa)"
             tags: [free, univ]
             status: todo
           - slug: cmu-10-601
@@ -160,6 +160,7 @@ tiers:
             code: "10-601"
             tags: [free, univ]
             status: todo
+            alt_of: stanford-cs229
       - name: "Statistical learning"
         courses:
           - slug: stanford-statistical-learning-with-python
@@ -181,16 +182,6 @@ tiers:
             status: todo
       - name: "Bayesian & probabilistic methods"
         courses:
-          - slug: tubingen-probabilistic-machine-learning
-            title: "Probabilistic Machine Learning"
-            org: "University of Tübingen (Hennig)"
-            tags: [free, series]
-            status: todo
-          - slug: tubingen-numerics-of-machine-learning
-            title: "Numerics of Machine Learning"
-            org: "University of Tübingen (Hennig)"
-            tags: [free, series]
-            status: todo
           - slug: mpi-statistical-rethinking
             title: "Statistical Rethinking"
             org: "Max Planck (McElreath)"
@@ -201,20 +192,30 @@ tiers:
             org: "HSE University"
             tags: [coursera, paid]
             status: todo
+          - slug: tubingen-probabilistic-machine-learning
+            title: "Probabilistic Machine Learning"
+            org: "University of Tübingen (Hennig)"
+            tags: [free, series]
+            status: todo
+          - slug: tubingen-numerics-of-machine-learning
+            title: "Numerics of Machine Learning"
+            org: "University of Tübingen (Hennig)"
+            tags: [free, series]
+            status: todo
       - name: "Probabilistic graphical models"
         courses:
-          - slug: stanford-probabilistic-graphical-models-spe
-            title: "Probabilistic Graphical Models Specialization (3 courses)"
-            org: "Stanford (Koller)"
-            tags: [coursera, paid]
-            status: todo
-            alt_of: stanford-cs228
           - slug: stanford-cs228
             title: "Probabilistic Graphical Models (CS228)"
             org: "Stanford"
             code: "CS228"
             tags: [free, univ]
             status: todo
+          - slug: stanford-probabilistic-graphical-models-spe
+            title: "Probabilistic Graphical Models Specialization (3 courses)"
+            org: "Stanford (Koller)"
+            tags: [coursera, paid]
+            status: todo
+            alt_of: stanford-cs228
           - slug: cmu-10-708
             title: "Probabilistic Graphical Models (10-708)"
             org: "CMU"
@@ -223,15 +224,15 @@ tiers:
             status: todo
       - name: "Causal inference"
         courses:
-          - slug: columbia-causal-inference-i-ii
-            title: "Causal Inference & Causal Inference 2"
-            org: "Columbia University (via Coursera)"
-            tags: [coursera, paid]
-            status: todo
           - slug: brady-neal-introduction-to-causal-inference
             title: "Introduction to Causal Inference"
             org: "Brady Neal"
             tags: [free, series]
+            status: todo
+          - slug: columbia-causal-inference-i-ii
+            title: "Causal Inference & Causal Inference 2"
+            org: "Columbia University (via Coursera)"
+            tags: [coursera, paid]
             status: todo
   - id: deep-learning-core
     n: 2
@@ -242,17 +243,23 @@ tiers:
     domains:
       - name: "Deep learning fundamentals"
         courses:
-          - slug: dlai-deep-learning-specialization-5-cou
-            title: "Deep Learning Specialization (5 courses)"
-            org: "DeepLearning.AI (Ng)"
-            tags: [coursera, paid]
-            status: todo
           - slug: mit-6-s191
             title: "Introduction to Deep Learning (6.S191)"
             org: "MIT"
             code: "6.S191"
             tags: [free, univ]
             status: todo
+          - slug: dlai-deep-learning-specialization-5-cou
+            title: "Deep Learning Specialization (5 courses)"
+            org: "DeepLearning.AI (Ng)"
+            tags: [coursera, paid]
+            status: todo
+          - slug: fastai-practical-deep-learning-for-coders
+            title: "Practical Deep Learning for Coders"
+            org: "fast.ai"
+            tags: [free, series]
+            status: todo
+            alt_of: dlai-deep-learning-specialization-5-cou
           - slug: stanford-cs230
             title: "Deep Learning (CS230)"
             org: "Stanford"
@@ -266,34 +273,30 @@ tiers:
             code: "11-785"
             tags: [free, univ]
             status: todo
-          - slug: nyu-deep-learning
-            title: "Deep Learning"
-            org: "NYU (LeCun & Canziani)"
-            tags: [free, univ]
-            status: todo
           - slug: berkeley-cs182
             title: "Designing, Visualizing and Understanding Deep Neural Networks (CS182)"
             org: "UC Berkeley"
             code: "CS182/282A"
             tags: [free, univ]
             status: todo
-          - slug: fastai-practical-deep-learning-for-coders
-            title: "Practical Deep Learning for Coders"
-            org: "fast.ai"
-            tags: [free, series]
+            alt_of: cmu-11-785
+          - slug: nyu-deep-learning
+            title: "Deep Learning"
+            org: "NYU (LeCun & Canziani)"
+            tags: [free, univ]
             status: todo
       - name: "Generative models"
         courses:
-          - slug: berkeley-cs294-158
-            title: "Deep Unsupervised Learning (CS294-158)"
-            org: "UC Berkeley"
-            code: "CS294-158"
-            tags: [free, univ]
-            status: todo
           - slug: stanford-cs236
             title: "Deep Generative Models (CS236)"
             org: "Stanford"
             code: "CS236"
+            tags: [free, univ]
+            status: todo
+          - slug: berkeley-cs294-158
+            title: "Deep Unsupervised Learning (CS294-158)"
+            org: "UC Berkeley"
+            code: "CS294-158"
             tags: [free, univ]
             status: todo
           - slug: hf-diffusion-course
@@ -335,6 +338,7 @@ tiers:
             code: "11-711"
             tags: [free, univ]
             status: todo
+            alt_of: stanford-cs224n
           - slug: dlai-natural-language-processing-specia
             title: "Natural Language Processing Specialization (4 courses)"
             org: "DeepLearning.AI"
@@ -347,6 +351,11 @@ tiers:
             status: todo
       - name: "Transformers & building LLMs"
         courses:
+          - slug: karpathy-neural-networks-zero-to-hero
+            title: "Neural Networks: Zero to Hero"
+            org: "Karpathy"
+            tags: [free, series]
+            status: todo
           - slug: stanford-cs336
             title: "Language Modeling from Scratch (CS336)"
             org: "Stanford"
@@ -359,11 +368,6 @@ tiers:
             code: "CS25"
             tags: [free, series]
             status: todo
-          - slug: karpathy-neural-networks-zero-to-hero
-            title: "Neural Networks: Zero to Hero"
-            org: "Karpathy"
-            tags: [free, series]
-            status: todo
           - slug: dlai-generative-ai-with-large-language-
             title: "Generative AI with Large Language Models"
             org: "DeepLearning.AI + AWS"
@@ -374,6 +378,7 @@ tiers:
             org: "IBM"
             tags: [coursera, paid]
             status: todo
+            alt_of: dlai-generative-ai-with-large-language-
       - name: "Fine-tuning & post-training"
         courses:
           - slug: dlai-finetuning-large-language-models
@@ -467,12 +472,6 @@ tiers:
             alt_of: university-of--reinforcement-learning-specializat
       - name: "Deep RL"
         courses:
-          - slug: berkeley-cs285
-            title: "Deep Reinforcement Learning (CS285)"
-            org: "UC Berkeley"
-            code: "CS285"
-            tags: [free, univ]
-            status: todo
           - slug: hf-deep-rl-course
             title: "Deep RL Course"
             org: "Hugging Face"
@@ -487,6 +486,12 @@ tiers:
             title: "Reinforcement Learning (CS234)"
             org: "Stanford"
             code: "CS234"
+            tags: [free, univ]
+            status: todo
+          - slug: berkeley-cs285
+            title: "Deep Reinforcement Learning (CS285)"
+            org: "UC Berkeley"
+            code: "CS285"
             tags: [free, univ]
             status: todo
   - id: other-modalities-applicati
@@ -670,27 +675,27 @@ tiers:
             status: todo
       - name: "Data engineering"
         courses:
-          - slug: datatalks-club-data-engineering-zoomcamp
-            title: "Data Engineering Zoomcamp"
-            org: "DataTalks.Club"
-            tags: [free, cert]
-            status: todo
           - slug: ibm-ibm-data-engineering-professional-
             title: "IBM Data Engineering Professional Certificate"
             org: "IBM"
             tags: [coursera, paid, cert]
             status: todo
+          - slug: datatalks-club-data-engineering-zoomcamp
+            title: "Data Engineering Zoomcamp"
+            org: "DataTalks.Club"
+            tags: [free, cert]
+            status: todo
       - name: "Cloud ML certifications"
         courses:
-          - slug: google-preparing-for-google-cloud-profess
-            title: "Preparing for Google Cloud Certification: Machine Learning Engineer"
-            org: "Google Cloud"
-            tags: [coursera, paid, cert]
-            status: todo
           - slug: aws-aws-certified-machine-learning-spe
             title: "AWS Certified Machine Learning Engineer - Associate (MLA-C01)"
             org: "AWS"
             tags: [paid, cert]
+            status: todo
+          - slug: google-preparing-for-google-cloud-profess
+            title: "Preparing for Google Cloud Certification: Machine Learning Engineer"
+            org: "Google Cloud"
+            tags: [coursera, paid, cert]
             status: todo
   - id: safety-security-privacy-go
     n: 8
@@ -751,13 +756,13 @@ tiers:
     domains:
       - name: "Doing and writing research"
         courses:
-          - slug: ecrire-et-publ-how-to-write-and-publish-a-scienti
-            title: "How to Write and Publish a Scientific Paper"
-            org: "École Polytechnique"
-            tags: [coursera, paid]
-            status: todo
           - slug: stanford-writing-in-the-sciences
             title: "Writing in the Sciences"
             org: "Stanford Online"
             tags: [free, univ]
+            status: todo
+          - slug: ecrire-et-publ-how-to-write-and-publish-a-scienti
+            title: "How to Write and Publish a Scientific Paper"
+            org: "École Polytechnique"
+            tags: [coursera, paid]
             status: todo
