@@ -2,6 +2,7 @@
 import { rm, mkdir, cp } from "fs/promises";
 import { join } from "path";
 import { paths, site } from "./config";
+import { load as parseYaml } from "js-yaml";
 import { loadContent, type Article } from "./content";
 import { createRenderer } from "./markdown/pipeline";
 import { buildAssets } from "./assets";
@@ -12,6 +13,7 @@ import { renderHome } from "./render/home";
 import { renderArticlesList } from "./render/articles-list";
 import { renderProjects } from "./render/projects";
 import { renderAbout } from "./render/about";
+import { renderRoadmap, type Roadmap } from "./render/roadmap";
 import { renderNotFound } from "./render/notfound";
 import { collectTags, renderTagPage, renderTagsIndex } from "./render/tags";
 import { writeSearchIndex } from "./search";
@@ -168,6 +170,29 @@ async function main() {
         activeNav: "about",
       },
       renderAbout(),
+      manifest,
+      inlineCss,
+    ),
+  );
+
+  // AI roadmap: a data-driven page, reachable from the footer only.
+  const roadmap = parseYaml(
+    await Bun.file(join(paths.content, "data", "ai-roadmap.yml")).text(),
+  ) as Roadmap;
+  await mkdir(join(paths.dist, "ai"), { recursive: true });
+  await Bun.write(
+    join(paths.dist, "ai", "index.html"),
+    page(
+      {
+        title: roadmap.title,
+        description:
+          "A dependency-ordered map of AI course material: ten tiers from mathematics to research practice, structured courses only.",
+        path: "/ai/",
+        ogImage: DEFAULT_OG,
+        jsonLd: [breadcrumbJsonLd([{ name: roadmap.title, path: "/ai/" }])],
+        bodyClass: "page-roadmap",
+      },
+      renderRoadmap(roadmap),
       manifest,
       inlineCss,
     ),

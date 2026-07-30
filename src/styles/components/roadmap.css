@@ -1,0 +1,508 @@
+/* AI roadmap page (/ai/).
+   Tier colours are used for geometry and accents only, never for text: several
+   of them do not reach 4.5:1 against the light background, and the a11y gate is
+   a perfect score. Text always uses the standard tokens. */
+
+:root {
+  --tier-0: #5566a8;
+  --tier-1: #3f74ac;
+  --tier-2: #2c86ad;
+  --tier-3: #1d8f9b;
+  --tier-4: #2a9479;
+  --tier-5: #579a55;
+  --tier-6: #7f8c33;
+  --tier-7: #9c7f28;
+  --tier-8: #a4652b;
+  --tier-9: #a8523f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tier-0: #93a2e0;
+    --tier-1: #79aae4;
+    --tier-2: #5cc0e2;
+    --tier-3: #43cbd6;
+    --tier-4: #4fd0aa;
+    --tier-5: #83d181;
+    --tier-6: #bdcc5e;
+    --tier-7: #e0bd52;
+    --tier-8: #eda05f;
+    --tier-9: #e8806c;
+  }
+}
+
+:root[data-theme="dark"] {
+  --tier-0: #93a2e0;
+  --tier-1: #79aae4;
+  --tier-2: #5cc0e2;
+  --tier-3: #43cbd6;
+  --tier-4: #4fd0aa;
+  --tier-5: #83d181;
+  --tier-6: #bdcc5e;
+  --tier-7: #e0bd52;
+  --tier-8: #eda05f;
+  --tier-9: #e8806c;
+}
+
+:root[data-theme="light"] {
+  --tier-0: #5566a8;
+  --tier-1: #3f74ac;
+  --tier-2: #2c86ad;
+  --tier-3: #1d8f9b;
+  --tier-4: #2a9479;
+  --tier-5: #579a55;
+  --tier-6: #7f8c33;
+  --tier-7: #9c7f28;
+  --tier-8: #a4652b;
+  --tier-9: #a8523f;
+}
+
+.rm {
+  max-width: 62rem;
+  margin-inline: auto;
+}
+
+.rm-head h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-sm);
+  text-wrap: balance;
+}
+
+.rm-lede {
+  color: var(--color-text-secondary);
+  max-width: 62ch;
+  margin: 0 0 var(--space-md);
+}
+
+/* --- progress --- */
+
+.rm-overall,
+.rm-tier__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs) var(--space-sm);
+  margin: 0;
+}
+
+.rm-tally {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rm-bar {
+  flex: 1 1 8rem;
+  min-width: 5rem;
+  max-width: 22rem;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.rm-bar > i {
+  display: block;
+  height: 100%;
+  background: var(--tier, var(--color-accent));
+}
+
+/* --- the spine graphic --- */
+
+.spine {
+  margin: var(--space-lg) 0 var(--space-xl);
+  overflow-x: auto;
+}
+
+.spine__svg {
+  display: block;
+  /* Cap near the natural viewBox width: letting it stretch to the container
+     scales the label text up with it and the graphic stops looking considered. */
+  width: 100%;
+  max-width: 36rem;
+  min-width: 30rem;
+  height: auto;
+  margin-inline: auto;
+}
+
+.spine__edge {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+
+.spine__node > rect {
+  fill: color-mix(in oklab, var(--tier) 14%, var(--color-surface));
+  stroke: var(--tier);
+  stroke-width: 1.5;
+}
+
+.spine__label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--color-text);
+}
+
+/* --- tier jump nav --- */
+
+.rm-jump ul {
+  list-style: none;
+  margin: 0 0 var(--space-lg);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.rm-jump a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.7em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+
+.rm-jump a:hover {
+  border-color: var(--tier);
+  color: var(--color-text);
+}
+
+.rm-jump__num,
+.rm-tier__num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #fff;
+  background: var(--tier);
+  border-radius: var(--radius-sm);
+  display: inline-grid;
+  place-items: center;
+}
+
+.rm-jump__num {
+  width: 1.15rem;
+  height: 1.15rem;
+  font-size: 0.62rem;
+}
+
+.rm-note {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  max-width: 68ch;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+  margin: 0 0 var(--space-lg);
+}
+
+/* --- search + filters (revealed by the client script) --- */
+
+.rm-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space-xl);
+}
+
+.rm-controls[hidden] {
+  display: none;
+}
+
+.rm-controls__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.rm-search {
+  flex: 1 1 16rem;
+}
+
+.rm-search input {
+  width: 100%;
+  padding: 0.45em 0.7em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.rm-fil {
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  padding: 0.28em 0.75em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.rm-fil[aria-pressed="true"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.rm-controls__count {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* --- tiers --- */
+
+.rm-tier {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+.rm-tier__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-xl);
+  letter-spacing: -0.011em;
+  margin: 0 0 var(--space-2xs);
+}
+
+.rm-tier__num {
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: var(--text-sm);
+  flex: none;
+}
+
+.rm-tier__tagline {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  max-width: 68ch;
+  margin: 0 0 var(--space-xs);
+}
+
+.rm-builds {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  padding: 0.15em 0.6em;
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in oklab, var(--tier) 35%, transparent);
+  background: color-mix(in oklab, var(--tier) 8%, transparent);
+}
+
+.rm-builds--none {
+  border-style: dashed;
+  background: none;
+}
+
+/* --- domains: the branch lines are drawn with a border, not markup --- */
+
+.rm-domain {
+  margin-top: var(--space-md);
+  padding-left: var(--space-md);
+  border-left: 2px solid color-mix(in oklab, var(--tier) 30%, transparent);
+}
+
+.rm-domain__title {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-xs);
+}
+
+.rm-courses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.rm-course {
+  display: grid;
+  grid-template-columns: 0.85rem 1fr;
+  gap: var(--space-xs);
+  align-items: start;
+}
+
+.rm-course[hidden] {
+  display: none;
+}
+
+.rm-course__marker {
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: 0.42em;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--tier);
+}
+
+.rm-course__marker--done {
+  background: var(--tier);
+}
+
+.rm-course__marker--doing {
+  background: linear-gradient(to right, var(--tier) 50%, transparent 50%);
+}
+
+.rm-course__title {
+  display: block;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.rm-course__title a {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--tier) 55%, transparent);
+  text-underline-offset: 2.5px;
+}
+
+.rm-course__title a:hover {
+  color: var(--color-accent-strong);
+}
+
+.rm-course__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2em 0.5em;
+  margin-top: 0.1em;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.rm-code {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 0.05em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
+.rm-tag {
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.rm-tag--free { color: var(--color-success); border-color: color-mix(in oklab, var(--color-success) 40%, transparent); }
+.rm-tag--paid { color: var(--color-warning); border-color: color-mix(in oklab, var(--color-warning) 40%, transparent); }
+.rm-tag--univ,
+.rm-tag--coursera { color: var(--color-info); border-color: color-mix(in oklab, var(--color-info) 40%, transparent); }
+
+/* status is spelled out; never colour alone */
+.rm-status {
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.rm-status--todo {
+  /* the default state is the quiet one: keep it out of the way */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.rm-status--done { color: var(--color-success); }
+.rm-status--doing { color: var(--color-info); }
+
+.rm-rating {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+}
+
+.rm-verdict {
+  margin-top: 0.3em;
+}
+
+.rm-verdict > summary {
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  width: fit-content;
+}
+
+.rm-verdict__body {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  border-left: 2px solid var(--color-border);
+  padding-left: var(--space-sm);
+  margin-top: 0.35em;
+  max-width: 62ch;
+}
+
+/* --- scroll reveal ---
+   Layered so the default state is fully visible: unsupported browsers, print,
+   reduced-motion users and the Lighthouse crawler all see complete content.
+   Deleting this block leaves a correct static page. */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .rm-tier,
+    .spine {
+      animation: rm-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 55%;
+    }
+
+    .spine__node {
+      animation: rm-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 70%;
+    }
+  }
+}
+
+@keyframes rm-reveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes rm-pop {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+@media print {
+  .rm-controls,
+  .rm-jump { display: none; }
+  .rm-tier { break-inside: avoid; }
+}
+
+@media (max-width: 640px) {
+  .rm-domain { padding-left: var(--space-sm); }
+  .rm-tier__title { font-size: var(--text-lg); }
+}

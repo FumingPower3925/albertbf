@@ -25,6 +25,7 @@ const STYLE_ORDER = [
   "components/terminal.css",
   "components/charts.css",
   "components/diagram.css",
+  "components/roadmap.css",
   "prose.css",
   "code.css",
   "pages/home.css",
