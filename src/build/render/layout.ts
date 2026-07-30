@@ -57,6 +57,9 @@ const NAV_ITEMS = [
   { key: "about", label: "About", href: "/about/" },
 ] as const;
 
+/** Reachable from the footer but deliberately kept out of the main nav. */
+const FOOTER_ONLY_ITEMS = [{ key: "ai", label: "AI roadmap", href: "/ai/" }] as const;
+
 export function page(
   meta: PageMeta,
   body: RawHtml,
@@ -147,7 +150,7 @@ ${body}
 </div>
 <nav class="footer-nav" aria-label="Footer">
 <ul>
-${NAV_ITEMS.map((item) => html`<li><a href="${item.href}">${item.label}</a></li>`)}
+${[...NAV_ITEMS, ...FOOTER_ONLY_ITEMS].map((item) => html`<li><a href="${item.href}">${item.label}</a></li>`)}
 </ul>
 </nav>
 <div class="footer-social">
