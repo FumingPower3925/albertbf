@@ -71,7 +71,7 @@ tiers:
         courses:
           - slug: mitx-6-431x
             title: "Probability - The Science of Uncertainty and Data (6.431x)"
-            org: "MITx / edX"
+            org: "MITx (MIT Open Learning, via MITx Online)"
             code: "6.431x"
             tags: [free, paid, univ]
             status: todo
@@ -117,11 +117,6 @@ tiers:
             org: "Stanford Online"
             code: "EE364B"
             tags: [free, univ]
-            status: todo
-          - slug: melbourne-discrete-optimization
-            title: "Discrete Optimization"
-            org: "University of Melbourne"
-            tags: [coursera, paid]
             status: todo
           - slug: mit-18-335
             title: "Introduction to Numerical Methods (18.335)"
@@ -174,9 +169,9 @@ tiers:
             tags: [free, univ]
             status: todo
           - slug: stanford-cs229t
-            title: "Statistical Learning Theory (CS229T)"
+            title: "Machine Learning Theory (CS229M / STATS214)"
             org: "Stanford"
-            code: "CS229T"
+            code: "CS229M / STATS214"
             tags: [free, univ]
             status: todo
       - name: "Bayesian & probabilistic methods"
@@ -223,8 +218,8 @@ tiers:
       - name: "Causal inference"
         courses:
           - slug: columbia-causal-inference-i-ii
-            title: "Causal Inference I & II"
-            org: "Columbia University"
+            title: "Causal Inference & Causal Inference 2"
+            org: "Columbia University (via Coursera)"
             tags: [coursera, paid]
             status: todo
           - slug: brady-neal-introduction-to-causal-inference
@@ -270,9 +265,9 @@ tiers:
             tags: [free, univ]
             status: todo
           - slug: berkeley-cs182
-            title: "Deep Learning (CS182)"
+            title: "Designing, Visualizing and Understanding Deep Neural Networks (CS182)"
             org: "UC Berkeley"
-            code: "CS182"
+            code: "CS182/282A"
             tags: [free, univ]
             status: todo
           - slug: fastai-practical-deep-learning-for-coders
@@ -425,9 +420,9 @@ tiers:
             tags: [free, cert]
             status: todo
           - slug: berkeley-cs294
-            title: "Large Language Model Agents MOOC"
-            org: "UC Berkeley (Dawn Song)"
-            code: "CS294"
+            title: "Large Language Model Agents (MOOC)"
+            org: "UC Berkeley (Dawn Song, with Xinyun Chen)"
+            code: "CS194/294-196"
             tags: [free, univ]
             status: todo
       - name: "Evaluation & interpretability"
@@ -529,12 +524,6 @@ tiers:
             org: "University of Minnesota"
             tags: [coursera, paid]
             status: todo
-          - slug: stanford-cs276
-            title: "Information Retrieval and Web Search (CS276)"
-            org: "Stanford"
-            code: "CS276"
-            tags: [free, univ]
-            status: todo
           - slug: stanford-cs246
             title: "Mining Massive Datasets (CS246)"
             org: "Stanford"
@@ -579,11 +568,6 @@ tiers:
             org: "NVIDIA DLI"
             tags: [paid, cert]
             status: todo
-          - slug: uiuc-community-programming-massively-parallel-pro
-            title: "Programming Massively Parallel Processors (PMPP) lecture series"
-            org: "UIUC / community"
-            tags: [free, series]
-            status: todo
           - slug: gpu-mode-gpu-mode-lecture-series
             title: "GPU MODE lecture series"
             org: "GPU MODE"
@@ -618,12 +602,6 @@ tiers:
             status: todo
       - name: "ML systems design"
         courses:
-          - slug: stanford-cs329s
-            title: "Machine Learning Systems Design (CS329S)"
-            org: "Stanford"
-            code: "CS329S"
-            tags: [free, univ]
-            status: todo
           - slug: harvard-cs249r
             title: "Machine Learning Systems (CS249r)"
             org: "Harvard (Reddi)"
@@ -644,7 +622,7 @@ tiers:
             tags: [free, univ]
             status: todo
           - slug: cmu-15-445
-            title: "Database Systems (15-445)"
+            title: "Intro to Database Systems (15-445/645)"
             org: "CMU"
             code: "15-445"
             tags: [free, univ]
@@ -675,7 +653,7 @@ tiers:
             status: todo
           - slug: made-with-ml-made-with-ml
             title: "Made With ML"
-            org: "Made With ML"
+            org: "Anyscale (Made With ML)"
             tags: [free, series]
             status: todo
       - name: "LLMOps"
@@ -705,18 +683,13 @@ tiers:
       - name: "Cloud ML certifications"
         courses:
           - slug: google-preparing-for-google-cloud-profess
-            title: "Preparing for Google Cloud Professional ML Engineer"
+            title: "Preparing for Google Cloud Certification: Machine Learning Engineer"
             org: "Google Cloud"
             tags: [coursera, paid, cert]
             status: todo
           - slug: aws-aws-certified-machine-learning-spe
-            title: "AWS Certified Machine Learning - Specialty"
+            title: "AWS Certified Machine Learning Engineer - Associate (MLA-C01)"
             org: "AWS"
-            tags: [paid, cert]
-            status: todo
-          - slug: microsoft-azure-ai-engineer-associate
-            title: "Azure AI Engineer Associate"
-            org: "Microsoft"
             tags: [paid, cert]
             status: todo
   - id: safety-security-privacy-go
@@ -729,12 +702,12 @@ tiers:
       - name: "AI safety & alignment"
         courses:
           - slug: bluedot-impact-ai-safety-fundamentals-alignment-c
-            title: "AI Safety Fundamentals - Alignment Course"
+            title: "AI Alignment"
             org: "BlueDot Impact"
             tags: [free, cert]
             status: todo
           - slug: bluedot-impact-ai-safety-fundamentals-governance-
-            title: "AI Safety Fundamentals - Governance Course"
+            title: "Frontier AI Governance"
             org: "BlueDot Impact"
             tags: [free, cert]
             status: todo
@@ -750,20 +723,10 @@ tiers:
             org: "DeepLearning.AI"
             tags: [free, series]
             status: todo
-          - slug: dlai-quality-and-safety-for-llm-applica
-            title: "Quality and Safety for LLM Applications"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
       - name: "Privacy-preserving ML"
         courses:
           - slug: openmined-privacy-preserving-ai-series
             title: "Privacy-Preserving AI series"
-            org: "OpenMined"
-            tags: [free, series]
-            status: todo
-          - slug: openmined-federated-learning-differential-pr
-            title: "Federated Learning / differential privacy modules"
             org: "OpenMined"
             tags: [free, series]
             status: todo
@@ -790,7 +753,7 @@ tiers:
         courses:
           - slug: ecrire-et-publ-how-to-write-and-publish-a-scienti
             title: "How to Write and Publish a Scientific Paper"
-            org: "Écrire et publier / Coursera catalogue"
+            org: "École Polytechnique"
             tags: [coursera, paid]
             status: todo
           - slug: stanford-writing-in-the-sciences
