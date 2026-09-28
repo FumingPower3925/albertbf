@@ -29,6 +29,8 @@ export interface Course {
 
 export interface Domain {
   name: string;
+  /** Inline markdown for what the entries alone cannot say, e.g. a topic only taught inside a broader course. */
+  note?: string;
   courses: Course[];
 }
 
@@ -87,7 +89,7 @@ function courseItem(c: Course, showProgress: boolean, allCourses: Course[]): Raw
       ? html`<span class="rm-rating"><span class="sr-only">Rated </span>${String(c.rating)}<span aria-hidden="true">/5</span></span>`
       : null;
 
-  // With nothing completed yet, "not started" on all 118 entries is noise, not
+  // With nothing completed yet, "not started" on every entry is noise, not
   // information; it earns its place once there is real variation to show.
   const statusLabel = showProgress
     ? html`<span class="rm-status rm-status--${status}">${STATUS_LABEL[status]}</span>${rating}`
@@ -201,6 +203,7 @@ ${showProgress ? html`${tally(done, list.length)}${bar(done, list.length)}` : nu
 ${t.domains.map(
     (d) => html`<section class="rm-domain">
 <h3 class="rm-domain__title">${d.name}</h3>
+${d.note ? html`<p class="rm-domain__note">${raw(marked.parseInline(d.note) as string)}</p>` : null}
 <ul class="rm-courses">
 ${domainItems(d).map((item) => domainItem(item, showProgress, allCourses))}
 </ul>
@@ -214,7 +217,7 @@ export function renderRoadmap(data: Roadmap): RawHtml {
   const done = doneCount(all);
   // The progress chrome (bars, tallies, per-course status) earns its place once
   // there is real status to show; at all-todo it would just repeat "0%"/"not
-  // started" 118 times. It reappears on its own the day a course changes status.
+  // started" once per course. It reappears on its own the day a course changes status.
   const showProgress = all.some((c) => (c.status ?? "todo") !== "todo");
 
   return html`<article class="rm">

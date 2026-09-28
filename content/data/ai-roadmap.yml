@@ -9,6 +9,10 @@
 #                                — pick one, not both)
 # builds_on_course: <slug>      (optional, points to a course this one continues
 #                                from as a sequel or real prerequisite)
+#
+# A domain may carry a `note` (inline markdown) for what its entries alone
+# cannot say: where a topic is only taught inside a broader course, or what no
+# structured course covers yet.
 ---
 title: The AI knowledge tree
 lede: >-
@@ -17,10 +21,13 @@ lede: >-
   each one stating what it builds on. Within a tier the domains are siblings and
   can be taken in any order.
 note: >-
-  Every entry names the course, the institution and its course code, so it
-  resolves to exactly one thing. Nothing here is pruned to a shortest path: the
-  tree covers each branch as it exists. Computer vision is deliberately out of
-  scope, though the multimodal material in tier 5 necessarily touches it.
+  Every entry names the course, the institution and its course code, and the
+  edition where a course has changed over time, so it resolves to exactly one
+  thing. Overlap is pruned rather than listed: courses that cover the same scope
+  at the same rigour form a "pick one" group, and a course another one dominates
+  is left out. Where no structured course exists for a topic, a domain names the
+  single lecture that teaches it and says so. Computer vision is deliberately out
+  of scope, though the multimodal material in tier 5 necessarily touches it.
 tiers:
   - id: mathematical-foundations
     n: 0
@@ -29,43 +36,47 @@ tiers:
     tagline: "Everything downstream assumes this material. Probability and statistics carry the most weight later."
     builds_on: []
     domains:
-      - name: "Linear algebra"
+      - name: "Linear algebra & linear systems"
         courses:
           - slug: mit-18-06
-            title: "Linear Algebra (18.06)"
-            org: "MIT OCW"
-            code: "18.06"
+            title: "Linear Algebra (18.06SC)"
+            org: "MIT OCW (Strang)"
+            code: "18.06SC"
             tags: [free, univ]
             status: todo
-          - slug: imperial-mathematics-for-machine-learning-l
-            title: "Mathematics for Machine Learning: Linear Algebra"
-            org: "Imperial College London"
-            tags: [coursera, paid]
-            status: todo
           - slug: mit-18-065
-            title: "Matrix Methods in Data Analysis, Signal Processing & ML (18.065)"
-            org: "MIT OCW"
+            title: "Matrix Methods in Data Analysis, Signal Processing, and Machine Learning (18.065)"
+            org: "MIT OCW (Strang)"
             code: "18.065"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: mit-18-06
+          - slug: stanford-ee263
+            title: "Introduction to Linear Dynamical Systems (EE263)"
+            org: "Stanford Engineering Everywhere (Boyd)"
+            code: "EE263"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: mit-18-06
+          - slug: mit-18-335
+            title: "Introduction to Numerical Methods (18.335J)"
+            org: "MIT OCW"
+            code: "18.335J"
             tags: [free, univ]
             status: todo
             builds_on_course: mit-18-06
       - name: "Calculus & matrix calculus"
         courses:
           - slug: mit-18-02
-            title: "Multivariable Calculus (18.02)"
-            org: "MIT OCW"
-            code: "18.02"
+            title: "Multivariable Calculus (18.02SC)"
+            org: "MIT OCW (Auroux)"
+            code: "18.02SC"
             tags: [free, univ]
             status: todo
-          - slug: imperial-mathematics-for-machine-learning-m
-            title: "Mathematics for Machine Learning: Multivariate Calculus"
-            org: "Imperial College London"
-            tags: [coursera, paid]
-            status: todo
           - slug: mit-18-s096
-            title: "Matrix Calculus for Machine Learning and Beyond (18.S096)"
-            org: "MIT OCW"
-            code: "18.S096"
+            title: "Matrix Calculus for Machine Learning and Beyond (18.063, formerly 18.S096)"
+            org: "MIT OCW (Edelman & Johnson)"
+            code: "18.063"
             tags: [free, univ]
             status: todo
             builds_on_course: mit-18-02
@@ -84,17 +95,13 @@ tiers:
             tags: [free, paid, univ]
             status: todo
             alt_of: harvard-stat-110
-          - slug: mitx-micromasters-in-statistics-and-dat
-            title: "MicroMasters in Statistics and Data Science"
-            org: "MITx / edX"
-            tags: [paid, cert]
+          - slug: mitx-18-6501x
+            title: "Fundamentals of Statistics (18.6501x)"
+            org: "MITx (MIT Open Learning, via MITx Online)"
+            code: "18.6501x"
+            tags: [free, paid, univ]
             status: todo
             builds_on_course: mitx-6-431x
-          - slug: ucsc-bayesian-statistics-from-concept-t
-            title: "Bayesian Statistics: From Concept to Data Analysis"
-            org: "UC Santa Cruz"
-            tags: [coursera, paid]
-            status: todo
       - name: "Information theory"
         courses:
           - slug: cambridge-information-theory-pattern-recogni
@@ -102,33 +109,21 @@ tiers:
             org: "Cambridge (MacKay)"
             tags: [free, series]
             status: todo
-          - slug: stanford-ee276
-            title: "Information Theory (EE276)"
-            org: "Stanford"
-            code: "EE276"
-            tags: [free, univ]
-            status: todo
       - name: "Optimization"
         courses:
           - slug: stanford-ee364a
             title: "Convex Optimization I (EE364A)"
-            org: "Stanford Online"
+            org: "Stanford (Boyd)"
             code: "EE364A"
             tags: [free, univ]
             status: todo
-          - slug: stanford-ee364b
-            title: "Convex Optimization II (EE364B)"
-            org: "Stanford Online"
-            code: "EE364B"
+          - slug: epfl-cs-439
+            title: "Optimization for Machine Learning (CS-439)"
+            org: "EPFL (Jaggi & Flammarion)"
+            code: "CS-439"
             tags: [free, univ]
             status: todo
             builds_on_course: stanford-ee364a
-          - slug: mit-18-335
-            title: "Introduction to Numerical Methods (18.335)"
-            org: "MIT OCW"
-            code: "18.335"
-            tags: [free, univ]
-            status: todo
   - id: classical-machine-learning
     n: 1
     name: "Classical machine learning"
@@ -136,18 +131,8 @@ tiers:
     tagline: "The pre-deep-learning core: estimators, generalisation, and the theory the rest leans on."
     builds_on: [mathematical-foundations]
     domains:
-      - name: "Applied / intro ML"
+      - name: "Core ML"
         courses:
-          - slug: stanford-machine-learning-specialization-3-
-            title: "Machine Learning Specialization (3 courses)"
-            org: "DeepLearning.AI + Stanford (Ng)"
-            tags: [coursera, paid]
-            status: todo
-          - slug: caltech-learning-from-data
-            title: "Learning From Data"
-            org: "Caltech (Abu-Mostafa)"
-            tags: [free, univ]
-            status: todo
           - slug: stanford-cs229
             title: "Machine Learning (CS229)"
             org: "Stanford"
@@ -155,42 +140,34 @@ tiers:
             tags: [free, univ]
             status: todo
           - slug: cmu-10-601
-            title: "Introduction to Machine Learning (10-601 / 10-701)"
+            title: "Introduction to Machine Learning (10-301/10-601)"
             org: "CMU"
             code: "10-601"
             tags: [free, univ]
             status: todo
             alt_of: stanford-cs229
-      - name: "Statistical learning"
+      - name: "Learning theory"
         courses:
-          - slug: stanford-statistical-learning-with-python
-            title: "Statistical Learning with Python"
-            org: "Stanford Online / edX (Hastie & Tibshirani)"
-            tags: [free, univ]
-            status: todo
-          - slug: mit-9-520
-            title: "Statistical Learning Theory and Applications (9.520)"
-            org: "MIT"
-            code: "9.520"
-            tags: [free, univ]
-            status: todo
           - slug: stanford-cs229t
             title: "Machine Learning Theory (CS229M / STATS214)"
             org: "Stanford"
             code: "CS229M / STATS214"
             tags: [free, univ]
             status: todo
+            builds_on_course: stanford-cs229
+          - slug: mit-9-520
+            title: "Statistical Learning Theory and Applications (9.520/6.7910)"
+            org: "MIT (Poggio & Rosasco)"
+            code: "9.520/6.7910"
+            tags: [free, univ]
+            status: todo
+            alt_of: stanford-cs229t
       - name: "Bayesian & probabilistic methods"
         courses:
           - slug: mpi-statistical-rethinking
             title: "Statistical Rethinking"
             org: "Max Planck (McElreath)"
             tags: [free, series]
-            status: todo
-          - slug: hse-bayesian-methods-for-machine-learn
-            title: "Bayesian Methods for Machine Learning"
-            org: "HSE University"
-            tags: [coursera, paid]
             status: todo
           - slug: tubingen-probabilistic-machine-learning
             title: "Probabilistic Machine Learning"
@@ -199,15 +176,16 @@ tiers:
             status: todo
           - slug: tubingen-numerics-of-machine-learning
             title: "Numerics of Machine Learning"
-            org: "University of Tübingen (Hennig)"
+            org: "University of Tübingen (Hennig et al.)"
             tags: [free, series]
             status: todo
+            builds_on_course: tubingen-probabilistic-machine-learning
       - name: "Probabilistic graphical models"
         courses:
-          - slug: stanford-cs228
-            title: "Probabilistic Graphical Models (CS228)"
-            org: "Stanford"
-            code: "CS228"
+          - slug: cmu-10-708
+            title: "Probabilistic Graphical Models (10-708)"
+            org: "CMU"
+            code: "10-708"
             tags: [free, univ]
             status: todo
           - slug: stanford-probabilistic-graphical-models-spe
@@ -215,24 +193,13 @@ tiers:
             org: "Stanford (Koller)"
             tags: [coursera, paid]
             status: todo
-            alt_of: stanford-cs228
-          - slug: cmu-10-708
-            title: "Probabilistic Graphical Models (10-708)"
-            org: "CMU"
-            code: "10-708"
-            tags: [free, univ]
-            status: todo
+            alt_of: cmu-10-708
       - name: "Causal inference"
         courses:
           - slug: brady-neal-introduction-to-causal-inference
             title: "Introduction to Causal Inference"
             org: "Brady Neal"
             tags: [free, series]
-            status: todo
-          - slug: columbia-causal-inference-i-ii
-            title: "Causal Inference & Causal Inference 2"
-            org: "Columbia University (via Coursera)"
-            tags: [coursera, paid]
             status: todo
   - id: deep-learning-core
     n: 2
@@ -243,67 +210,41 @@ tiers:
     domains:
       - name: "Deep learning fundamentals"
         courses:
-          - slug: mit-6-s191
-            title: "Introduction to Deep Learning (6.S191)"
-            org: "MIT"
-            code: "6.S191"
-            tags: [free, univ]
-            status: todo
-          - slug: dlai-deep-learning-specialization-5-cou
-            title: "Deep Learning Specialization (5 courses)"
-            org: "DeepLearning.AI (Ng)"
-            tags: [coursera, paid]
-            status: todo
-          - slug: fastai-practical-deep-learning-for-coders
-            title: "Practical Deep Learning for Coders"
-            org: "fast.ai"
-            tags: [free, series]
-            status: todo
-            alt_of: dlai-deep-learning-specialization-5-cou
-          - slug: stanford-cs230
-            title: "Deep Learning (CS230)"
-            org: "Stanford"
-            code: "CS230"
-            tags: [free, univ]
-            status: todo
-            builds_on_course: dlai-deep-learning-specialization-5-cou
           - slug: cmu-11-785
             title: "Introduction to Deep Learning (11-785)"
             org: "CMU"
             code: "11-785"
             tags: [free, univ]
             status: todo
-          - slug: berkeley-cs182
-            title: "Designing, Visualizing and Understanding Deep Neural Networks (CS182)"
-            org: "UC Berkeley"
-            code: "CS182/282A"
+          - slug: mit-6-7960
+            title: "Deep Learning (6.7960)"
+            org: "MIT OCW"
+            code: "6.7960"
             tags: [free, univ]
             status: todo
             alt_of: cmu-11-785
-          - slug: nyu-deep-learning
-            title: "Deep Learning"
-            org: "NYU (LeCun & Canziani)"
-            tags: [free, univ]
-            status: todo
       - name: "Generative models"
         courses:
-          - slug: stanford-cs236
-            title: "Deep Generative Models (CS236)"
-            org: "Stanford"
-            code: "CS236"
-            tags: [free, univ]
-            status: todo
           - slug: berkeley-cs294-158
             title: "Deep Unsupervised Learning (CS294-158)"
             org: "UC Berkeley"
             code: "CS294-158"
             tags: [free, univ]
             status: todo
-          - slug: hf-diffusion-course
-            title: "Diffusion Course"
-            org: "Hugging Face"
-            tags: [free, cert]
+          - slug: stanford-cs236
+            title: "Deep Generative Models (CS236)"
+            org: "Stanford"
+            code: "CS236"
+            tags: [free, univ]
             status: todo
+            alt_of: berkeley-cs294-158
+          - slug: mit-6-s184
+            title: "Introduction to Flow Matching and Diffusion Models (6.S184)"
+            org: "MIT"
+            code: "6.S184"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: berkeley-cs294-158
       - name: "Graph & geometric learning"
         courses:
           - slug: stanford-cs224w
@@ -313,43 +254,71 @@ tiers:
             tags: [free, univ]
             status: todo
           - slug: ammi-geometric-deep-learning
-            title: "Geometric Deep Learning"
-            org: "AMMI (Bronstein et al.)"
+            title: "Geometric Deep Learning (AMMI 2022)"
+            org: "AMMI (Bronstein, Bruna, Cohen & Veličković)"
             tags: [free, series]
             status: todo
   - id: nlp-transformers-llms
     n: 3
     name: "NLP, transformers & LLMs"
     short: "NLP & LLMs"
-    tagline: "From word vectors to building a language model end to end. CS336 is the densest item in the tree."
+    tagline: "From word vectors to building a language model end to end, with encoders and the alternatives to attention as branches of their own. CS336 is the densest item in the tree."
     builds_on: [deep-learning-core]
     domains:
       - name: "NLP foundations"
+        note: >-
+          CS224N is pinned to Spring 2024, the last run with public lectures and
+          the one whose default final project builds BERT from scratch (minBERT);
+          later runs switched it to GPT-2.
         courses:
           - slug: stanford-cs224n
-            title: "NLP with Deep Learning (CS224N)"
+            title: "Natural Language Processing with Deep Learning (CS224N, Spring 2024)"
             org: "Stanford"
             code: "CS224N"
             tags: [free, univ]
             status: todo
           - slug: cmu-11-711
-            title: "Advanced NLP (11-711)"
-            org: "CMU"
+            title: "Advanced Natural Language Processing (11-711)"
+            org: "CMU (LTI)"
             code: "11-711"
             tags: [free, univ]
             status: todo
             alt_of: stanford-cs224n
-          - slug: dlai-natural-language-processing-specia
-            title: "Natural Language Processing Specialization (4 courses)"
-            org: "DeepLearning.AI"
-            tags: [coursera, paid]
-            status: todo
           - slug: hf-llm-course-formerly-nlp-course
             title: "LLM Course (formerly NLP Course)"
             org: "Hugging Face"
             tags: [free, cert]
             status: todo
+      - name: "Encoders, embeddings & retrieval"
+        note: >-
+          The encoder-only branch: BERT, RoBERTa and ELECTRA, sentence embeddings,
+          cross-encoders and dense and late-interaction retrieval. CS224U's
+          behavioural-evaluation and analysis-methods units are also the tree's
+          model-level evaluation course; hands-on interpretability is ARENA, in
+          tier 8. No structured course yet teaches the 2024-26 encoder
+          generation (ModernBERT and after) or large-scale embedding training;
+          the ingredients they borrow (RoPE, GLU, FlashAttention, long context)
+          are in [CS336](#c-stanford-cs336).
+        courses:
+          - slug: stanford-cs224u
+            title: "Natural Language Understanding (CS224U)"
+            org: "Stanford (Potts)"
+            code: "CS224U"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: stanford-cs224n
+          - slug: tuwien-advanced-information-retrieval
+            title: "Advanced Information Retrieval (188.980)"
+            org: "TU Wien (Hofstätter)"
+            code: "188.980"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: stanford-cs224u
       - name: "Transformers & building LLMs"
+        note: >-
+          Post-training (SFT, RLHF, DPO, RLVR/GRPO) has no domain of its own: it
+          is CS336's lectures 15-16 and assignment 5, chapters 11-12 of the
+          Hugging Face LLM Course, and the LLM-RL work in tier 4's deep RL courses.
         courses:
           - slug: karpathy-neural-networks-zero-to-hero
             title: "Neural Networks: Zero to Hero"
@@ -368,57 +337,28 @@ tiers:
             code: "CS25"
             tags: [free, series]
             status: todo
-          - slug: dlai-generative-ai-with-large-language-
-            title: "Generative AI with Large Language Models"
-            org: "DeepLearning.AI + AWS"
-            tags: [coursera, paid]
-            status: todo
-          - slug: ibm-generative-ai-engineering-with-llm
-            title: "Generative AI Engineering with LLMs Specialization"
-            org: "IBM"
-            tags: [coursera, paid]
-            status: todo
-            alt_of: dlai-generative-ai-with-large-language-
-      - name: "Fine-tuning & post-training"
+      - name: "Beyond transformers: SSMs, linear attention & diffusion LMs"
+        note: >-
+          No structured course is dedicated to this yet, so the domain is built
+          from single lectures, each named down to the lecture. Around them: the
+          Albert Gu talk on state-space models in [CS25](#c-stanford-cs25) V6,
+          the discrete-diffusion lecture of [6.S184](#c-mit-6-s184), the
+          convolution maths in [18.065](#c-mit-18-065) and the linear-systems
+          maths in [EE263](#c-stanford-ee263). No course sets a graded exercise
+          that implements an SSM or linear-attention layer; swapping one into the
+          CS336 assignment-1 model is the hands-on step.
         courses:
-          - slug: dlai-finetuning-large-language-models
-            title: "Finetuning Large Language Models"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: dlai-reinforcement-learning-from-human-
-            title: "Reinforcement Learning from Human Feedback"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: stanford-cs336-2
-            title: "Post-training & alignment (within CS336)"
+          - slug: stanford-cs336-attention-alternatives
+            title: "Attention Alternatives (Lecture 4 of CS336, Spring 2026)"
             org: "Stanford"
             code: "CS336"
             tags: [free, univ]
             status: todo
-            builds_on_course: stanford-cs336
-      - name: "Prompting, RAG & context"
-        courses:
-          - slug: dlai-chatgpt-prompt-engineering-for-dev
-            title: "ChatGPT Prompt Engineering for Developers"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: vanderbilt-uni-prompt-engineering-specialization
-            title: "Prompt Engineering Specialization"
-            org: "Vanderbilt University"
-            tags: [coursera, paid]
-            status: todo
-          - slug: dlai-building-and-evaluating-advanced-r
-            title: "Building and Evaluating Advanced RAG"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: uiuc-text-retrieval-and-search-engines
-            title: "Text Retrieval and Search Engines"
-            org: "UIUC"
-            tags: [coursera, paid]
+          - slug: cmu-10-423-state-space-models
+            title: "State Space Models & Hybrid Models (Lecture 21 of 10-423/623 Generative AI)"
+            org: "CMU"
+            code: "10-423"
+            tags: [free, univ]
             status: todo
       - name: "Agents & tool use"
         courses:
@@ -427,34 +367,22 @@ tiers:
             org: "Hugging Face"
             tags: [free, cert]
             status: todo
-          - slug: hf-mcp-course
-            title: "MCP Course"
+          - slug: hf-context-course
+            title: "The Context Course: Context Engineering for Code Agents"
             org: "Hugging Face"
             tags: [free, cert]
             status: todo
-          - slug: berkeley-cs294
-            title: "Large Language Model Agents (MOOC)"
-            org: "UC Berkeley (Dawn Song, with Xinyun Chen)"
-            code: "CS194/294-196"
+          - slug: berkeley-agentic-ai
+            title: "Agentic AI (MOOC, Fall 2025)"
+            org: "UC Berkeley RDI (Dawn Song)"
+            code: "CS294/194-196"
             tags: [free, univ]
-            status: todo
-      - name: "Evaluation & interpretability"
-        courses:
-          - slug: dlai-evaluating-and-debugging-generativ
-            title: "Evaluating and Debugging Generative AI"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: dlai-automated-testing-for-llmops
-            title: "Automated Testing for LLMOps"
-            org: "DeepLearning.AI"
-            tags: [free, series]
             status: todo
   - id: reinforcement-learning
     n: 4
     name: "Reinforcement learning"
     short: "RL"
-    tagline: "A standalone branch. Feeds post-training (RLHF, GRPO) back into tier 3."
+    tagline: "A standalone branch. Feeds post-training (RLHF, DPO, GRPO) back into tier 3."
     builds_on: [deep-learning-core]
     domains:
       - name: "Classical RL"
@@ -465,55 +393,43 @@ tiers:
             tags: [coursera, paid]
             status: todo
           - slug: deepmind-reinforcement-learning-course
-            title: "Reinforcement Learning Course"
-            org: "DeepMind × UCL (Silver)"
-            tags: [free, series]
+            title: "Introduction to Reinforcement Learning (COMPM050)"
+            org: "UCL (Silver), recordings by Google DeepMind"
+            code: "COMPM050 / COMPGI13"
+            tags: [free, univ]
             status: todo
             alt_of: university-of--reinforcement-learning-specializat
       - name: "Deep RL"
         courses:
-          - slug: hf-deep-rl-course
-            title: "Deep RL Course"
-            org: "Hugging Face"
-            tags: [free, cert]
-            status: todo
-          - slug: openai-spinning-up-in-deep-rl
-            title: "Spinning Up in Deep RL"
-            org: "OpenAI"
-            tags: [free, series]
-            status: todo
-          - slug: stanford-cs234
-            title: "Reinforcement Learning (CS234)"
-            org: "Stanford"
-            code: "CS234"
+          - slug: stanford-cs224r
+            title: "Deep Reinforcement Learning (CS224R)"
+            org: "Stanford (Finn)"
+            code: "CS224R"
             tags: [free, univ]
             status: todo
           - slug: berkeley-cs285
-            title: "Deep Reinforcement Learning (CS285)"
-            org: "UC Berkeley"
-            code: "CS285"
+            title: "Deep Reinforcement Learning (CS185/285)"
+            org: "UC Berkeley (Levine)"
+            code: "CS185/285"
             tags: [free, univ]
             status: todo
+            alt_of: stanford-cs224r
   - id: other-modalities-applicati
     n: 5
     name: "Other modalities & applications"
     short: "Modalities"
-    tagline: "Speech, tabular data, time series, and multimodal systems. Multimodal work necessarily touches vision."
+    tagline: "Speech, time series, recommender systems, and multimodal models. Multimodal work necessarily touches vision."
     builds_on: [deep-learning-core]
     domains:
       - name: "Speech & audio"
         courses:
-          - slug: hf-audio-course
-            title: "Audio Course"
-            org: "Hugging Face"
-            tags: [free, cert]
-            status: todo
           - slug: stanford-cs224s
             title: "Spoken Language Processing (CS224S)"
             org: "Stanford"
             code: "CS224S"
             tags: [free, univ]
             status: todo
+            builds_on_course: stanford-cs224n
       - name: "Time series & forecasting"
         courses:
           - slug: suny-practical-time-series-analysis
@@ -521,12 +437,7 @@ tiers:
             org: "SUNY"
             tags: [coursera, paid]
             status: todo
-          - slug: dlai-sequences-time-series-and-predicti
-            title: "Sequences, Time Series and Prediction"
-            org: "DeepLearning.AI"
-            tags: [coursera, paid]
-            status: todo
-      - name: "Recommenders & information retrieval"
+      - name: "Recommenders & large-scale mining"
         courses:
           - slug: university-of--recommender-systems-specialization
             title: "Recommender Systems Specialization (5 courses)"
@@ -539,31 +450,27 @@ tiers:
             code: "CS246"
             tags: [free, univ]
             status: todo
-      - name: "Embodied & robotics"
+      - name: "Multimodal learning"
         courses:
-          - slug: hf-robotics-course-lerobot
-            title: "Robotics Course (LeRobot)"
-            org: "Hugging Face"
-            tags: [free, cert]
-            status: todo
-          - slug: hf-ml-for-games-course
-            title: "ML for Games Course"
-            org: "Hugging Face"
-            tags: [free, cert]
+          - slug: mit-mas-s60
+            title: "How to AI (Almost) Anything (MAS.S60)"
+            org: "MIT OCW (Liang)"
+            code: "MAS.S60"
+            tags: [free, univ]
             status: todo
   - id: ml-systems-efficiency
     n: 6
-    name: "ML systems & efficiency"
-    short: "Systems"
-    tagline: "Kernels, quantisation, distributed training, and serving. Where systems engineering meets models."
-    builds_on: [deep-learning-core]
+    name: "ML systems (MLSys)"
+    short: "MLSys"
+    tagline: "How models run fast and at scale: GPU kernels, frameworks and compilers, distributed training, LLM serving, and compression. Picks up where CS336's systems assignment stops."
+    builds_on: [nlp-transformers-llms]
     domains:
-      - name: "Parallel & GPU programming"
+      - name: "GPU & parallel programming"
         courses:
-          - slug: cmu-15-418
-            title: "Parallel Computer Architecture and Programming (15-418/618)"
-            org: "CMU"
-            code: "15-418"
+          - slug: mit-6-s894
+            title: "Accelerated Computing (6.S894)"
+            org: "MIT"
+            code: "6.S894"
             tags: [free, univ]
             status: todo
           - slug: stanford-cs149
@@ -572,13 +479,8 @@ tiers:
             code: "CS149"
             tags: [free, univ]
             status: todo
-            alt_of: cmu-15-418
-          - slug: nvidia-dli-fundamentals-of-accelerated-comput
-            title: "Fundamentals of Accelerated Computing with CUDA C/C++"
-            org: "NVIDIA DLI"
-            tags: [paid, cert]
-            status: todo
-      - name: "Deep learning systems & compilers"
+            alt_of: mit-6-s894
+      - name: "DL frameworks & compilers"
         courses:
           - slug: cmu-10-414
             title: "Deep Learning Systems: Algorithms and Implementation (10-414/714)"
@@ -586,12 +488,28 @@ tiers:
             code: "10-414"
             tags: [free, univ]
             status: todo
-          - slug: mlc-ai-tianqi--machine-learning-compilation
-            title: "Machine Learning Compilation"
-            org: "MLC.ai (Tianqi Chen)"
+      - name: "Distributed training & LLM serving"
+        courses:
+          - slug: ucsd-cse-234
+            title: "Data Systems for Machine Learning (CSE 234)"
+            org: "UC San Diego (Hao Zhang)"
+            code: "CSE 234"
+            tags: [free, univ]
+            status: todo
+            builds_on_course: cmu-10-414
+          - slug: cmu-11-868
+            title: "Large Language Model Systems (11-868)"
+            org: "CMU (LTI)"
+            code: "11-868"
+            tags: [free, univ]
+            status: todo
+            alt_of: ucsd-cse-234
+          - slug: stanford-stanford-mlsys-seminar-series
+            title: "Stanford MLSys Seminar Series"
+            org: "Stanford"
             tags: [free, series]
             status: todo
-      - name: "Efficient inference & TinyML"
+      - name: "Efficient ML & compression"
         courses:
           - slug: mit-6-5940
             title: "TinyML and Efficient Deep Learning Computing (6.5940)"
@@ -599,87 +517,35 @@ tiers:
             code: "6.5940"
             tags: [free, univ]
             status: todo
-          - slug: mit-6-5930
-            title: "Hardware Architecture for Deep Learning (6.5930)"
-            org: "MIT"
-            code: "6.5930"
-            tags: [free, univ]
-            status: todo
-      - name: "ML systems design"
-        courses:
-          - slug: harvard-cs249r
-            title: "Machine Learning Systems (CS249r)"
-            org: "Harvard (Reddi)"
-            code: "CS249r"
-            tags: [free, univ]
-            status: todo
-          - slug: stanford-stanford-mlsys-seminar-series
-            title: "Stanford MLSys Seminar Series"
-            org: "Stanford"
-            tags: [free, series]
-            status: todo
-      - name: "Distributed systems substrate"
-        courses:
-          - slug: mit-6-824
-            title: "Distributed Systems (6.824/6.5840)"
-            org: "MIT"
-            code: "6.824"
-            tags: [free, univ]
-            status: todo
-          - slug: cmu-15-445
-            title: "Intro to Database Systems (15-445/645)"
-            org: "CMU"
-            code: "15-445"
-            tags: [free, univ]
-            status: todo
   - id: mlops-production-engineeri
     n: 7
     name: "MLOps & production engineering"
     short: "MLOps"
-    tagline: "Shipping, serving, and monitoring models once they leave the notebook."
+    tagline: "Deploying, operating, and monitoring ML and LLM products. How models run fast at scale lives in tier 6."
     builds_on: [deep-learning-core]
     domains:
       - name: "MLOps"
         courses:
-          - slug: dlai-machine-learning-engineering-for-p
-            title: "Machine Learning Engineering for Production (MLOps) Specialization (4 courses)"
-            org: "DeepLearning.AI"
-            tags: [coursera, paid]
+          - slug: cmu-17-445
+            title: "Machine Learning in Production (17-445/17-645)"
+            org: "CMU (Kästner)"
+            code: "17-445"
+            tags: [free, univ]
             status: todo
           - slug: datatalks-club-mlops-zoomcamp
             title: "MLOps Zoomcamp"
             org: "DataTalks.Club"
-            tags: [free, cert]
-            status: todo
-          - slug: fsdl-full-stack-deep-learning
-            title: "Full Stack Deep Learning"
-            org: "FSDL"
-            tags: [free, series]
-            status: todo
-          - slug: made-with-ml-made-with-ml
-            title: "Made With ML"
-            org: "Anyscale (Made With ML)"
-            tags: [free, series]
+            tags: [free]
             status: todo
       - name: "LLMOps"
         courses:
-          - slug: dlai-llmops
-            title: "LLMOps"
-            org: "DeepLearning.AI"
-            tags: [free, series]
-            status: todo
-          - slug: fsdl-full-stack-llm-bootcamp
-            title: "Full Stack LLM Bootcamp"
-            org: "FSDL"
-            tags: [free, series]
+          - slug: datatalks-club-llm-zoomcamp
+            title: "LLM Zoomcamp"
+            org: "DataTalks.Club"
+            tags: [free, cert]
             status: todo
       - name: "Data engineering"
         courses:
-          - slug: ibm-ibm-data-engineering-professional-
-            title: "IBM Data Engineering Professional Certificate"
-            org: "IBM"
-            tags: [coursera, paid, cert]
-            status: todo
           - slug: datatalks-club-data-engineering-zoomcamp
             title: "Data Engineering Zoomcamp"
             org: "DataTalks.Club"
@@ -687,32 +553,29 @@ tiers:
             status: todo
       - name: "Cloud ML certifications"
         courses:
-          - slug: aws-aws-certified-machine-learning-spe
-            title: "AWS Certified Machine Learning Engineer - Associate (MLA-C01)"
-            org: "AWS"
+          - slug: aws-mla-c02-exam-prep
+            title: "Exam Prep Plan: AWS Certified Machine Learning Engineer - Associate (MLA-C02)"
+            org: "AWS Skill Builder"
+            code: "MLA-C02"
             tags: [paid, cert]
             status: todo
-          - slug: google-preparing-for-google-cloud-profess
-            title: "Preparing for Google Cloud Certification: Machine Learning Engineer"
-            org: "Google Cloud"
-            tags: [coursera, paid, cert]
+          - slug: google-pmle-learning-path
+            title: "Professional Machine Learning Engineer Certification (learning path)"
+            org: "Google Cloud (Google Skills)"
+            tags: [paid, cert]
             status: todo
+            alt_of: aws-mla-c02-exam-prep
   - id: safety-security-privacy-go
     n: 8
     name: "Safety, security, privacy & governance"
     short: "Safety"
-    tagline: "Alignment, adversarial robustness, privacy, and policy. Thin on formal courses, which is itself informative."
+    tagline: "Alignment, interpretability, adversarial robustness, privacy, and policy. ARENA doubles as the tree's hands-on transformer interpretability course."
     builds_on: [nlp-transformers-llms]
     domains:
       - name: "AI safety & alignment"
         courses:
-          - slug: bluedot-impact-ai-safety-fundamentals-alignment-c
-            title: "AI Alignment"
-            org: "BlueDot Impact"
-            tags: [free, cert]
-            status: todo
-          - slug: bluedot-impact-ai-safety-fundamentals-governance-
-            title: "Frontier AI Governance"
+          - slug: bluedot-technical-ai-safety
+            title: "Technical AI Safety"
             org: "BlueDot Impact"
             tags: [free, cert]
             status: todo
@@ -721,31 +584,38 @@ tiers:
             org: "ARENA"
             tags: [free, series]
             status: todo
-      - name: "Adversarial ML & LLM security"
+      - name: "LLM security & red teaming"
         courses:
-          - slug: dlai-red-teaming-llm-applications
-            title: "Red Teaming LLM Applications"
-            org: "DeepLearning.AI"
+          - slug: microsoft-ai-red-teaming-101
+            title: "AI Red Teaming 101"
+            org: "Microsoft (AI Red Team)"
             tags: [free, series]
             status: todo
       - name: "Privacy-preserving ML"
         courses:
-          - slug: openmined-privacy-preserving-ai-series
-            title: "Privacy-Preserving AI series"
-            org: "OpenMined"
-            tags: [free, series]
+          - slug: waterloo-cs-860
+            title: "Algorithms for Private Data Analysis (CS 860)"
+            org: "University of Waterloo (Kamath)"
+            code: "CS 860"
+            tags: [free, univ]
             status: todo
-      - name: "Fairness, ethics & policy"
+      - name: "Ethics, governance & policy"
         courses:
-          - slug: various-course-ai-ethics-responsible-ai
-            title: "AI Ethics / Responsible AI"
-            org: "various (Coursera catalogue)"
-            tags: [coursera, paid]
+          - slug: helsinki-ethics-of-ai
+            title: "Ethics of AI"
+            org: "University of Helsinki (MOOC.fi)"
+            tags: [free, univ, cert]
             status: todo
-          - slug: various-provid-eu-ai-act-compliance-training
-            title: "EU AI Act compliance training"
-            org: "various providers"
-            tags: [paid]
+          - slug: bluedot-impact-ai-safety-fundamentals-governance-
+            title: "Frontier AI Governance"
+            org: "BlueDot Impact"
+            tags: [free, cert]
+            status: todo
+          - slug: iapp-aigp-training
+            title: "AIGP: Artificial Intelligence Governance Professional training"
+            org: "IAPP"
+            code: "AIGP"
+            tags: [paid, cert]
             status: todo
   - id: research-practice
     n: 9
@@ -756,13 +626,14 @@ tiers:
     domains:
       - name: "Doing and writing research"
         courses:
-          - slug: stanford-writing-in-the-sciences
-            title: "Writing in the Sciences"
-            org: "Stanford Online"
+          - slug: stanford-cs197
+            title: "Computer Science Research (CS197)"
+            org: "Stanford"
+            code: "CS197"
             tags: [free, univ]
             status: todo
-          - slug: ecrire-et-publ-how-to-write-and-publish-a-scienti
-            title: "How to Write and Publish a Scientific Paper"
-            org: "École Polytechnique"
-            tags: [coursera, paid]
+          - slug: stanford-writing-in-the-sciences
+            title: "Writing in the Sciences"
+            org: "Stanford Online (Sainani)"
+            tags: [free, coursera, univ]
             status: todo

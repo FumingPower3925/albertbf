@@ -327,6 +327,13 @@
   margin: 0 0 var(--space-xs);
 }
 
+.rm-domain__note {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  max-width: 68ch;
+  margin: 0 0 var(--space-xs);
+}
+
 .rm-courses {
   list-style: none;
   margin: 0;
