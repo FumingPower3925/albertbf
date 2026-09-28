@@ -127,7 +127,14 @@ tiers:
     builds_on: [mathematical-foundations]
     domains:
       - name: "Core ML"
+        note: >-
+          The ML Specialization is an optional, calculus-free on-ramp before CS229.
         courses:
+          - slug: stanford-machine-learning-specialization-3-
+            title: "Machine Learning Specialization (3 courses)"
+            org: "DeepLearning.AI + Stanford Online (Ng)"
+            tags: [coursera, paid]
+            status: todo
           - slug: stanford-cs229
             title: "Machine Learning (CS229)"
             org: "Stanford"
