@@ -20,17 +20,12 @@ lede: >-
   Every branch of learning-based AI except computer vision and robotics, as
   structured courses only: no articles, no blog posts, no "read this repo". Ten
   tiers ordered by dependency, each one stating what it builds on. Within a tier
-  the domains are siblings: apart from the prerequisites an entry names, they can
-  be taken in any order.
+  the domains are siblings and can be taken in any order.
 note: >-
-  Every entry names the course, the institution, its course code where one
-  exists, and the edition where a course has changed over time, so it resolves to
-  exactly one thing. Overlap is pruned rather than listed: courses that cover the
-  same scope at the same rigour form a "pick one" group, and a course another one
-  dominates is left out. Where no structured course exists for a topic, a domain
-  names the lecture that teaches it and says so. Computer vision and robotics are
-  deliberately out of scope, though the multimodal material in tier 5
-  necessarily touches vision.
+  Every entry names the course, the institution, and its code and edition where
+  they matter, so it resolves to exactly one thing. Genuine substitutes form a
+  "pick one" group; dominated courses are left out. Computer vision and robotics
+  are deliberately out of scope.
 tiers:
   - id: mathematical-foundations
     n: 0
@@ -237,15 +232,10 @@ tiers:
     n: 3
     name: "NLP, transformers & LLMs"
     short: "NLP & LLMs"
-    tagline: "From word vectors to building a language model end to end, with encoders and the alternatives to attention as branches of their own. CS336 is the densest item in the tree."
+    tagline: "From word vectors to building a language model end to end. CS336 is the densest item in the tree."
     builds_on: [deep-learning-core]
     domains:
       - name: "NLP foundations"
-        note: >-
-          CS224N is pinned to Spring 2024, the last run with public lectures and
-          the one whose default final project (minBERT) has you implement BERT's
-          layers, load pretrained weights and fine-tune it on three tasks; later
-          runs switched that project to GPT-2.
         courses:
           - slug: stanford-cs224n
             title: "Natural Language Processing with Deep Learning (CS224N, Spring 2024)"
@@ -274,16 +264,7 @@ tiers:
             builds_on_course: stanford-cs224n
       - name: "Encoders, embeddings & retrieval"
         note: >-
-          The encoder-only branch: BERT, RoBERTa and ELECTRA, sentence embeddings,
-          cross-encoders, and dense and late-interaction retrieval. CS224U's
-          behavioural-evaluation and analysis-methods units are also the tree's
-          model-level evaluation course; hands-on interpretability is ARENA, in
-          tier 8. TU Wien's lectures 4-6 repeat CS224N and can be skipped, and
-          its exercise needs its MS MARCO data rebuilt. No structured course yet
-          teaches the 2024-26 encoder generation (ModernBERT and after) or
-          today's large-scale embedding training; the ingredients those encoders
-          borrow are in [CS336](#c-stanford-cs336): RoPE, GLU and local/global
-          attention in lecture 3, FlashAttention in assignment 2.
+          No course yet covers ModernBERT-era encoders or large-scale embedding training.
         courses:
           - slug: stanford-cs224u
             title: "Natural Language Understanding (CS224U, Spring 2023)"
@@ -301,9 +282,7 @@ tiers:
             builds_on_course: stanford-cs224n
       - name: "Transformers & building LLMs"
         note: >-
-          Post-training (SFT, RLHF, DPO, RLVR/GRPO) has no domain of its own: it
-          is CS336's lectures 15-16 and assignment 5, chapters 11-12 of the
-          Hugging Face LLM Course, and the LLM-RL work in tier 4's deep RL courses.
+          Post-training is taught in CS336 (lectures 15-16, assignment 5) and tier 4's deep RL courses.
         courses:
           - slug: stanford-cs336
             title: "Language Modeling from Scratch (CS336, Spring 2026)"
@@ -319,20 +298,7 @@ tiers:
             status: todo
       - name: "Beyond transformers: SSMs, linear attention & diffusion LMs"
         note: >-
-          No structured course is dedicated to this yet, so the domain names the
-          one lecture with a public recording that derives state-space models from
-          first principles: continuous-time form, discretisation, the recurrent and
-          convolutional views, S4 and Mamba's selective scan. CMU 10-423's Spring
-          2026 lecture 21 slides are its written companion and add hybrids. The
-          rest is already on the path: the opening of lecture 4 of
-          [CS336](#c-stanford-cs336) (linear attention, Mamba-2, Gated DeltaNet,
-          hybrids, sparse attention), Albert Gu's talk on state-space models and
-          transformers in [CS25](#c-stanford-cs25) V6, lecture 5 of
-          [6.S184](#c-mit-6-s184) on discrete diffusion for masked diffusion LMs,
-          and the maths in [18.065](#c-mit-18-065) and [EE263](#c-stanford-ee263).
-          The one public exercise that implements an SSM layer is homework 8 of
-          Berkeley's EECS 182 (Fall 2025); swapping an SSM or linear-attention
-          layer into the CS336 assignment-1 model is the step beyond it.
+          No dedicated course exists yet. This lecture derives S4 and Mamba; the rest is in [CS336](#c-stanford-cs336) lecture 4, [CS25](#c-stanford-cs25) V6 and [6.S184](#c-mit-6-s184) lecture 5.
         courses:
           - slug: cmu-11-711-scaling-sequence-length
             title: "Scaling Sequence Length (Lecture 22 of 11-711 Advanced NLP, Spring 2026)"
@@ -375,10 +341,6 @@ tiers:
             status: todo
             alt_of: university-of--reinforcement-learning-specializat
       - name: "Deep RL"
-        note: >-
-          CS224R's public lectures include preference optimisation and RL for
-          reasoning. CS185/285's public recordings are from Fall 2023; its Spring
-          2026 homework 4 is LLM RL.
         courses:
           - slug: stanford-cs224r
             title: "Deep Reinforcement Learning (CS224R, Spring 2025)"
@@ -397,7 +359,7 @@ tiers:
     n: 5
     name: "Other modalities & applications"
     short: "Modalities"
-    tagline: "Speech, time series, recommender systems and large-scale mining, and multimodal models. Multimodal work necessarily touches vision."
+    tagline: "Speech, time series, recommenders, and multimodal models. Multimodal work necessarily touches vision."
     builds_on: [deep-learning-core]
     domains:
       - name: "Speech & audio"
@@ -440,13 +402,10 @@ tiers:
     n: 6
     name: "ML systems (MLSys)"
     short: "MLSys"
-    tagline: "How models run fast and at scale: GPU kernels, frameworks, distributed training, LLM serving, and compression. Starts below CS336's systems assignment and goes well past it."
+    tagline: "Kernels, frameworks, distributed training, serving, and compression: how models run fast at scale."
     builds_on: [nlp-transformers-llms]
     domains:
       - name: "GPU & parallel programming"
-        note: >-
-          6.S894's labs need your own NVIDIA GPU (its remote runner is for enrolled
-          students, and lab 10 targets an H100).
         courses:
           - slug: stanford-cs149
             title: "Parallel Computing (CS149, Fall 2023)"
@@ -470,8 +429,6 @@ tiers:
             tags: [free, univ]
             status: todo
       - name: "Distributed training & LLM serving"
-        note: >-
-          CSE 234 has public recordings; 11-868 has slides and homework only.
         courses:
           - slug: ucsd-cse-234
             title: "Data Systems for Machine Learning (CSE 234, Winter 2025)"
@@ -503,7 +460,7 @@ tiers:
     n: 7
     name: "MLOps & production engineering"
     short: "MLOps"
-    tagline: "Deploying, operating, and monitoring ML and LLM products, and the data pipelines that feed them. How models run fast at scale lives in tier 6."
+    tagline: "Shipping, operating, and monitoring models and the data pipelines behind them."
     builds_on: [deep-learning-core]
     domains:
       - name: "MLOps"
@@ -551,7 +508,7 @@ tiers:
     n: 8
     name: "Safety, security, privacy & governance"
     short: "Safety"
-    tagline: "Alignment, interpretability, LLM red teaming, privacy, ethics and governance. ARENA doubles as the tree's hands-on transformer interpretability course."
+    tagline: "Alignment, interpretability, red teaming, privacy, and policy."
     builds_on: [nlp-transformers-llms]
     domains:
       - name: "AI safety & alignment"
@@ -574,9 +531,6 @@ tiers:
             tags: [free, series]
             status: todo
       - name: "Privacy-preserving ML"
-        note: >-
-          Differential privacy from first principles: DP-SGD and ML privacy take
-          two of its nineteen lectures, and its problem sets are proofs, not code.
         courses:
           - slug: waterloo-cs-860
             title: "Algorithms for Private Data Analysis (CS 860, Fall 2020)"
