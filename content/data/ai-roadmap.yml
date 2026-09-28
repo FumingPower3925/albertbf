@@ -11,11 +11,15 @@
 # builds_on_course: <slug>      (optional, points to a course this one continues
 #                                from as a sequel or real prerequisite)
 #
+# reviewed: YYYY-MM-DD          (when every entry was last checked against its
+#                                official page; shown on the page)
+#
 # A domain may carry a `note` (inline markdown) for what its entries alone
 # cannot say: where a topic is only taught inside a broader course, or what no
 # structured course covers yet.
 ---
 title: The AI knowledge tree
+reviewed: 2026-09-28
 lede: >-
   Every branch of learning-based AI except computer vision and robotics, as
   structured courses only: no articles, no blog posts, no "read this repo". Ten
@@ -123,7 +127,14 @@ tiers:
     builds_on: [mathematical-foundations]
     domains:
       - name: "Core ML"
+        note: >-
+          The ML Specialization is an optional, calculus-free on-ramp before CS229.
         courses:
+          - slug: stanford-machine-learning-specialization-3-
+            title: "Machine Learning Specialization (3 courses)"
+            org: "DeepLearning.AI + Stanford Online (Ng)"
+            tags: [coursera, paid]
+            status: todo
           - slug: stanford-cs229
             title: "Machine Learning (CS229)"
             org: "Stanford"

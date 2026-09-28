@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import { html, raw, type RawHtml } from "./html";
+import { formatDate } from "./components";
 import { renderSpine, type SpineTier } from "../roadmap/spine";
 
 /**
@@ -43,6 +44,8 @@ export interface Roadmap {
   title: string;
   lede: string;
   note: string;
+  /** ISO date every entry was last checked against its official page. */
+  reviewed: string;
   tiers: Tier[];
 }
 
@@ -53,6 +56,18 @@ const STATUS_LABEL: Record<Status, string> = {
   doing: "in progress",
   todo: "not started",
 };
+
+/**
+ * Course pages go stale fast, so the page says when the entries were last
+ * verified. Set by hand, not from git: a status change is an edit, not a check.
+ */
+function reviewedLine(reviewed: string): RawHtml {
+  const date = new Date(reviewed);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`ai-roadmap.yml: invalid reviewed date ${JSON.stringify(reviewed)} (expected e.g. 2026-09-28)`);
+  }
+  return html`<p class="rm-reviewed">Courses last checked <time datetime="${date.toISOString().slice(0, 10)}">${formatDate(date)}</time></p>`;
+}
 
 function courses(tier: Tier): Course[] {
   return tier.domains.flatMap((d) => d.courses);
@@ -224,6 +239,7 @@ export function renderRoadmap(data: Roadmap): RawHtml {
 <header class="rm-head">
 <h1>${data.title}</h1>
 <p class="rm-lede">${data.lede}</p>
+${reviewedLine(data.reviewed)}
 ${showProgress ? html`<p class="rm-overall">${tally(done, all.length)}${bar(done, all.length)}</p>` : null}
 </header>
 
