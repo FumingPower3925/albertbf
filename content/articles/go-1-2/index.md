@@ -137,7 +137,7 @@ func main() {
 len 2 cap 5
 ```
 
-`a[2:4:7]` is `a[2:4]` with its capacity set by the third index: length `4-2`, capacity `7-2`. Before Go 1.2 there was no third index, and the syntax for it did not parse. Built with Go 1.1.2, the program does not compile:[^repro]
+All three numbers are indices into `a`. The new slice starts at index 2, so its length spans 2 to 4 and its capacity spans 2 to 7: length `4-2`, capacity `7-2`, which is 5. Before Go 1.2 there was no third index, and the syntax for it did not parse. Built with Go 1.1.2, the program does not compile:[^repro]
 
 ```
 $ go build slice3.go     # Go 1.1.2
