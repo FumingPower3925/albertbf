@@ -196,7 +196,7 @@ func main() {
 }
 ```
 
-Slicing `p` should not work, because there is no array to slice. Built with Go 1.1.2, it works anyway, quietly:
+Slicing `p` should not work, because there is no array to slice. Built with Go 1.1.2, it works anyway:
 
 ```
 $ ./nilptr     # Go 1.1.2
