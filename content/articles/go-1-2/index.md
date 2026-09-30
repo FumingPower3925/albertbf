@@ -1,6 +1,6 @@
 ---
 title: "Go 1.2: Yielding at the Door"
-date: 2026-07-21
+date: 2026-09-30
 description: "Go 1.2 could finally take the processor back from a goroutine that never yielded, but only when the goroutine entered a function."
 tags: [go, go-history]
 series: go-version-by-version
