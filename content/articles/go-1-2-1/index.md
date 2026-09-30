@@ -10,7 +10,7 @@ links:
   - { label: "Issue #6946", url: "https://github.com/golang/go/issues/6946" }
 ---
 
-Go 1.2.1 shipped on 2 March 2014, three months after Go 1.2. The notes give it one sentence: bug fixes to the `runtime`, `net`, and `database/sql` packages.[^rel] Behind that sentence are seven commits touching fourteen files: five code fixes, the release notes, and the version bump. Every one of the five is a bug with no workaround, and that is the bar this release is clearing. The profiler crashed unless you stopped profiling. The database wedged unless you forked three packages. The collector miscounted so seldom that the team gave up on it twice.
+Go 1.2.1 shipped on 2 March 2014, three months after Go 1.2. The notes give it one sentence: bug fixes to the `runtime`, `net`, and `database/sql` packages.[^rel] Behind that sentence are seven commits touching fourteen files: five code fixes, the release notes, and the version bump. All five are bugs with no workaround. The collector miscounted so seldom that the team gave up on it twice. The profiler crashed unless you stopped profiling, and the database wedged unless you forked three packages.
 
 ## The double wakeup
 
@@ -73,7 +73,7 @@ Issue #6946 is the crash the release notes do not name, and it comes with its ow
 >
 > The only workaround is not to call GoroutineProfile. Possible #go121 candidate.
 
-Ian Lance Taylor agreed it met the bar, "a critical bug with no workaround", and tagged it for the release.[^prof]
+Ian Lance Taylor agreed, "a critical bug with no workaround", and tagged it for the release.[^prof]
 
 ### Should run forever
 
@@ -449,7 +449,7 @@ The fifth fix is issue #6987, and it only ever bit on Windows. A twelve-line HTT
 panic: AcceptEx tcp [::]:8888: An existing connection was forcibly closed by the remote host.
 ```
 
-Same code on Debian, no error no matter how long. When a client resets between connect and accept, `AcceptEx` reports the dead connection's error as the accept's error, and Go returned it, killing the listener. The reporter's complaint was the release thesis in miniature: "http.ListenAndServe just plain crashed." Vyukov: "it's more of an informational notification exposed through standard error reporting channel. Think of EINTR." Alex Brainman, who owned the Windows port: "WSAECONNRESET is actually about new connection, not about listening socket." The fix splits the accept into a single attempt plus a retry loop that ignores the two reset errors, and adds a Windows test file that did not exist.[^win]
+Same code on Debian, no error no matter how long. When a client resets between connect and accept, `AcceptEx` reports the dead connection's error as the accept's error, and Go returned it, killing the listener. The reporter's complaint: "http.ListenAndServe just plain crashed." Vyukov: "it's more of an informational notification exposed through standard error reporting channel. Think of EINTR." Alex Brainman, who owned the Windows port: "WSAECONNRESET is actually about new connection, not about listening socket." The fix splits the accept into a single attempt plus a retry loop that ignores the two reset errors, and adds a Windows test file that did not exist.[^win]
 
 The last commit of the seven is documentation: the release-notes block for 1.2.1 and a one-line install fix, where the tarball name still said `go1.1`. Andrew Gerrand: "I had to patch this in manually instead of using release-apply."
 
