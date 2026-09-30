@@ -1,6 +1,6 @@
 ---
 title: "Go 1.2.1: The Double Wakeup"
-date: 2026-09-30
+date: 2026-10-01
 description: "Every fix in Go 1.2.1 is a bug with no workaround. The sharpest is a GC data race that took the better part of a year to reproduce."
 tags: [go, go-history]
 series: go-version-by-version
