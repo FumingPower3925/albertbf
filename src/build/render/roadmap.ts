@@ -1,5 +1,6 @@
 import { marked } from "marked";
 import { html, raw, type RawHtml } from "./html";
+import { formatDate } from "./components";
 import { renderSpine, type SpineTier } from "../roadmap/spine";
 
 /**
@@ -29,6 +30,8 @@ export interface Course {
 
 export interface Domain {
   name: string;
+  /** Inline markdown for what the entries alone cannot say, e.g. a topic only taught inside a broader course. */
+  note?: string;
   courses: Course[];
 }
 
@@ -41,6 +44,8 @@ export interface Roadmap {
   title: string;
   lede: string;
   note: string;
+  /** ISO date every entry was last checked against its official page. */
+  reviewed: string;
   tiers: Tier[];
 }
 
@@ -51,6 +56,18 @@ const STATUS_LABEL: Record<Status, string> = {
   doing: "in progress",
   todo: "not started",
 };
+
+/**
+ * Course pages go stale fast, so the page says when the entries were last
+ * verified. Set by hand, not from git: a status change is an edit, not a check.
+ */
+function reviewedLine(reviewed: string): RawHtml {
+  const date = new Date(reviewed);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`ai-roadmap.yml: invalid reviewed date ${JSON.stringify(reviewed)} (expected e.g. 2026-09-28)`);
+  }
+  return html`<p class="rm-reviewed">Courses last checked <time datetime="${date.toISOString().slice(0, 10)}">${formatDate(date)}</time></p>`;
+}
 
 function courses(tier: Tier): Course[] {
   return tier.domains.flatMap((d) => d.courses);
@@ -87,7 +104,7 @@ function courseItem(c: Course, showProgress: boolean, allCourses: Course[]): Raw
       ? html`<span class="rm-rating"><span class="sr-only">Rated </span>${String(c.rating)}<span aria-hidden="true">/5</span></span>`
       : null;
 
-  // With nothing completed yet, "not started" on all 118 entries is noise, not
+  // With nothing completed yet, "not started" on every entry is noise, not
   // information; it earns its place once there is real variation to show.
   const statusLabel = showProgress
     ? html`<span class="rm-status rm-status--${status}">${STATUS_LABEL[status]}</span>${rating}`
@@ -201,6 +218,7 @@ ${showProgress ? html`${tally(done, list.length)}${bar(done, list.length)}` : nu
 ${t.domains.map(
     (d) => html`<section class="rm-domain">
 <h3 class="rm-domain__title">${d.name}</h3>
+${d.note ? html`<p class="rm-domain__note">${raw(marked.parseInline(d.note) as string)}</p>` : null}
 <ul class="rm-courses">
 ${domainItems(d).map((item) => domainItem(item, showProgress, allCourses))}
 </ul>
@@ -214,13 +232,14 @@ export function renderRoadmap(data: Roadmap): RawHtml {
   const done = doneCount(all);
   // The progress chrome (bars, tallies, per-course status) earns its place once
   // there is real status to show; at all-todo it would just repeat "0%"/"not
-  // started" 118 times. It reappears on its own the day a course changes status.
+  // started" once per course. It reappears on its own the day a course changes status.
   const showProgress = all.some((c) => (c.status ?? "todo") !== "todo");
 
   return html`<article class="rm">
 <header class="rm-head">
 <h1>${data.title}</h1>
 <p class="rm-lede">${data.lede}</p>
+${reviewedLine(data.reviewed)}
 ${showProgress ? html`<p class="rm-overall">${tally(done, all.length)}${bar(done, all.length)}</p>` : null}
 </header>
 
