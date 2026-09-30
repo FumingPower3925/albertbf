@@ -148,6 +148,26 @@ function parseFrontmatter(rawYaml: string, file: string): Frontmatter {
   };
 }
 
+function compareSlugsAsc(a: Article, b: Article): number {
+  return a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0;
+}
+
+/**
+ * Newest first. Same-timestamp ties break toward the later slug, so a sequel
+ * article published the same day as its predecessor lists first.
+ */
+export function compareArticlesNewestFirst(a: Article, b: Article): number {
+  return b.fm.date.getTime() - a.fm.date.getTime() || compareSlugsAsc(b, a);
+}
+
+/**
+ * Oldest first. Same-timestamp ties keep slug order, matching series
+ * chronology for sequentially slugged entries.
+ */
+export function compareArticlesOldestFirst(a: Article, b: Article): number {
+  return a.fm.date.getTime() - b.fm.date.getTime() || compareSlugsAsc(a, b);
+}
+
 function computeReadTime(markdown: string): number {
   const text = markdown
     .replace(/```[\s\S]*?```/g, " ")
@@ -260,7 +280,7 @@ export async function loadContent(): Promise<Content> {
     });
   }
 
-  articles.sort((a, b) => b.fm.date.getTime() - a.fm.date.getTime());
+  articles.sort(compareArticlesNewestFirst);
 
   // Series relationships (chronological order within a series).
   const bySeries = new Map<string, Article[]>();
@@ -271,7 +291,7 @@ export async function loadContent(): Promise<Content> {
     bySeries.set(article.fm.series, group);
   }
   for (const [slug, group] of bySeries) {
-    group.sort((a, b) => a.fm.date.getTime() - b.fm.date.getTime());
+    group.sort(compareArticlesOldestFirst);
     const meta = seriesBySlug.get(slug)!;
     group.forEach((article, i) => {
       article.series = {
@@ -303,8 +323,7 @@ export async function loadContent(): Promise<Content> {
       }))
       .filter((entry) => entry.shared > 0)
       .sort(
-        (a, b) =>
-          b.shared - a.shared || b.article.fm.date.getTime() - a.article.fm.date.getTime(),
+        (a, b) => b.shared - a.shared || compareArticlesNewestFirst(a.article, b.article),
       )
       .slice(0, RELATED_LIMIT)
       .map((entry) => entry.article);
