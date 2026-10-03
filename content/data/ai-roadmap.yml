@@ -262,6 +262,7 @@ tiers:
             title: "Machine Learning with Graphs (CS224W)"
             org: "Stanford"
             code: "CS224W"
+            effort: "60 videos (~22 h video)"
             tags: [free, univ]
             status: todo
           - slug: ammi-geometric-deep-learning
@@ -317,6 +318,7 @@ tiers:
             title: "Natural Language Understanding (CS224U, Spring 2023)"
             org: "Stanford (Potts)"
             code: "CS224U"
+            effort: "50 videos (~16 h video)"
             tags: [free, univ]
             status: todo
             builds_on_course: stanford-cs224n
@@ -513,6 +515,7 @@ tiers:
           - slug: stanford-stanford-mlsys-seminar-series
             title: "Stanford MLSys Seminar Series"
             org: "Stanford"
+            effort: "ongoing, ~1 h/week"
             tags: [free, series]
             status: todo
       - name: "Efficient ML & compression"
@@ -574,6 +577,7 @@ tiers:
           - slug: google-pmle-learning-path
             title: "Professional Machine Learning Engineer Certification (learning path)"
             org: "Google Cloud (Google Skills)"
+            effort: "~58 h (17 activities)"
             tags: [free, paid, cert]
             status: todo
             alt_of: aws-mla-c02-exam-prep
@@ -650,6 +654,7 @@ tiers:
             title: "AI Research Experiences (CS197, Fall 2022)"
             org: "Harvard (Rajpurkar)"
             code: "CS197"
+            effort: "21 lectures"
             tags: [free, univ]
             status: todo
           - slug: stanford-writing-in-the-sciences
