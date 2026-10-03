@@ -22,6 +22,13 @@ export interface Course {
   status?: Status;
   rating?: number;
   verdict?: string;
+  /**
+   * Expected workload as stated by the official course page ("~150 hours
+   * total", "2 months at 10 h/week"), or derived from its credit units plus
+   * the institution's published hours-per-unit rule ("12 units · ~12 h/week").
+   * Omitted when no official figure exists.
+   */
+  effort?: string;
   /** Another course in the same domain this one is a genuine substitute for. */
   alt_of?: string;
   /** A course (any domain) this one continues from as a sequel or real prerequisite. */
@@ -127,6 +134,7 @@ function courseItem(c: Course, showProgress: boolean, allCourses: Course[]): Raw
 <span class="rm-course__title">${c.title}</span>
 <span class="rm-course__meta">
 <span class="rm-org">${c.org}</span>${c.code ? html`<span class="rm-code">${c.code}</span>` : null}
+${c.effort ? html`<span class="rm-effort">${c.effort}</span>` : null}
 ${c.tags.map((t) => html`<span class="rm-tag rm-tag--${t}">${t}</span>`)}
 ${statusLabel}
 ${buildsOn}
