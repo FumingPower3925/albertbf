@@ -171,7 +171,7 @@ tiers:
             alt_of: stanford-cs229
       - name: "Learning theory"
         courses:
-          - slug: stanford-cs229t
+          - slug: stanford-cs229m
             title: "Machine Learning Theory (CS229M / STATS214, Fall 2021)"
             org: "Stanford (Ma)"
             code: "CS229M / STATS214"
