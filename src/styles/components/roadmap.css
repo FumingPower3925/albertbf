@@ -402,6 +402,15 @@
   color: var(--color-text-secondary);
 }
 
+.rm-effort {
+  font-size: 0.68rem;
+  padding: 0.05em 0.35em;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .rm-tag {
   font-size: 0.6rem;
   letter-spacing: 0.05em;
