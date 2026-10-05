@@ -1,6 +1,6 @@
 ---
 title: "Go 1.3: The Hot Spot"
-date: 2026-10-03
+date: 2026-10-05
 description: "Go 1.3 gave every goroutine a contiguous stack and a precise collector, then nearly shipped a 4KB default that turned Bolt seventy times slower."
 tags: [go, go-history]
 series: go-version-by-version
