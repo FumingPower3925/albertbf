@@ -132,6 +132,37 @@ if (katexCss && katexCss.rel === "preload") {
   katexCss.rel = "stylesheet";
 }
 
+// --- Collapsed footnotes: open the References panel when jumping to a note ---
+function openFootnotesForHash(): void {
+  if (!location.hash.startsWith("#footnote-")) return;
+  const target = document.getElementById(location.hash.slice(1));
+  const details = target?.closest?.("details.footnotes") as HTMLDetailsElement | null;
+  if (details && !details.open) details.open = true;
+}
+
+document.addEventListener("click", (event) => {
+  const ref = (event.target as Element).closest?.("a[data-footnote-ref]") as HTMLAnchorElement | null;
+  if (!ref) return;
+  const details = document.querySelector("details.footnotes") as HTMLDetailsElement | null;
+  if (details && !details.open) details.open = true;
+});
+window.addEventListener("hashchange", openFootnotesForHash);
+openFootnotesForHash();
+
+// --- Print: expand collapsed footnotes (and restore after) ---
+window.addEventListener("beforeprint", () => {
+  document.querySelectorAll("details.footnotes:not([open])").forEach((d) => {
+    d.setAttribute("open", "");
+    d.setAttribute("data-print-opened", "");
+  });
+});
+window.addEventListener("afterprint", () => {
+  document.querySelectorAll("details.footnotes[data-print-opened]").forEach((d) => {
+    d.removeAttribute("open");
+    d.removeAttribute("data-print-opened");
+  });
+});
+
 // --- 404 terminal: print the missed path ---
 const termPath = document.getElementById("term-path");
 if (termPath) {

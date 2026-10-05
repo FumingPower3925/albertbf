@@ -1,19 +1,51 @@
-/* Footnotes (marked-footnote output). */
+/* Footnotes (marked-footnote output, collapsed into <details> by the pipeline). */
 
 .footnotes {
   margin-top: var(--space-2xl);
-  padding-top: var(--space-lg);
+  padding-top: var(--space-md);
   border-top: 1px solid var(--color-border);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
-.footnotes h2 {
-  font-size: var(--text-sm);
+.footnotes > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
   font-family: var(--font-ui);
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-text-muted);
+  user-select: none;
+  transition: color var(--dur-1) var(--ease);
+}
+
+.footnotes > summary::-webkit-details-marker {
+  display: none;
+}
+
+.footnotes > summary::before {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--dur-1) var(--ease);
+}
+
+.footnotes[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.footnotes > summary:hover {
+  color: var(--color-accent);
+}
+
+.footnotes[open] > summary {
   margin-bottom: var(--space-md);
 }
 
@@ -23,6 +55,7 @@
 
 .footnotes li {
   margin-bottom: var(--space-xs);
+  scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 [data-footnote-ref] {

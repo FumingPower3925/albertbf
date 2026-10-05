@@ -237,6 +237,13 @@
   font-weight: 500;
 }
 
+.series-all {
+  margin-top: var(--space-lg);
+  max-width: var(--measure);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
 .related {
   margin-top: var(--space-xl);
   max-width: var(--measure);

@@ -74,6 +74,29 @@ function walkAllTokens(tokens: Token[]): void {
   }
 }
 
+const FOOTNOTES_OPEN = '<section class="footnotes" data-footnotes>\n<h2 id="footnote-label" class="sr-only">Footnotes</h2>';
+
+/**
+ * Collapses marked-footnote's end-of-article list into a closed <details>
+ * so long reference lists cost one line until opened. Malformed or missing
+ * footnote sections pass through untouched.
+ */
+export function collapseFootnotes(htmlText: string): string {
+  const start = htmlText.indexOf(FOOTNOTES_OPEN);
+  if (start === -1) return htmlText;
+  const end = htmlText.indexOf("</section>", start);
+  if (end === -1) return htmlText;
+  const inner = htmlText.slice(start + FOOTNOTES_OPEN.length, end);
+  const count = (inner.match(/<li id="footnote-/g) ?? []).length;
+  return (
+    htmlText.slice(0, start) +
+    `<details class="footnotes" data-footnotes>\n<summary>References (${count})</summary>` +
+    inner +
+    `</details>` +
+    htmlText.slice(end + "</section>".length)
+  );
+}
+
 function stripHtml(htmlText: string): string {
   return htmlText
     .replace(/<style[\s\S]*?<\/style>/g, " ")
@@ -151,7 +174,7 @@ export async function createRenderer(): Promise<(article: Article) => RenderResu
       features: new Set<Feature>(),
     };
 
-    const htmlOut = marked.parse(article.markdown) as string;
+    const htmlOut = collapseFootnotes(marked.parse(article.markdown) as string);
 
     if (htmlOut.includes('class="math')) ctx.features.add("math");
     if (ctx.media.usedLightbox) ctx.features.add("lightbox");
