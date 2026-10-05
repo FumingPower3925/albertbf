@@ -70,10 +70,11 @@ ${articles.map(
 </section>`;
 }
 
-/** "More in this series" — other entries of the same series. */
+/** "All N parts" — prev/next nav covers neighbors; the full list would grow without bound. */
 function seriesMoreBlock(article: Article): RawHtml {
-  const others = article.series?.others ?? [];
-  return articleListBlock(`More in ${article.series?.meta.title ?? "this series"}`, others);
+  const s = article.series;
+  if (!s || s.total <= 1) return html``;
+  return html`<p class="series-all"><a href="/projects/#${s.meta.slug}">All ${s.total} parts in ${s.meta.title} →</a></p>`;
 }
 
 /** "Related articles" — cross-series recommendations by shared tags. */
