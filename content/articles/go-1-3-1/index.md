@@ -71,7 +71,7 @@ $ time go build -o x6-131 x6000.go    # go1.3.1
 real  0m0.562s
 ```
 
-Doubling the input nearly quadruples the old compiler's time (0.73 to 2.63 seconds) while the new one a bit more than doubles (0.25 to 0.56): 2.9x faster at 3,000 elements, 4.7x at 6,000. (Absolute times are from a container and mean nothing; the ratios are the finding, and both binaries print the right counts.)
+Doubling the input nearly quadruples the old compiler's time (0.73 to 2.63 seconds) while the new one a bit more than doubles (0.25 to 0.56): 2.9x faster at 3,000 elements, 4.7x at 6,000.
 
 ## Eight characters
 
