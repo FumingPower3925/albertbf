@@ -10,7 +10,7 @@ links:
   - { label: "Liveness 10x fix", url: "https://github.com/golang/go/commit/7aa3031ebaa5dc641808f55cb1cb27ddc409fbca" }
 ---
 
-Go 1.3.1 shipped on 13 August 2014, eight weeks after Go 1.3.[^rel] Sixteen commits sit between the tags, and every one of the fifteen cherry-picks carries Andrew Gerrand's name, thirteen of them landed on 12 and 13 August. There is no blog post and the whole release note is one paragraph in the release history, complete with a doubled word: "bug fixes to the compiler and the the runtime, net, and crypto/rsa packages."[^rel]
+Go 1.3.1 shipped on 13 August 2014, eight weeks after Go 1.3.[^rel] Sixteen commits sit between the tags, and every one of the fifteen cherry-picks carries Andrew Gerrand's name, thirteen of them landed on 12 and 13 August. There is no blog post and the whole release note is one paragraph in the release history, as committed complete with a doubled word, "bug fixes to the compiler and the the runtime, net, and crypto/rsa packages", removed two days later.[^rel]
 
 It is a point release in the classic mold: one miscompile, three panics, a spurious connect, and a compile-time fix worth ten times its weight.
 
@@ -189,7 +189,7 @@ The rest in brief: `ParseMultipartForm` gets documentation for its Go 1.3 behavi
 
 Go 1.3.2 followed on 25 September with security fixes to `crypto/tls` and further cgo fixes.[^minor]
 
-[^rel]: [Release History](https://go.dev/doc/devel/release#go1.3.1), the source for the 13 August 2014 date, the one-paragraph note (doubled word included), and the commit count: sixteen commits between the `go1.3` (`1cdd48c8`) and `go1.3.1` (`f466851b`) tags. Unlike 1.3, the point release got no blog post (`/blog/go1.3.1` is a 404).
+[^rel]: [Release History](https://go.dev/doc/devel/release#go1.3.1), the source for the 13 August 2014 date, the one-paragraph note (its "the the" doubling lasted two days before [`4a05139f`](https://github.com/golang/go/commit/4a05139f6fed4755bb49f8fcc2970e38c1778e61) removed it), and the commit count: sixteen commits between the `go1.3` (`1cdd48c8`) and `go1.3.1` (`f466851b`) tags. Unlike 1.3, the point release got no blog post (`/blog/go1.3.1` is a 404).
 [^8325]: [Issue 8325](https://github.com/golang/go/issues/8325), "Slice access of const causes strange string errors", psnim2000: the `[A-Z0-9]` generator emitting lowercase and punctuation on 1.3 but not 1.2. Fixed by [commit `5b63ce4e`](https://github.com/golang/go/commit/5b63ce4e1929914da33a0a53a0a2868b3fb092d2), "fix, test byte-sized magic multiply", Russ Cox, 11 August 2014 (CL 124950043, LGTM=r): "Credit to Rémy for finding and writing test case." Cherry-picked as [`3fa4a784`](https://github.com/golang/go/commit/3fa4a7849c51eaad5a5c67f80489e0e12ff10005).
 [^8354]: [Issue 8354](https://github.com/golang/go/issues/8354), "superlinear slow-down compiling slice of interface literal", Brad Fitzpatrick, with the 100-to-14000 timing table quoted above.
 [^live]: [Commit `7aa3031e`](https://github.com/golang/go/commit/7aa3031ebaa5dc641808f55cb1cb27ddc409fbca), "make liveness ~10x faster", Russ Cox, 6 August 2014 (CL 125720043, LGTM=iant, r): the O(1) lookup, the debug-only O(n²) check, `bvnext`, and the `x.go`/`x100.go`…`x10000.go` table, all quoted from the message. Fixes #8354 and [issue 8259](https://github.com/golang/go/issues/8259) ("go build takes too long to compile table driven test code"). Cherry-picked as [`69dc3a91`](https://github.com/golang/go/commit/69dc3a910f5fbd37d9ead0147ca8bc8c998c7d01).
