@@ -20,7 +20,7 @@ The lead bug came from a service upgrade. After moving to Go 1.3, psnim2000's pr
 
 Rémy Oudompheng reduced it to a byte modulo. His test, committed verbatim as `test/fixedbugs/issue8325.go`, indexes into an alphanumeric string with `b % byte(len(alphanum))` and panics on anything outside `[0-9A-Z]`.[^8325] The culprit was the byte-sized magic multiply in `6g` and `8g`: division by a constant gets compiled into a multiplication by a magic number, and the byte-sized version of that optimization got it wrong. Russ Cox's fix of 11 August corrects the code generation and adds the test.[^8325]
 
-The test needs no adaptation. On the old toolchain it finds the bad character; on the new one it passes silently:[^repro]
+The test needs no adaptation. On the old toolchain it finds the bad character; on the new one it prints nothing:[^repro]
 
 ```
 $ go run issue8325.go     # go1.3
@@ -40,7 +40,7 @@ import "fmt"
 const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func main() {
-	bytes := []byte{10, 20, 30, 40, 50}
+	bytes := []byte{95, 96, 83, 102, 88, 100}
 	for i, b := range bytes {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
@@ -49,7 +49,7 @@ func main() {
 ```
 
 ```output
-"AKU4E"
+"NOBUGS"
 ```
 
 ## Liveness, ten times faster
